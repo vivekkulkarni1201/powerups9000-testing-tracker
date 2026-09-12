@@ -1,85 +1,100 @@
 <!doctype html>
 <html>
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>POWERUPS 9000 QR Sticker Generator</title>
 <link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 <div class="wrap">
-  <div class="header">
-    <div class="brand">
-      <h1>POWERUPS 9000 QR Sticker Generator</h1>
-      <div class="sub">Generate stage-wise QR stickers after GitHub Pages deployment</div>
-    </div>
-  </div>
+  <div class="header"><div class="brand">
+    <h1>POWERUPS 9000 QR Sticker Generator</h1>
+    <div class="sub">Generate stage-wise QR stickers after GitHub Pages deployment</div>
+  </div></div>
 
   <div class="panel">
     <div class="generator-controls">
-      <input id="serial" placeholder="Serial No. e.g. P9K240001">
+      <input id="serial" placeholder="Serial No. e.g. 202609P9S0001">
       <select id="project">
         <option value="ADANI">Adani</option>
         <option value="RELIANCE">Reliance</option>
         <option value="STANDARD">Standard</option>
       </select>
-      <button class="btn primary" onclick="generate()">Generate QR Set</button>
+      <button class="btn primary" onclick="generateQRSet()">Generate QR Set</button>
       <button class="btn" onclick="window.print()">Print</button>
       <a class="btn" href="index.html">Back to Dashboard</a>
     </div>
     <div class="footer-note">Important: Generate final production QR only from the deployed GitHub Pages URL.</div>
   </div>
 
+  <div id="statusMsg" class="footer-note" style="margin:14px 0"></div>
   <div id="qrGrid" class="qr-grid"></div>
 </div>
 
 <script>
 const STAGES={
-  ADANI:[
-    ['RECEIVED','Received'],
-    ['UNDER_TESTING','Under Testing'],
-    ['HEATRUN_PROGRESS','Heatrun In Progress'],
-    ['HEATRUN_COMPLETED','Heatrun Completed'],
-    ['FAT_PROGRESS','FAT Testing In Progress'],
-    ['TO_FINISHING','To Finishing']
-  ],
-  RELIANCE:[
-    ['RECEIVED','Received'],
-    ['UNDER_TESTING','Under Testing'],
-    ['HEATRUN_PROGRESS','Heatrun In Progress'],
-    ['HEATRUN_COMPLETED','Heatrun Completed'],
-    ['TO_FINISHING','To Finishing']
-  ],
-  STANDARD:[
-    ['RECEIVED','Received'],
-    ['UNDER_TESTING','Under Testing'],
-    ['HEATRUN_PROGRESS','Heatrun In Progress'],
-    ['HEATRUN_COMPLETED','Heatrun Completed'],
-    ['TO_FINISHING','To Finishing']
-  ]
+ADANI:[['RECEIVED','Received'],['UNDER_TESTING','Under Testing'],['HEATRUN_PROGRESS','Heatrun In Progress'],['HEATRUN_COMPLETED','Heatrun Completed'],['FAT_PROGRESS','FAT Testing In Progress'],['TO_FINISHING','To Finishing']],
+RELIANCE:[['RECEIVED','Received'],['UNDER_TESTING','Under Testing'],['HEATRUN_PROGRESS','Heatrun In Progress'],['HEATRUN_COMPLETED','Heatrun Completed'],['TO_FINISHING','To Finishing']],
+STANDARD:[['RECEIVED','Received'],['UNDER_TESTING','Under Testing'],['HEATRUN_PROGRESS','Heatrun In Progress'],['HEATRUN_COMPLETED','Heatrun Completed'],['TO_FINISHING','To Finishing']]
 };
 
-async function generate(){
-  const sn=(serial.value||'').trim().toUpperCase();
-  const p=project.value;
-  if(!sn){alert('Enter serial number');return;}
+function rootUrl(){
+  const base=location.pathname.substring(0,location.pathname.lastIndexOf('/')+1);
+  return location.origin+base;
+}
 
-  qrGrid.innerHTML='';
-  const root=location.href.replace(/qr-generator\.html.*$/,'');
-  for(const [code,label] of STAGES[p]){
+function generateQRSet(){
+  const sn=(document.getElementById('serial').value||'').trim().toUpperCase();
+  const project=document.getElementById('project').value;
+  const grid=document.getElementById('qrGrid');
+  const msg=document.getElementById('statusMsg');
+
+  if(!sn){alert('Enter serial number');return;}
+  if(typeof QRCode==='undefined'){
+    msg.textContent='QR library failed to load. Refresh page and check internet access.';
+    msg.style.color='#ff8f8f';
+    return;
+  }
+
+  grid.innerHTML='';
+  const root=rootUrl();
+
+  for(const [code,label] of STAGES[project]){
     const card=document.createElement('div');
     card.className='qr-card';
-    const canvas=document.createElement('canvas');
-    const b=document.createElement('b');
-    const m=document.createElement('span');
-    b.textContent=label;
-    m.textContent=sn+' · '+p;
-    card.append(canvas,b,m);
-    qrGrid.appendChild(card);
 
-    const url=root+'scan.html?'+new URLSearchParams({sn:sn,project:p,stage:code}).toString();
-    await QRCode.toCanvas(canvas,url,{width:190,margin:2});
+    const qrBox=document.createElement('div');
+    qrBox.style.display='flex';
+    qrBox.style.justifyContent='center';
+    qrBox.style.marginBottom='10px';
+
+    const title=document.createElement('b');
+    title.textContent=label;
+
+    const meta=document.createElement('span');
+    meta.textContent=sn+' · '+project;
+
+    card.appendChild(qrBox);
+    card.appendChild(title);
+    card.appendChild(meta);
+    grid.appendChild(card);
+
+    const scanUrl=root+'scan.html?'+new URLSearchParams({
+      sn:sn,project:project,stage:code
+    }).toString();
+
+    new QRCode(qrBox,{
+      text:scanUrl,
+      width:190,
+      height:190,
+      correctLevel:QRCode.CorrectLevel.M
+    });
   }
+
+  msg.textContent=STAGES[project].length+' QR stickers generated successfully for '+sn+' ('+project+').';
+  msg.style.color='#75eda7';
 }
 </script>
 </body>
