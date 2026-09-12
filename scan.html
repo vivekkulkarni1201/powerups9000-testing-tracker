@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>POWERUPS 9000 QR Update</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+</head>
+<body>
+<div class="scan-card">
+  <div id="icon" class="scan-icon">⏳</div>
+  <h2 id="title">Updating Status…</h2>
+  <p id="serial"></p>
+  <p id="project"></p>
+  <p id="stage"></p>
+  <p id="message" class="footer-note">Please wait.</p>
+</div>
+
+<script>
+const cfg=window.P9K_CONFIG||{};
+const sb=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
+const STAGE={
+  RECEIVED:'Received',
+  UNDER_TESTING:'Under Testing',
+  HEATRUN_PROGRESS:'Heatrun In Progress',
+  HEATRUN_COMPLETED:'Heatrun Completed',
+  FAT_PROGRESS:'FAT Testing In Progress',
+  TO_FINISHING:'To Finishing'
+};
+
+const p=new URLSearchParams(location.search);
+const sn=(p.get('sn')||'').trim().toUpperCase();
+const pr=(p.get('project')||'').trim().toUpperCase();
+const st=(p.get('stage')||'').trim().toUpperCase();
+
+serial.textContent=sn?'Serial: '+sn:'';
+project.textContent=pr?'Project: '+pr:'';
+stage.textContent=st?'Stage: '+(STAGE[st]||st):'';
+
+async function go(){
+  if(!sn||!pr||!st){fail('Invalid QR link.');return;}
+  const {data,error}=await sb.rpc('powerups9000_scan_update',{
+    p_serial_no:sn,
+    p_project_type:pr,
+    p_stage:st
+  });
+  if(error){fail(error.message);return;}
+  icon.textContent='✅';
+  title.textContent='Status Updated';
+  title.className='success';
+  message.textContent=data?.duplicate_ignored
+    ? 'Duplicate scan ignored. Current status is already the same.'
+    : 'POWERUPS 9000 dashboard updated successfully.';
+}
+function fail(msg){
+  icon.textContent='❌';
+  title.textContent='Update Failed';
+  title.className='error';
+  message.textContent=msg;
+}
+go();
+</script>
+</body>
+</html>

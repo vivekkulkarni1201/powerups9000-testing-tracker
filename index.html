@@ -1,0 +1,206 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>POWERUPS 9000 Testing Tracker</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="brand">
+      <h1>POWERUPS 9000 Testing Tracker</h1>
+      <div class="sub">Live Production Testing Flow · QR Based Status Monitoring</div>
+    </div>
+    <div class="live"><span class="dot"></span><span id="liveText">Connecting…</span></div>
+  </div>
+
+  <div class="nav">
+    <a class="btn primary" href="qr-generator.html">QR Sticker Generator</a>
+    <button class="btn" onclick="refreshAll()">Refresh</button>
+    <button class="btn good" onclick="exportCSV()">Export History CSV</button>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="label">Today Received</div><div id="kReceived" class="num">0</div></div>
+    <div class="kpi"><div class="label">Under Testing</div><div id="kTesting" class="num">0</div></div>
+    <div class="kpi"><div class="label">Heatrun In Progress</div><div id="kHeat" class="num">0</div></div>
+    <div class="kpi"><div class="label">Heatrun Completed</div><div id="kHeatDone" class="num">0</div></div>
+    <div class="kpi"><div class="label">FAT In Progress</div><div id="kFat" class="num">0</div></div>
+    <div class="kpi"><div class="label">To Finishing Today</div><div id="kFinishing" class="num">0</div></div>
+  </div>
+
+  <div class="projects">
+    <div class="project"><h3>Adani</h3><div class="minis">
+      <div class="mini"><span>Received Today</span><b id="aRec">0</b></div>
+      <div class="mini"><span>Active</span><b id="aAct">0</b></div>
+      <div class="mini"><span>Finishing Today</span><b id="aFin">0</b></div>
+    </div></div>
+
+    <div class="project"><h3>Reliance</h3><div class="minis">
+      <div class="mini"><span>Received Today</span><b id="rRec">0</b></div>
+      <div class="mini"><span>Active</span><b id="rAct">0</b></div>
+      <div class="mini"><span>Finishing Today</span><b id="rFin">0</b></div>
+    </div></div>
+
+    <div class="project"><h3>Standard</h3><div class="minis">
+      <div class="mini"><span>Received Today</span><b id="sRec">0</b></div>
+      <div class="mini"><span>Active</span><b id="sAct">0</b></div>
+      <div class="mini"><span>Finishing Today</span><b id="sFin">0</b></div>
+    </div></div>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <div class="panel-title">
+        <span>Current UPS Status</span>
+        <input id="search" placeholder="Search serial / project / stage" oninput="renderCurrent()">
+      </div>
+      <div style="overflow:auto"><table>
+        <thead><tr>
+          <th>Serial No.</th><th>Project</th><th>Current Stage</th><th>Previous Stage</th><th>Received</th><th>Last Updated</th>
+        </tr></thead>
+        <tbody id="currentBody"></tbody>
+      </table></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title"><span>Latest Scan History</span></div>
+      <div style="overflow:auto;max-height:560px"><table>
+        <thead><tr><th>Time</th><th>Serial</th><th>Project</th><th>Stage</th></tr></thead>
+        <tbody id="historyBody"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const cfg=window.P9K_CONFIG||{};
+if(!cfg.SUPABASE_URL || cfg.SUPABASE_URL.includes('PASTE_')){
+  alert('Open config.js and paste Supabase Project URL + Anon/Publishable Key.');
+}
+const sb=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
+
+const STAGE={
+  RECEIVED:'Received',
+  UNDER_TESTING:'Under Testing',
+  HEATRUN_PROGRESS:'Heatrun In Progress',
+  HEATRUN_COMPLETED:'Heatrun Completed',
+  FAT_PROGRESS:'FAT Testing In Progress',
+  TO_FINISHING:'To Finishing'
+};
+
+let upsRows=[],historyRows=[];
+
+function dayKey(x){
+  let d=new Date(x);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function todayKey(){return dayKey(new Date())}
+function isToday(x){return x && dayKey(x)===todayKey()}
+function fmt(x){return x?new Date(x).toLocaleString():'-'}
+
+async function refreshAll(){
+  const [u,h]=await Promise.all([
+    sb.from('powerups9000_ups').select('*').order('last_updated_at',{ascending:false}),
+    sb.from('powerups9000_scan_history').select('*').order('scanned_at',{ascending:false}).limit(200)
+  ]);
+
+  if(u.error || h.error){
+    liveText.textContent='Connection Error';
+    console.error(u.error,h.error);
+    return;
+  }
+  upsRows=u.data||[];
+  historyRows=h.data||[];
+  liveText.textContent='Live · Supabase Connected';
+  renderKPIs();renderCurrent();renderHistory();
+}
+
+function currentCount(stage){return upsRows.filter(x=>x.current_stage===stage).length}
+function todayAll(stage){
+  return new Set(historyRows.filter(x=>x.stage===stage && isToday(x.scanned_at)).map(x=>x.serial_no)).size;
+}
+function projectToday(project,stage){
+  return new Set(historyRows.filter(x=>x.project_type===project && x.stage===stage && isToday(x.scanned_at)).map(x=>x.serial_no)).size;
+}
+function projectActive(project){
+  return upsRows.filter(x=>x.project_type===project && x.current_stage!=='TO_FINISHING').length;
+}
+
+function renderKPIs(){
+  kReceived.textContent=todayAll('RECEIVED');
+  kTesting.textContent=currentCount('UNDER_TESTING');
+  kHeat.textContent=currentCount('HEATRUN_PROGRESS');
+  kHeatDone.textContent=currentCount('HEATRUN_COMPLETED');
+  kFat.textContent=currentCount('FAT_PROGRESS');
+  kFinishing.textContent=todayAll('TO_FINISHING');
+
+  aRec.textContent=projectToday('ADANI','RECEIVED');
+  aAct.textContent=projectActive('ADANI');
+  aFin.textContent=projectToday('ADANI','TO_FINISHING');
+
+  rRec.textContent=projectToday('RELIANCE','RECEIVED');
+  rAct.textContent=projectActive('RELIANCE');
+  rFin.textContent=projectToday('RELIANCE','TO_FINISHING');
+
+  sRec.textContent=projectToday('STANDARD','RECEIVED');
+  sAct.textContent=projectActive('STANDARD');
+  sFin.textContent=projectToday('STANDARD','TO_FINISHING');
+}
+
+function renderCurrent(){
+  let q=(search.value||'').toLowerCase().trim();
+  let rows=upsRows;
+  if(q){
+    rows=rows.filter(x=>
+      (x.serial_no||'').toLowerCase().includes(q) ||
+      (x.project_type||'').toLowerCase().includes(q) ||
+      (STAGE[x.current_stage]||'').toLowerCase().includes(q)
+    );
+  }
+  currentBody.innerHTML=rows.length?rows.map(x=>`
+    <tr>
+      <td><b>${x.serial_no}</b></td>
+      <td>${x.project_type}</td>
+      <td><span class="badge">${STAGE[x.current_stage]||x.current_stage}</span></td>
+      <td>${STAGE[x.previous_stage]||x.previous_stage||'-'}</td>
+      <td>${fmt(x.first_received_at)}</td>
+      <td>${fmt(x.last_updated_at)}</td>
+    </tr>`).join(''):
+    `<tr><td colspan="6" class="empty">No UPS records available.</td></tr>`;
+}
+
+function renderHistory(){
+  historyBody.innerHTML=historyRows.length?historyRows.slice(0,50).map(x=>`
+    <tr>
+      <td>${fmt(x.scanned_at)}</td><td><b>${x.serial_no}</b></td><td>${x.project_type}</td><td>${STAGE[x.stage]||x.stage}</td>
+    </tr>`).join(''):
+    `<tr><td colspan="4" class="empty">No scan history yet.</td></tr>`;
+}
+
+function exportCSV(){
+  let csv='Time,Serial,Project,Stage\\n';
+  historyRows.forEach(x=>{
+    csv += [fmt(x.scanned_at),x.serial_no,x.project_type,STAGE[x.stage]||x.stage]
+      .map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')+'\\n';
+  });
+  let blob=new Blob([csv],{type:'text/csv'});
+  let a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='POWERUPS9000_Scan_History.csv';
+  a.click();
+}
+
+sb.channel('p9k-live')
+  .on('postgres_changes',{event:'*',schema:'public',table:'powerups9000_ups'},refreshAll)
+  .on('postgres_changes',{event:'*',schema:'public',table:'powerups9000_scan_history'},refreshAll)
+  .subscribe();
+
+refreshAll();
+setInterval(refreshAll,30000);
+</script>
+</body>
+</html>
