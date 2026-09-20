@@ -1,13 +1,261 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>POWERUPS 9000 Scan</title><link rel="stylesheet" href="pilot.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script></head><body><div class="main"><div class="mobileCard"><div class="top"><div><h1>Scan / Update UPS</h1><div class="sub">Mobile testing update</div></div><a class="btn" href="pilot-dashboard.html">Dashboard</a></div><div class="card"><div id="head"></div><div id="body"></div><div id="status" class="small" style="margin-top:10px"></div></div></div></div><script src="pilot-common.js"></script><script>
-const id=(new URLSearchParams(location.search).get('id')||'').toUpperCase();let state=null,projects=[],engineers=[],settings={};async function init(){let [{data:p},{data:e},{data:s}]=await Promise.all([sb.from('p9k_prod_projects').select('*').eq('active',true).order('sort_order'),sb.from('p9k_prod_engineers').select('*').eq('active',true).order('engineer_name'),sb.from('p9k_prod_settings').select('*').eq('id',1).single()]);projects=p||[];engineers=e||[];settings=s||{};load()}
-async function load(){let {data,error}=await sb.rpc('p9k_prod_get_tracker',{p_tracker_id:id});if(error){fail(error.message);return}state=data;if(!data.exists){showReceive();return}if(!data.serial_no){showAssign();return}showStages()}
-function baseHead(extra=''){head.innerHTML=`<div class="metric"><span>Tracker ID</span><b>${id}</b></div>${extra}`}
-function showReceive(){baseHead();body.innerHTML=`<div class="stageMenu"><div class="stageBlock pending"><button onclick="receive()"><b>First Scan → RECEIVED</b><div class="small">Confirm incoming UPS received for testing.</div></button></div></div>`}
-async function receive(){if(!confirm('Confirm Received?'))return;let {error}=await sb.rpc('p9k_prod_receive',{p_tracker_id:id});error?fail(error.message):ok('Received recorded');setTimeout(load,700)}
-function showAssign(){baseHead(`<div class="small" style="margin-top:8px">Status: Received · Serial not assigned</div>`);let po=projects.map(x=>`<option value="${x.project_code}">${x.project_name}</option>`).join(''),eo=engineers.map(x=>`<option>${x.engineer_name}</option>`).join('');body.innerHTML=`<div class="formGrid" style="margin-top:12px"><div class="field"><label>Project</label><select id="proj">${po}</select></div><div class="field"><label>Engineer</label><select id="eng">${eo}</select></div><div class="field full" ${settings.serial_mode==='AUTO'?'style="display:none"':''}><label>Manual Serial Number</label><input id="manualSerial" placeholder="Enter current-month serial"></div></div><button class="btn primary" style="width:100%;margin-top:12px" onclick="assign()">Assign ${settings.serial_mode==='AUTO'?'Auto':'Manual'} Serial</button>`}
-async function assign(){let {error}=await sb.rpc('p9k_prod_assign_serial',{p_tracker_id:id,p_project_code:proj.value,p_engineer:eng.value,p_manual_serial:document.getElementById('manualSerial')?.value||null});error?fail(error.message):ok('Serial assigned');setTimeout(load,800)}
-function showStages(){let serial=`<div class="metricGrid" style="margin-top:10px"><div class="metric"><span>Generated / Assigned Serial</span><b>${state.serial_no}</b></div><div class="metric"><span>Project</span><b>${state.project_name||state.project_code}</b></div></div>`;baseHead(serial);let eo=engineers.map(x=>`<option ${x.engineer_name===state.last_engineer?'selected':''}>${x.engineer_name}</option>`).join('');let timer=state.timer_left_minutes>0?`<div class="stageBlock locked"><div><b>Heatrun Timer Locked</b><div class="timer">${state.timer_left_minutes} minute(s) remaining</div></div></div>`:'';let blocks=(state.stages||[]).map(s=>{if(s.completed)return `<div class="stageBlock done"><div><b>✓ ${s.stage_name}</b><div class="small">Completed / already visited</div></div></div>`;if(s.is_finishing)return `<div class="stageBlock locked"><button onclick="choose('${s.stage_code}')"><b>🔒 ${s.stage_name}</b><div class="small">Enabled only when all mandatory stages are complete.</div></button></div>`;return `<div class="stageBlock pending"><button onclick="choose('${s.stage_code}')"><b>${s.stage_name}</b><div class="small">Pending — tap to update</div></button></div>`}).join('');body.innerHTML=`${timer}<div class="field" style="margin-top:12px"><label>Engineer</label><select id="eng">${eo}</select></div><div class="stageMenu">${blocks}</div>`}
-async function choose(stage){if(!confirm('Confirm stage update: '+(STAGE_LABEL[stage]||stage)+'?'))return;let {error}=await sb.rpc('p9k_prod_update_stage',{p_tracker_id:id,p_stage:stage,p_engineer:eng.value,p_remarks:null});error?fail(error.message):ok('Stage updated');setTimeout(load,800)}
-function ok(t){status.textContent='✅ '+t;status.className='success'}function fail(t){status.textContent='❌ '+t;status.className='error'}
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>POWERUPS 9000 Scan</title>
+<link rel="stylesheet" href="pilot.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+</head>
+<body>
+<div class="main">
+  <div class="mobileCard">
+    <div class="top">
+      <div>
+        <h1>Scan / Update UPS</h1>
+        <div class="sub">Mobile testing update</div>
+      </div>
+      <a class="btn" href="pilot-dashboard.html">Dashboard</a>
+    </div>
+
+    <div class="card">
+      <div id="head"></div>
+      <div id="body"></div>
+      <div id="status" class="small" style="margin-top:10px"></div>
+    </div>
+  </div>
+</div>
+
+<script src="pilot-common.js"></script>
+<script>
+const id=(new URLSearchParams(location.search).get('id')||'').toUpperCase();
+let state=null,projects=[],engineers=[],settings={};
+
+async function init(){
+  const [{data:p},{data:e},{data:s}] = await Promise.all([
+    sb.from('p9k_prod_projects').select('*').eq('active',true).order('sort_order'),
+    sb.from('p9k_prod_engineers').select('*').eq('active',true).order('engineer_name'),
+    sb.from('p9k_prod_settings').select('*').eq('id',1).single()
+  ]);
+  projects=p||[];
+  engineers=e||[];
+  settings=s||{};
+  load();
+}
+
+async function load(){
+  let {data,error}=await sb.rpc('p9k_prod_get_tracker',{p_tracker_id:id});
+  if(error){fail(error.message);return}
+  state=data;
+  if(!data.exists){showReceive();return}
+  if(!data.serial_no){showAssign();return}
+  showStages();
+}
+
+function baseHead(extra=''){
+  head.innerHTML=`
+    <div class="metric">
+      <span>Tracker ID</span>
+      <b>${id}</b>
+    </div>${extra}`;
+}
+
+function showReceive(){
+  baseHead();
+  body.innerHTML=`
+    <div class="stageMenu">
+      <div class="stageBlock pending">
+        <button onclick="receive()">
+          <b>First Scan → RECEIVED</b>
+          <div class="small">Confirm incoming UPS received for testing.</div>
+        </button>
+      </div>
+    </div>`;
+}
+
+async function receive(){
+  if(!confirm('Confirm Received?'))return;
+  let {error}=await sb.rpc('p9k_prod_receive',{p_tracker_id:id});
+  error?fail(error.message):ok('Received recorded');
+  setTimeout(load,700);
+}
+
+function showAssign(){
+  baseHead(`<div class="small" style="margin-top:8px">Status: Received · Serial not assigned</div>`);
+  let po=projects.map(x=>`<option value="${x.project_code}">${x.project_name}</option>`).join('');
+  let eo=engineers.map(x=>`<option>${x.engineer_name}</option>`).join('');
+  body.innerHTML=`
+    <div class="formGrid" style="margin-top:12px">
+      <div class="field"><label>Project</label><select id="proj">${po}</select></div>
+      <div class="field"><label>Engineer</label><select id="eng">${eo}</select></div>
+      <div class="field full" ${settings.serial_mode==='AUTO'?'style="display:none"':''}>
+        <label>Manual Serial Number</label>
+        <input id="manualSerial" placeholder="Enter current-month serial">
+      </div>
+    </div>
+    <button class="btn primary" style="width:100%;margin-top:12px" onclick="assign()">
+      Assign ${settings.serial_mode==='AUTO'?'Auto':'Manual'} Serial
+    </button>`;
+}
+
+async function assign(){
+  let {error}=await sb.rpc('p9k_prod_assign_serial',{
+    p_tracker_id:id,
+    p_project_code:proj.value,
+    p_engineer:eng.value,
+    p_manual_serial:document.getElementById('manualSerial')?.value||null
+  });
+  error?fail(error.message):ok('Serial assigned');
+  setTimeout(load,800);
+}
+
+function showStages(){
+  const validStages=(state.stages||[]).filter(s=>s && s.stage_code && s.stage_name);
+
+  const heatStarted = validStages.some(s=>s.stage_code==='HEATRUN_PROGRESS' && s.completed);
+  const heatCompleted = validStages.some(s=>s.stage_code==='HEATRUN_COMPLETED' && s.completed);
+  const heatActive = state.current_stage==='HEATRUN_PROGRESS' && !heatCompleted;
+  const timerRunning = heatActive && state.timer_left_minutes>0;
+  const timerFinished = heatActive && state.timer_left_minutes<=0;
+
+  const serial=`
+    <div class="metricGrid" style="margin-top:10px">
+      <div class="metric"><span>Assigned Serial</span><b>${state.serial_no}</b></div>
+      <div class="metric"><span>Project</span><b>${state.project_name||state.project_code}</b></div>
+    </div>`;
+  baseHead(serial);
+
+  const eo=engineers.map(x=>`<option ${x.engineer_name===state.last_engineer?'selected':''}>${x.engineer_name}</option>`).join('');
+
+  let lockBanner='';
+  if(timerRunning){
+    lockBanner=`
+      <div class="stageBlock locked" style="margin-top:12px">
+        <div>
+          <b>🔒 Heatrun In Progress</b>
+          <div class="timer">${state.timer_left_minutes} minute(s) remaining</div>
+          <div class="small">All other pending stages are temporarily locked.</div>
+        </div>
+      </div>`;
+  } else if(timerFinished){
+    lockBanner=`
+      <div class="stageBlock locked" style="margin-top:12px">
+        <div>
+          <b>⏱ Heatrun Timer Complete</b>
+          <div class="small">Mark Heatrun Completed before continuing to any other stage.</div>
+        </div>
+      </div>`;
+  }
+
+  const blocks=validStages.map(s=>{
+    // Completed = grey, checked, non-clickable
+    if(s.completed){
+      return `
+        <div class="stageBlock done">
+          <div>
+            <b>✓ ${s.stage_name}</b>
+            <div class="small">Completed</div>
+          </div>
+        </div>`;
+    }
+
+    // Heatrun Completed cannot be selected before Heatrun In Progress.
+    if(s.stage_code==='HEATRUN_COMPLETED' && !heatStarted){
+      return lockedBlock(s,'Start Heatrun In Progress first.');
+    }
+
+    // During active heatrun: everything locked.
+    if(timerRunning){
+      return lockedBlock(s,`Heatrun in progress · ${state.timer_left_minutes} min remaining.`);
+    }
+
+    // Timer is done but heatrun not marked complete: only HEATRUN_COMPLETED is enabled.
+    if(timerFinished && s.stage_code!=='HEATRUN_COMPLETED'){
+      return lockedBlock(s,'Mark Heatrun Completed first.');
+    }
+
+    // Finishing remains visually locked. Backend makes final decision too.
+    if(s.is_finishing){
+      return `
+        <div class="stageBlock locked">
+          <button onclick="choose('${s.stage_code}')">
+            <b>🔒 ${s.stage_name}</b>
+            <div class="small">Available only after every mandatory stage is completed.</div>
+          </button>
+        </div>`;
+    }
+
+    // Normal selectable pending stage
+    return `
+      <div class="stageBlock pending">
+        <button onclick="choose('${s.stage_code}')">
+          <b>${s.stage_name}</b>
+          <div class="small">Pending · tap to update</div>
+        </button>
+      </div>`;
+  }).join('');
+
+  body.innerHTML=`
+    ${lockBanner}
+    <div class="field" style="margin-top:12px">
+      <label>Engineer</label>
+      <select id="eng">${eo}</select>
+    </div>
+    <div class="stageMenu">${blocks}</div>`;
+}
+
+function lockedBlock(s,msg){
+  const safeMsg=String(msg).replaceAll("'","\\'");
+  return `
+    <div class="stageBlock hardLocked">
+      <button onclick="lockedMsg('${safeMsg}')">
+        <b>🔒 ${s.stage_name}</b>
+        <div class="small">${msg}</div>
+      </button>
+    </div>`;
+}
+
+function lockedMsg(msg){
+  alert('LOCKED\\n\\n'+msg);
+}
+
+async function choose(stage){
+  if(!confirm('Confirm stage update: '+(STAGE_LABEL[stage]||stage)+'?'))return;
+  let {error}=await sb.rpc('p9k_prod_update_stage',{
+    p_tracker_id:id,
+    p_stage:stage,
+    p_engineer:eng.value,
+    p_remarks:null
+  });
+  error?fail(error.message):ok('Stage updated');
+  setTimeout(load,800);
+}
+
+function ok(t){status.textContent='✅ '+t;status.className='success'}
+function fail(t){status.textContent='❌ '+t;status.className='error'}
+
 init();
-</script></body></html>
+</script>
+<style>
+/* Explicit visual distinction */
+.stageBlock.done{
+  opacity:1 !important;
+  background:linear-gradient(90deg,#222d38,#1a2530)!important;
+  border-color:#536273!important;
+  color:#b9c4cf!important;
+}
+.stageBlock.done b{color:#d1d8df}
+.stageBlock.hardLocked{
+  background:linear-gradient(90deg,#283342,#202a35)!important;
+  border:1px dashed #65788c!important;
+  color:#92a3b4!important;
+  opacity:.88;
+}
+.stageBlock.hardLocked b{color:#b0bdca}
+.stageBlock.pending{
+  box-shadow:0 0 0 1px rgba(30,201,126,.14), inset 0 0 18px rgba(25,199,139,.06);
+}
+</style>
+</body>
+</html>

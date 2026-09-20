@@ -1,12 +1,220 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Daily Input Distribution</title><link rel="stylesheet" href="pilot.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script></head><body><div class="app"><aside class="side"><div class="brand">VERTIV<small>POWERUPS 9000 TESTING TRACKER</small></div><div class="nav"><a href="pilot-dashboard.html">⌂ Dashboard</a><a class="active" href="pilot-input.html">▥ Input Distribution</a><a href="pilot-admin.html">⚙ Admin</a></div></aside><main class="main">
-<div class="detailHead"><div><h1>Daily Input Distribution</h1><div class="sub">Detailed day-wise Ideal Capacity vs Received for Testing</div></div><div class="actions"><select id="monthSel" class="monthSel" onchange="load()"></select><button class="btn green copyBtn" onclick="copyTable()">Copy Table for Email</button><a class="btn primary" href="pilot-dashboard.html">← Dashboard</a></div></div>
-<div class="summary4"><div class="metric"><span>Monthly Ideal Capacity</span><b id="sIdeal">0</b></div><div class="metric"><span>Received for Testing</span><b id="sReceived">0</b></div><div class="metric"><span>Net GAP</span><b id="sGap">0</b></div><div class="metric"><span>Days Met Target</span><b id="sDays">0</b></div></div>
-<div class="card"><div class="titleRow"><h2 id="tableTitle">Daily Testing Status</h2><span id="copyMsg" class="small"></span></div><div class="tableWrap"><table id="bossTable" class="bossTable"></table></div>
-<div class="remarkLegend"><b>Note:</b><br>A - UPS Not received for testing<br>B - Manufacturing quality issue<br>C - Supplier quality issue</div></div>
-</main></div><script src="pilot-common.js"></script><script>
-let current={};function setup(){let n=new Date(),o='';for(let i=0;i<12;i++){let d=new Date(n.getFullYear(),n.getMonth()-i,1);o+=`<option value="${d.getFullYear()}-${d.getMonth()+1}">${d.toLocaleString([],{month:'long',year:'numeric'})}</option>`}monthSel.innerHTML=o}
-async function load(){let [yy,mm]=monthSel.value.split('-').map(Number),days=new Date(yy,mm,0).getDate(),b=new Date(yy,mm,1),e=new Date(yy,mm,1);let [{data:t},{data:s},{data:dp}]=await Promise.all([sb.from('p9k_prod_trackers').select('received_at').gte('received_at',b.toISOString()).lt('received_at',e.toISOString()),sb.from('p9k_prod_settings').select('*').eq('id',1).single(),sb.from('p9k_prod_daily_plan').select('*').gte('work_date',`${yy}-${String(mm).padStart(2,'0')}-01`).lt('work_date',`${e.getFullYear()}-${String(e.getMonth()+1).padStart(2,'0')}-01`)]);let rows=[],idealTot=0,recTot=0,met=0;for(let d=1;d<=days;d++){let date=new Date(yy,mm-1,d),iso=`${yy}-${String(mm).padStart(2,'0')}-${String(d).padStart(2,'0')}`,ov=(dp||[]).find(x=>x.work_date===iso),ideal=ov?.ideal_capacity??(date.getDay()===0?0:(s?.ideal_daily_capacity||0)),live=(t||[]).filter(x=>new Date(x.received_at).toDateString()===date.toDateString()).length,rec=live+(ov?.manual_received_qty||0),gap=ideal?rec-ideal:0,remark=ov?.remark_code||(ideal>0&&rec<ideal?'A':'');if(ideal>0){idealTot+=ideal;recTot+=rec;if(rec>=ideal)met++}rows.push({d,iso,ideal,rec,gap,remark,holiday:ideal===0})}current={yy,mm,rows};sIdeal.textContent=idealTot;sReceived.textContent=recTot;sGap.textContent=recTot-idealTot;sDays.textContent=met;tableTitle.textContent=`POWERUPS 9000 Daily Testing Status — ${new Date(yy,mm-1,1).toLocaleString([],{month:'long',year:'numeric'})}`;render()}
-function render(){let h='<tr><th>Date</th>'+current.rows.map(r=>`<th class="${r.holiday?'holiday':''}">${String(r.d).padStart(2,'0')}-${new Date(current.yy,current.mm-1,r.d).toLocaleString([],{month:'short'})}</th>`).join('')+'</tr>';h+='<tr><td>Ideal Capacity</td>'+current.rows.map(r=>`<td class="${r.holiday?'holiday':''}">${r.holiday?'':r.ideal}</td>`).join('')+'</tr>';h+='<tr><td>Received for testing</td>'+current.rows.map(r=>`<td class="${r.holiday?'holiday':''}">${r.holiday?'':r.rec}</td>`).join('')+'</tr>';h+='<tr class="gaprow"><td>GAP</td>'+current.rows.map(r=>`<td class="${r.holiday?'holiday':''}">${r.holiday?'':r.gap}</td>`).join('')+'</tr>';h+='<tr><td>Remark</td>'+current.rows.map(r=>`<td class="${r.holiday?'holiday':''}">${r.holiday?'':r.remark}</td>`).join('')+'</tr>';bossTable.innerHTML=h}
-async function copyTable(){let html=`<table border="1" cellspacing="0" cellpadding="5">${bossTable.innerHTML}</table><br><b>Note:</b><br>A - UPS Not received for testing<br>B - Manufacturing quality issue<br>C - Supplier quality issue`;let plain=[['Date',...current.rows.map(r=>String(r.d).padStart(2,'0'))],['Ideal Capacity',...current.rows.map(r=>r.holiday?'':r.ideal)],['Received for testing',...current.rows.map(r=>r.holiday?'':r.rec)],['GAP',...current.rows.map(r=>r.holiday?'':r.gap)],['Remark',...current.rows.map(r=>r.holiday?'':r.remark)]].map(r=>r.join('\t')).join('\n')+'\n\nNote:\nA - UPS Not received for testing\nB - Manufacturing quality issue\nC - Supplier quality issue';try{if(window.ClipboardItem){await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([plain],{type:'text/plain'})})])}else{await navigator.clipboard.writeText(plain)}copyMsg.textContent='Copied — paste directly into email.';copyMsg.className='success'}catch(e){copyMsg.textContent='Copy failed: '+e.message;copyMsg.className='error'}}
-setup();load();
-</script></body></html>
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Input Distribution</title>
+<link rel="stylesheet" href="pilot.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+  <div class="brand">VERTIV<small>POWERUPS 9000 TESTING TRACKER</small></div>
+  <div class="nav">
+    <a href="pilot-dashboard.html">⌂ Dashboard</a>
+    <a class="active" href="pilot-input.html">▥ Input Distribution</a>
+    <a href="pilot-admin.html">⚙ Admin</a>
+  </div>
+</aside>
+<main class="main">
+  <div class="detailHead">
+    <div>
+      <h1>Daily Input Distribution</h1>
+      <div class="sub">Detailed day-wise Ideal Capacity vs Received for Testing</div>
+    </div>
+    <div class="actions">
+      <select id="monthSel" class="monthSel" onchange="load()"></select>
+      <button class="btn green copyBtn" onclick="copyTable()">Copy Styled Table for Email</button>
+      <a class="btn primary" href="pilot-dashboard.html">← Dashboard</a>
+    </div>
+  </div>
+
+  <div class="summary4">
+    <div class="metric"><span>Monthly Ideal Capacity</span><b id="sIdeal">0</b></div>
+    <div class="metric"><span>Received for Testing</span><b id="sReceived">0</b></div>
+    <div class="metric"><span>Net GAP</span><b id="sGap">0</b></div>
+    <div class="metric"><span>Days Met Target</span><b id="sDays">0</b></div>
+  </div>
+
+  <div class="card">
+    <div class="titleRow">
+      <h2 id="tableTitle">Daily Testing Status</h2>
+      <span id="copyMsg" class="small"></span>
+    </div>
+    <div class="tableWrap">
+      <table id="bossTable" class="bossTable"></table>
+    </div>
+    <div class="remarkLegend">
+      <b>Note:</b><br>
+      <b>A</b> - UPS Not received for testing<br>
+      <b>B</b> - Manufacturing quality issue<br>
+      <b>C</b> - Supplier quality issue
+    </div>
+  </div>
+</main>
+</div>
+
+<script src="pilot-common.js"></script>
+<script>
+let current={};
+
+function setup(){
+  let n=new Date(),o='';
+  for(let i=0;i<12;i++){
+    let d=new Date(n.getFullYear(),n.getMonth()-i,1);
+    o+=`<option value="${d.getFullYear()}-${d.getMonth()+1}">${d.toLocaleString([],{month:'long',year:'numeric'})}</option>`;
+  }
+  monthSel.innerHTML=o;
+}
+
+async function load(){
+  let [yy,mm]=monthSel.value.split('-').map(Number);
+  let days=new Date(yy,mm,0).getDate();
+  let b=new Date(yy,mm-1,1);
+  let e=new Date(yy,mm,1);
+
+  let [{data:t},{data:s},{data:dp}]=await Promise.all([
+    sb.from('p9k_prod_trackers').select('received_at').gte('received_at',b.toISOString()).lt('received_at',e.toISOString()),
+    sb.from('p9k_prod_settings').select('*').eq('id',1).single(),
+    sb.from('p9k_prod_daily_plan').select('*')
+      .gte('work_date',`${yy}-${String(mm).padStart(2,'0')}-01`)
+      .lt('work_date',`${e.getFullYear()}-${String(e.getMonth()+1).padStart(2,'0')}-01`)
+  ]);
+
+  let rows=[],idealTot=0,recTot=0,met=0;
+
+  for(let d=1;d<=days;d++){
+    let date=new Date(yy,mm-1,d);
+    let iso=`${yy}-${String(mm).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    let ov=(dp||[]).find(x=>x.work_date===iso);
+    let ideal=ov?.ideal_capacity??(date.getDay()===0?0:(s?.ideal_daily_capacity||0));
+    let live=(t||[]).filter(x=>new Date(x.received_at).toDateString()===date.toDateString()).length;
+    let rec=live+(ov?.manual_received_qty||0);
+    let gap=ideal?rec-ideal:0;
+    let remark=ov?.remark_code||(ideal>0&&rec<ideal?'A':'');
+    if(ideal>0){idealTot+=ideal;recTot+=rec;if(rec>=ideal)met++}
+    rows.push({d,iso,ideal,rec,gap,remark,holiday:ideal===0});
+  }
+
+  current={yy,mm,rows};
+  sIdeal.textContent=idealTot;
+  sReceived.textContent=recTot;
+  sGap.textContent=recTot-idealTot;
+  sDays.textContent=met;
+  tableTitle.textContent=`POWERUPS 9000 Daily Testing Status — ${new Date(yy,mm-1,1).toLocaleString([],{month:'long',year:'numeric'})}`;
+  render();
+}
+
+function render(){
+  let h='<tr><th>Date</th>'+
+    current.rows.map(r=>`<th class="${r.holiday?'holiday':''}">${String(r.d).padStart(2,'0')}-${new Date(current.yy,current.mm-1,r.d).toLocaleString([],{month:'short'})}</th>`).join('')+
+    '</tr>';
+
+  h+='<tr><td>Ideal Capacity</td>'+
+    current.rows.map(r=>`<td class="${r.holiday?'holiday':''}">${r.holiday?'':r.ideal}</td>`).join('')+
+    '</tr>';
+
+  h+='<tr><td>Received for testing</td>'+
+    current.rows.map(r=>`<td class="${r.holiday?'holiday':''}">${r.holiday?'':r.rec}</td>`).join('')+
+    '</tr>';
+
+  h+='<tr class="gaprow"><td>GAP</td>'+
+    current.rows.map(r=>`<td class="${r.holiday?'holiday':''}">${r.holiday?'':r.gap}</td>`).join('')+
+    '</tr>';
+
+  h+='<tr><td>Remark</td>'+
+    current.rows.map(r=>`<td class="${r.holiday?'holiday':''}">${r.holiday?'':r.remark}</td>`).join('')+
+    '</tr>';
+
+  bossTable.innerHTML=h;
+}
+
+function esc(s){return String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')}
+
+function buildEmailHTML(){
+  const blue='#0B6FB8';
+  const dark='#17365D';
+  const lightBlue='#D9EAF7';
+  const orange='#F4B183';
+  const yellow='#FFF200';
+  const white='#FFFFFF';
+  const border='#7F8C8D';
+
+  const title=`POWERUPS 9000 Daily Testing Status - ${new Date(current.yy,current.mm-1,1).toLocaleString([],{month:'long',year:'numeric'})}`;
+
+  const td=(txt,bg=white,bold=false,align='center') =>
+    `<td style="border:1px solid ${border};padding:6px 8px;background:${bg};font-family:Arial,sans-serif;font-size:11pt;text-align:${align};${bold?'font-weight:bold;':''}">${esc(txt)}</td>`;
+
+  let html=`
+    <div style="font-family:Arial,sans-serif">
+      <div style="font-size:16pt;font-weight:bold;color:${blue};text-align:center;margin-bottom:8px">${esc(title)}</div>
+      <table cellspacing="0" cellpadding="0" style="border-collapse:collapse;border:1px solid ${border};font-family:Arial,sans-serif">
+        <tr>
+          ${td('Date',lightBlue,true,'left')}
+          ${current.rows.map(r=>td(String(r.d).padStart(2,'0')+'-'+new Date(current.yy,current.mm-1,r.d).toLocaleString([],{month:'short'}),r.holiday?yellow:lightBlue,true)).join('')}
+        </tr>
+        <tr>
+          ${td('Ideal Capacity',white,true,'left')}
+          ${current.rows.map(r=>td(r.holiday?'':r.ideal,r.holiday?yellow:white)).join('')}
+        </tr>
+        <tr>
+          ${td('Received for testing',white,true,'left')}
+          ${current.rows.map(r=>td(r.holiday?'':r.rec,r.holiday?yellow:white)).join('')}
+        </tr>
+        <tr>
+          ${td('GAP',orange,true,'left')}
+          ${current.rows.map(r=>td(r.holiday?'':r.gap,r.holiday?yellow:orange,true)).join('')}
+        </tr>
+        <tr>
+          ${td('Remark',white,true,'left')}
+          ${current.rows.map(r=>td(r.holiday?'':r.remark,r.holiday?yellow:white,true)).join('')}
+        </tr>
+      </table>
+      <div style="margin-top:10px;font-family:Arial,sans-serif;font-size:11pt;line-height:1.5">
+        <b>Note:</b><br>
+        <b>A</b> - UPS Not received for testing<br>
+        <b>B</b> - Manufacturing quality issue<br>
+        <b>C</b> - Supplier quality issue
+      </div>
+    </div>`;
+  return html;
+}
+
+async function copyTable(){
+  const html=buildEmailHTML();
+
+  const plain=[
+    ['Date',...current.rows.map(r=>String(r.d).padStart(2,'0'))],
+    ['Ideal Capacity',...current.rows.map(r=>r.holiday?'':r.ideal)],
+    ['Received for testing',...current.rows.map(r=>r.holiday?'':r.rec)],
+    ['GAP',...current.rows.map(r=>r.holiday?'':r.gap)],
+    ['Remark',...current.rows.map(r=>r.holiday?'':r.remark)]
+  ].map(r=>r.join('\t')).join('\n')+
+  '\n\nNote:\nA - UPS Not received for testing\nB - Manufacturing quality issue\nC - Supplier quality issue';
+
+  try{
+    if(window.ClipboardItem){
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html':new Blob([html],{type:'text/html'}),
+          'text/plain':new Blob([plain],{type:'text/plain'})
+        })
+      ]);
+    }else{
+      await navigator.clipboard.writeText(plain);
+    }
+    copyMsg.textContent='✓ Styled table copied — paste into Outlook.';
+    copyMsg.className='success';
+  }catch(e){
+    copyMsg.textContent='Copy failed: '+e.message;
+    copyMsg.className='error';
+  }
+}
+
+setup();
+load();
+</script>
+</body>
+</html>
