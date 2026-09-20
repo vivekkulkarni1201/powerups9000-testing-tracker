@@ -1,0 +1,105 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>POWERUPS 9000 QR Generator</title>
+<link rel="stylesheet" href="pilot.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">VERTIV<small>POWERUPS 9000 TESTING TRACKER</small></div>
+    <div class="nav">
+      <a href="pilot-dashboard.html">⌂ Dashboard</a>
+      <a href="pilot-scan.html?id=P9K-Q0001">⌗ Scan / Update</a>
+      <a class="active" href="pilot-qr-generator.html">▦ QR Generator</a>
+      <a href="pilot-input.html">▥ Input Distribution</a>
+      <a href="pilot-admin.html">⚙ Admin</a>
+    </div>
+  </aside>
+  <main class="main">
+    <div class="top">
+      <div>
+        <h1>POWERUPS 9000 QR Generator</h1>
+        <div class="sub">Generate unique Tracker IDs for production / QR printing test</div>
+      </div>
+      <div class="actions">
+        <a class="btn" href="pilot-dashboard.html">Dashboard</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="formGrid">
+        <div class="field">
+          <label>Starting Tracker Number</label>
+          <input id="startNo" type="number" min="1" value="1">
+        </div>
+        <div class="field">
+          <label>Quantity</label>
+          <select id="qty">
+            <option>1</option><option selected>5</option><option>10</option>
+            <option>25</option><option>50</option><option>100</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions" style="margin-top:12px">
+        <button class="btn primary" onclick="generate()">Generate QR Set</button>
+        <button class="btn" onclick="window.print()">Print</button>
+      </div>
+      <div class="small" style="margin-top:10px">
+        Each QR opens the production-pilot scan page using its unique Tracker ID.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="titleRow">
+        <h2>Generated Trackers</h2>
+        <span id="countMsg" class="small"></span>
+      </div>
+      <div id="qrGrid" style="display:flex;flex-wrap:wrap;gap:14px;margin-top:14px"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+function rootUrl(){
+  const p=location.pathname;
+  return location.origin + p.substring(0,p.lastIndexOf('/')+1);
+}
+function generate(){
+  const start=parseInt(startNo.value,10)||1;
+  const n=parseInt(qty.value,10)||1;
+  qrGrid.innerHTML='';
+  countMsg.textContent=n+' QR code(s)';
+  for(let i=0;i<n;i++){
+    const id='P9K-Q'+String(start+i).padStart(4,'0');
+    const url=rootUrl()+'pilot-scan.html?id='+encodeURIComponent(id);
+
+    const card=document.createElement('div');
+    card.style.cssText='background:#fff;color:#111;border-radius:12px;padding:13px;width:220px;text-align:center';
+
+    const q=document.createElement('div');
+    q.style.cssText='display:flex;justify-content:center';
+
+    const title=document.createElement('div');
+    title.innerHTML='<b style="font-size:16px">POWERUPS 9000</b><br><b>'+id+'</b><br><span style="font-size:10px">TEST TRACKER</span>';
+    title.style.marginTop='8px';
+
+    card.appendChild(q);
+    card.appendChild(title);
+    qrGrid.appendChild(card);
+
+    new QRCode(q,{
+      text:url,
+      width:175,
+      height:175,
+      correctLevel:QRCode.CorrectLevel.M
+    });
+  }
+}
+generate();
+</script>
+</body>
+</html>
