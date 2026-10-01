@@ -1,5 +1,211 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>POWERUPS 9000 Update</title><link rel="manifest" href="manifest.json"><link rel="stylesheet" href="pilot.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script></head><body><div class="main"><div class="mobileCard"><div class="top"><div><h1>Scan / Update UPS</h1><div class="sub">Mobile QR + laptop update page</div></div><div class="actions"><a class="btn" href="pilot-active.html">Active UPS</a><a class="btn" href="pilot-dashboard.html">Dashboard</a></div></div><div class="card"><div id="head"></div><div id="body"></div><div id="status" class="small" style="margin-top:10px"></div></div></div></div><script src="pilot-common.js"></script><script>
-const id=(new URLSearchParams(location.search).get('id')||'').toUpperCase();let state=null,projects=[],engineers=[],settings={};async function init(){if(!id){fail('Tracker ID missing.');return}let [{data:p},{data:e},{data:s}]=await Promise.all([sb.from('p9k_prod_projects').select('*').eq('active',true).order('sort_order'),sb.from('p9k_prod_engineers').select('*').eq('active',true).order('engineer_name'),sb.from('p9k_prod_settings').select('*').eq('id',1).single()]);projects=p||[];engineers=e||[];settings=s||{};load()}async function load(){let {data,error}=await sb.rpc('p9k_prod_get_tracker',{p_tracker_id:id});if(error){fail(error.message);return}state=data;if(!data.exists){if(!validateQRId(id)){baseHead();body.innerHTML=`<div class="error">❌ Invalid POWERUPS 9000 Tracker ID: ${esc(id)}</div>`;return}showReceive();return}if(data.completed_at){showCompleted();return}if(!data.serial_no){showAssign();return}showStages()}function baseHead(extra=''){head.innerHTML=`<div class="metric"><span>Tracker ID</span><b>${state?.is_faulty?trackerBadge({tracker_id:id,is_faulty:true}):esc(id)}</b></div>${extra}`}function showReceive(){baseHead();body.innerHTML=`<div class="softNote">New unused Tracker QR detected. First scan records <b>Received</b> only.</div><div class="stageMenu"><div class="stageBlock pending"><button onclick="receive()"><b>First Scan → RECEIVED</b><div class="small">Confirm incoming UPS received for testing.</div></button></div></div>`}async function receive(){if(!confirm('Confirm this UPS as RECEIVED?'))return;let {error}=await sb.rpc('p9k_prod_receive',{p_tracker_id:id});if(error)return failPopup(error.message);ok('Received recorded');setTimeout(load,500)}function showAssign(){baseHead(`<div class="small" style="margin-top:8px">Status: Received · Serial not assigned</div>`);let po='<option value="">Select Project ▼</option>'+projects.map(x=>`<option value="${x.project_code}">${esc(x.project_name)}</option>`).join(''),eo='<option value="">Select Engineer ▼</option>'+engineers.map(x=>`<option>${esc(x.engineer_name)}</option>`).join('');let preview=settings.serial_mode==='AUTO'?`<div class="softNote" style="margin-top:10px">AUTO Serial will be generated from counter <b>${settings.serial_counter}</b>.</div>`:'';body.innerHTML=`<div class="formGrid" style="margin-top:12px"><div class="field"><label>Project ▼</label><select id="proj">${po}</select></div><div class="field"><label>Engineer ▼</label><select id="eng">${eo}</select></div><div class="field full" ${settings.serial_mode==='AUTO'?'style="display:none"':''}><label>Manual Serial Number</label><input id="manualSerial"></div></div>${preview}<button class="btn primary" style="width:100%;margin-top:12px" onclick="assign()">Assign ${settings.serial_mode==='AUTO'?'AUTO':'Manual'} Serial</button>`}async function assign(){if(!proj.value)return failPopup('Project is required');if(!eng.value)return failPopup('Engineer is required');let m=document.getElementById('manualSerial');if(settings.serial_mode!=='AUTO'&&!m.value.trim())return failPopup('Manual serial number is required');let {data,error}=await sb.rpc('p9k_prod_assign_serial',{p_tracker_id:id,p_project_code:proj.value,p_engineer:eng.value,p_manual_serial:m?.value||null});if(error)return failPopup(error.message);ok('Serial assigned: '+(data?.serial_no||''));setTimeout(load,600)}function showCompleted(){baseHead(`<div class="metricGrid" style="margin-top:10px"><div class="metric"><span>Serial</span><b>${esc(state.serial_no||'—')}</b></div><div class="metric"><span>Project</span><b>${esc(state.project_name||state.project_code||'—')}</b></div></div>`);body.innerHTML=`<div class="completeHero" style="margin-top:14px"><div class="bigCheck">✅</div><h2>ALL TESTING STAGES COMPLETED</h2><div>UPS moved to <b>Finishing</b>.</div><div class="small" style="margin-top:10px">Completed: ${dstr(state.completed_at)} · Engineer: ${esc(state.last_engineer||'—')}</div><div class="actions" style="justify-content:center;margin-top:16px"><a class="btn primary" href="pilot-scanner.html">Scan Next UPS</a><a class="btn" href="pilot-dashboard.html">Dashboard</a></div></div>`}
-function showStages(){let valid=(state.stages||[]).filter(s=>s&&s.stage_code&&s.stage_name),heatStarted=valid.some(s=>s.stage_code==='HEATRUN_PROGRESS'&&s.completed),heatDone=valid.some(s=>s.stage_code==='HEATRUN_COMPLETED'&&s.completed),heatActive=state.current_stage==='HEATRUN_PROGRESS'&&!heatDone,timerRunning=heatActive&&state.timer_left_minutes>0,timerFinished=heatActive&&state.timer_left_minutes<=0;let serial=`<div class="metricGrid" style="margin-top:10px"><div class="metric"><span>Assigned Serial</span><b>${esc(state.serial_no)}</b></div><div class="metric"><span>Project</span><b>${esc(state.project_name||state.project_code)}</b></div></div>`;baseHead(serial);let eo='<option value="">Select Engineer ▼</option>'+engineers.map(x=>`<option ${x.engineer_name===state.last_engineer?'selected':''}>${esc(x.engineer_name)}</option>`).join(''),banner='';if(state.is_faulty)banner=`<div class="faultBanner"><b>⚠ UPS IS IN FAULTY / RTA STATE</b><div class="small">Tracker is highlighted RED across the portal.<br>Fault Stage: ${esc(STAGE_LABEL[state.faulty_stage]||state.faulty_stage||'—')} · Reason: ${esc(state.faulty_reason||'—')} · Since ${dstr(state.faulty_since)}</div></div>`;else if(timerRunning)banner=`<div class="lockBanner"><b>🔒 Heatrun In Progress</b><div class="timer">${state.timer_left_minutes} minute(s) remaining</div><div class="small">All other pending stages locked until timer completes.</div></div>`;else if(timerFinished)banner=`<div class="lockBanner"><b>⏱ Heatrun Timer Complete</b><div class="small">Only Heatrun Completed is available.</div></div>`;let blocks=valid.map(s=>{if(s.completed)return doneBlock(s);if(state.is_faulty)return lockedBlock(s,'UPS is Faulty / RTA. Return to Testing first.');if(s.stage_code==='HEATRUN_COMPLETED'&&!heatStarted)return lockedBlock(s,'Start Heatrun In Progress first.');if(timerRunning)return lockedBlock(s,`Heatrun is in progress · ${state.timer_left_minutes} min remaining.`);if(timerFinished&&s.stage_code!=='HEATRUN_COMPLETED')return lockedBlock(s,'Mark Heatrun Completed first.');if(s.is_finishing&&!state.finishing_enabled)return lockedBlock(s,`${state.mandatory_pending_count} mandatory stage(s) pending.`);if(s.is_finishing)return `<div class="stageBlock finishReady"><button onclick="choose('${s.stage_code}')"><b>✓ ${esc(s.stage_name)}</b><div class="small">All mandatory stages completed · tap to move to Finishing</div></button></div>`;return `<div class="stageBlock pending"><button onclick="choose('${s.stage_code}')"><b>${esc(s.stage_name)}</b><div class="small">Pending — tap to update</div></button></div>`}).join('');body.innerHTML=`${banner}<div class="field" style="margin-top:12px"><label>Engineer ▼</label><select id="eng">${eo}</select></div><div class="faultActions">${state.is_faulty?`<button class="btn green" onclick="returnTesting()">↩ Return to Testing</button>`:`<button class="btn red" onclick="markFaulty()">⚠ Mark Faulty / RTA</button>`}<a class="btn" href="pilot-project.html?project=${encodeURIComponent(state.project_code||'')}">Project Dashboard</a></div><div class="stageMenu">${blocks}</div>`}
-function doneBlock(s){return `<div class="stageBlock done"><div><b>✓ ${esc(s.stage_name)}</b><div class="small">Completed</div></div></div>`}function lockedBlock(s,msg){return `<div class="stageBlock hardLocked"><button onclick='lockedMsg(${JSON.stringify(msg)})'><b>🔒 ${esc(s.stage_name)}</b><div class="small">${esc(msg)}</div></button></div>`}function lockedMsg(msg){alert('LOCKED\n\n'+msg)}async function choose(stage){if(!eng.value)return failPopup('Engineer is required');if(!confirm('Confirm stage update: '+(STAGE_LABEL[stage]||stage)+'?'))return;let {error}=await sb.rpc('p9k_prod_update_stage',{p_tracker_id:id,p_stage:stage,p_engineer:eng.value,p_remarks:null});if(error)return failPopup(error.message);ok('Stage updated');setTimeout(load,550)}async function markFaulty(){if(!eng.value)return failPopup('Select engineer first');let reason=prompt('Fault reason: TESTING / MANUFACTURING / SUPPLIER / OTHER','TESTING');if(!reason)return;let remarks=prompt('Fault / RTA remarks (optional)','')||null;if(!confirm('Mark this UPS as FAULTY / RTA?'))return;let {error}=await sb.rpc('p9k_prod_mark_faulty',{p_tracker_id:id,p_reason:reason,p_engineer:eng.value,p_remarks:remarks});if(error)return failPopup(error.message);ok('UPS marked Faulty / RTA');setTimeout(load,500)}async function returnTesting(){if(!eng.value)return failPopup('Select engineer first');let remarks=prompt('Correction / return-to-testing remarks (optional)','')||null;if(!confirm('Return this UPS to active testing?'))return;let {error}=await sb.rpc('p9k_prod_return_to_testing',{p_tracker_id:id,p_engineer:eng.value,p_remarks:remarks});if(error)return failPopup(error.message);ok('UPS returned to Testing');setTimeout(load,500)}function ok(t){status.textContent='✅ '+t;status.className='success';showToast(t)}function fail(t){status.textContent='❌ '+t;status.className='error'}function failPopup(t){fail(t);alert('POWERUPS 9000\n\n'+t)}init();
+const id=(new URLSearchParams(location.search).get('id')||'').toUpperCase();let state=null,projects=[],engineers=[],bays=[],settings={},sessionUser=null,myRole='ANON';async function init(){if(!id){fail('Tracker ID missing.');return}sessionUser=await getSessionUser();myRole=await getMyRole();let [{data:p},{data:e},{data:b},{data:s}]=await Promise.all([sb.from('p9k_prod_projects').select('*').eq('active',true).order('sort_order'),sb.from('p9k_prod_engineers').select('*').eq('active',true).order('engineer_name'),sb.from('p9k_prod_test_bays').select('*').eq('active',true).order('sort_order'),sb.from('p9k_prod_settings').select('*').eq('id',1).single()]);projects=p||[];engineers=e||[];bays=b||[];settings=s||{};load()}async function load(){let {data,error}=await sb.rpc('p9k_prod_get_tracker',{p_tracker_id:id});if(error){fail(error.message);return}state=data;if(!data.exists){if(!validateQRId(id)){baseHead();body.innerHTML=`<div class="error">❌ Invalid POWERUPS 9000 Tracker ID: ${esc(id)}</div>`;return}showReceive();return}if(data.completed_at){showCompleted();return}if(!data.serial_no){showAssign();return}showStages()}function baseHead(extra=''){head.innerHTML=`<div class="metric"><span>Tracker ID</span><b>${state?.is_faulty?trackerBadge({tracker_id:id,is_faulty:true}):esc(id)}</b></div>${extra}`}function showReceive(){baseHead();body.innerHTML=`<div class="softNote">New unused Tracker QR detected. First scan records <b>Received</b> only.</div><div class="stageMenu"><div class="stageBlock pending"><button onclick="receive()"><b>First Scan → RECEIVED</b><div class="small">Confirm incoming UPS received for testing.</div></button></div></div>`}async function receive(){if(!confirm('Confirm this UPS as RECEIVED?'))return;let {error}=await sb.rpc('p9k_prod_receive_v4',{p_tracker_id:id});if(error)return failPopup(error.message);ok('Received recorded');setTimeout(load,500)}function showAssign(){baseHead(`<div class="small" style="margin-top:8px">Status: Received · Serial not assigned</div>`);let po='<option value="">Select Project ▼</option>'+projects.map(x=>`<option value="${x.project_code}">${esc(x.project_name)}</option>`).join(''),eo='<option value="">Select Engineer ▼</option>'+engineers.map(x=>`<option>${esc(x.engineer_name)}</option>`).join('');let preview=settings.serial_mode==='AUTO'?`<div class="softNote" style="margin-top:10px">AUTO Serial will be generated from counter <b>${settings.serial_counter}</b>.</div>`:'';body.innerHTML=`<div class="formGrid" style="margin-top:12px"><div class="field"><label>Project ▼</label><select id="proj">${po}</select></div><div class="field"><label>Engineer ▼</label><select id="eng">${eo}</select></div><div class="field"><label>Test Bay (optional) ▼</label><select id="bay"><option value="">Not Selected</option>${bays.map(x=>`<option value="${esc(x.bay_code)}">${esc(x.bay_name)}</option>`).join('')}</select></div><div class="field full" ${settings.serial_mode==='AUTO'?'style="display:none"':''}><label>Manual Serial Number</label><input id="manualSerial"></div></div>${preview}<button class="btn primary" style="width:100%;margin-top:12px" onclick="assign()">Assign ${settings.serial_mode==='AUTO'?'AUTO':'Manual'} Serial</button>`}async function assign(){if(!proj.value)return failPopup('Project is required');if(!eng.value)return failPopup('Engineer is required');let m=document.getElementById('manualSerial');if(settings.serial_mode!=='AUTO'&&!m.value.trim())return failPopup('Manual serial number is required');let {data,error}=await sb.rpc('p9k_prod_assign_serial_v4',{p_tracker_id:id,p_project_code:proj.value,p_engineer:eng.value,p_test_bay:bay.value||null,p_manual_serial:m?.value||null});if(error)return failPopup(error.message);ok('Serial assigned: '+(data?.serial_no||''));setTimeout(load,600)}function showCompleted(){baseHead(`<div class="metricGrid" style="margin-top:10px"><div class="metric"><span>Serial</span><b>${esc(state.serial_no||'—')}</b></div><div class="metric"><span>Project</span><b>${esc(state.project_name||state.project_code||'—')}</b></div></div>`);body.innerHTML=`<div class="completeHero" style="margin-top:14px"><div class="bigCheck">✅</div><h2>ALL TESTING STAGES COMPLETED</h2><div>UPS moved to <b>Finishing</b>.</div><div class="small" style="margin-top:10px">Completed: ${dstr(state.completed_at)} · Engineer: ${esc(state.last_engineer||'—')}</div><div class="actions" style="justify-content:center;margin-top:16px"><a class="btn primary" href="pilot-scanner.html">Scan Next UPS</a><a class="btn" href="pilot-dashboard.html">Dashboard</a></div></div>`}
+
+function showStages(){
+  let valid=(state.stages||[]).filter(s=>s&&s.stage_code&&s.stage_name);
+
+  const testStarted=!!state.testing_started;
+  const testDone=!!state.testing_completed;
+  const testActive=state.current_stage==='TESTING_PROGRESS'&&!testDone;
+
+  const heatStarted=!!state.heatrun_started;
+  const heatDone=!!state.heatrun_completed;
+  const heatActive=state.current_stage==='HEATRUN_PROGRESS'&&!heatDone;
+  const timerRunning=heatActive&&state.timer_left_minutes>0;
+  const timerFinished=heatActive&&state.timer_left_minutes<=0;
+
+  let serial=`<div class="metricGrid" style="margin-top:10px">
+    <div class="metric"><span>Assigned Serial</span><b>${esc(state.serial_no)}</b></div>
+    <div class="metric"><span>Project</span><b>${esc(state.project_name||state.project_code)}</b></div>
+  </div>`;
+  baseHead(serial);
+
+  let eo='<option value="">Select Engineer ▼</option>'+
+    engineers.map(x=>`<option ${x.engineer_name===state.last_engineer?'selected':''}>${esc(x.engineer_name)}</option>`).join('');
+
+  let banner='';
+
+  if(state.is_faulty){
+    banner=`<div class="faultBanner">
+      <b>⚠ UPS IS IN FAULTY / RTA STATE</b>
+      <div class="small">
+        Tracker is highlighted RED across the portal.<br>
+        Fault Stage: ${esc(STAGE_LABEL[state.faulty_stage]||state.faulty_stage||'—')}
+        · Reason: ${esc(state.faulty_reason||'—')}
+        · Since ${dstr(state.faulty_since)}
+      </div>
+    </div>`;
+  }else if(testActive){
+    banner=`<div class="lockBanner">
+      <b>🧪 Testing In Progress</b>
+      <div class="small">
+        Testing is an active activity. Mark <b>Testing — Completed</b> before selecting another stage.
+      </div>
+    </div>`;
+  }else if(timerRunning){
+    banner=`<div class="lockBanner">
+      <b>🔥 Heatrun In Progress</b>
+      <div class="timer">${state.timer_left_minutes} minute(s) remaining</div>
+      <div class="small">
+        Heatrun is an active activity. All other pending stages remain locked until timer completion.
+      </div>
+    </div>`;
+  }else if(timerFinished){
+    banner=`<div class="lockBanner">
+      <b>⏱ Heatrun Timer Complete</b>
+      <div class="small">Only <b>Heatrun — Completed</b> is available to close the Heatrun activity.</div>
+    </div>`;
+  }
+
+  let blocks=valid.map(s=>{
+    if(s.stage_code==='TESTING_PROGRESS'){
+      if(testDone) return activityClosedBlock('Testing','Testing activity closed');
+      if(testStarted) return activityRunningBlock('Testing — In Progress','Testing is currently active');
+      if(state.is_faulty) return lockedBlock(s,'UPS is Faulty / RTA. Return to Testing first.');
+      if(heatActive) return lockedBlock(s,'Heatrun is in progress. Close Heatrun first.');
+      return startBlock(s,'Start Testing');
+    }
+
+    if(s.stage_code==='TESTING_COMPLETED'){
+      if(testDone) return activityCompletedBlock(s,'Testing stage closed');
+      if(state.is_faulty) return lockedBlock(s,'UPS is Faulty / RTA. Return to Testing first.');
+      if(!testStarted) return lockedBlock(s,'Start Testing — In Progress first.');
+      if(testActive) return completeBlock(s,'Complete Testing and close this stage');
+      return lockedBlock(s,'Testing is not currently in progress.');
+    }
+
+    if(s.stage_code==='HEATRUN_PROGRESS'){
+      if(heatDone) return activityClosedBlock('Heatrun','Heatrun activity closed');
+      if(heatStarted) return activityRunningBlock('Heatrun — In Progress',timerRunning?`${state.timer_left_minutes} minute(s) remaining`:'Timer complete — close Heatrun');
+      if(state.is_faulty) return lockedBlock(s,'UPS is Faulty / RTA. Return to Testing first.');
+      if(testActive) return lockedBlock(s,'Testing is in progress. Mark Testing Completed first.');
+      return startBlock(s,'Start Heatrun');
+    }
+
+    if(s.stage_code==='HEATRUN_COMPLETED'){
+      if(heatDone) return activityCompletedBlock(s,'Heatrun stage closed');
+      if(state.is_faulty) return lockedBlock(s,'UPS is Faulty / RTA. Return to Testing first.');
+      if(!heatStarted) return lockedBlock(s,'Start Heatrun — In Progress first.');
+      if(timerRunning) return lockedBlock(s,`Heatrun in progress · ${state.timer_left_minutes} min remaining.`);
+      if(timerFinished) return completeBlock(s,'Complete Heatrun and close this stage');
+      return lockedBlock(s,'Heatrun is not currently in progress.');
+    }
+
+    if(s.stage_code==='FAT_PROGRESS'){if(state.fat_completed) return activityClosedBlock('FAT Testing','FAT activity closed');if(state.fat_started) return activityRunningBlock('FAT Testing — In Progress','FAT testing is currently active');if(state.is_faulty) return lockedBlock(s,'UPS is Faulty / RTA. Return to Testing first.');if(testActive) return lockedBlock(s,'Testing is in progress. Mark Testing Completed first.');if(timerRunning||timerFinished) return lockedBlock(s,'Close Heatrun before FAT Testing.');return startBlock(s,'Start FAT Testing');}
+    if(s.stage_code==='FAT_COMPLETED'){if(state.fat_completed) return activityCompletedBlock(s,'FAT stage closed');if(!state.fat_started) return lockedBlock(s,'Start FAT Testing — In Progress first.');if(state.current_stage==='FAT_PROGRESS') return completeBlock(s,'Complete FAT Testing and close this stage');return lockedBlock(s,'FAT Testing is not currently in progress.');}
+
+    if(s.completed) return doneBlock(s);
+    if(state.is_faulty) return lockedBlock(s,'UPS is Faulty / RTA. Return to Testing first.');
+    if(testActive) return lockedBlock(s,'Testing is in progress. Mark Testing Completed first.');
+    if(timerRunning) return lockedBlock(s,`Heatrun is in progress · ${state.timer_left_minutes} min remaining.`);
+    if(timerFinished) return lockedBlock(s,'Mark Heatrun Completed first.');
+    if(s.is_finishing&&!state.finishing_enabled) return lockedBlock(s,`${state.mandatory_pending_count} mandatory completed stage(s) pending.`);
+    if(s.is_finishing) return `<div class="stageBlock finishReady">
+      <button onclick="choose('${s.stage_code}')">
+        <b>✓ ${esc(s.stage_name)}</b>
+        <div class="small">All mandatory activities completed · tap to move to Finishing</div>
+      </button>
+    </div>`;
+
+    return `<div class="stageBlock pending">
+      <button onclick="choose('${s.stage_code}')">
+        <b>${esc(s.stage_name)}</b>
+        <div class="small">Pending — tap to update</div>
+      </button>
+    </div>`;
+  }).join('');
+
+  body.innerHTML=`${banner}
+    <div class="formGrid" style="margin-top:12px"><div class="field"><label>Engineer ▼</label><select id="eng">${eo}</select></div><div class="field"><label>Test Bay (optional) ▼</label><select id="bay"><option value="">Not Selected</option>${bays.map(x=>`<option value="${esc(x.bay_code)}" ${x.bay_code===state.test_bay?'selected':''}>${esc(x.bay_name)}</option>`).join('')}</select></div></div>
+    <div class="faultActions">
+      ${state.is_faulty
+        ? `<button class="btn green" onclick="returnTesting()">↩ Return to Testing</button>`
+        : `<button class="btn red" onclick="markFaulty()">⚠ Mark Faulty / RTA</button>`}
+      <a class="btn" href="pilot-project.html?project=${encodeURIComponent(state.project_code||'')}">Project Dashboard</a>
+    </div>
+    <div class="stageMenu">${blocks}</div>`;
+}
+
+function doneBlock(s){
+  return `<div class="stageBlock done"><div><b>✓ ${esc(s.stage_name)}</b><div class="small">Completed</div></div></div>`;
+}
+
+function startBlock(s,label){
+  return `<div class="stageBlock pending">
+    <button onclick="choose('${s.stage_code}')">
+      <b>▶ ${esc(label)}</b>
+      <div class="small">${esc(s.stage_name)}</div>
+    </button>
+  </div>`;
+}
+
+function completeBlock(s,label){
+  return `<div class="stageBlock finishReady">
+    <button onclick="choose('${s.stage_code}')">
+      <b>✓ ${esc(s.stage_name)}</b>
+      <div class="small">${esc(label)}</div>
+    </button>
+  </div>`;
+}
+
+function activityRunningBlock(title,msg){
+  return `<div class="stageBlock activityRunning"><div><b>● ${esc(title)}</b><div class="small">${esc(msg)}</div></div></div>`;
+}
+
+function activityCompletedBlock(s,msg){
+  return `<div class="stageBlock done"><div><b>✓ ${esc(s.stage_name)}</b><div class="small">${esc(msg)}</div></div></div>`;
+}
+
+function activityClosedBlock(name,msg){
+  return `<div class="stageBlock activityClosed"><div><b>✓ ${esc(name)}</b><div class="small">${esc(msg)}</div></div></div>`;
+}
+
+function lockedBlock(s,msg){
+  return `<div class="stageBlock hardLocked">
+    <button onclick='lockedMsg(${JSON.stringify(msg)})'>
+      <b>🔒 ${esc(s.stage_name)}</b>
+      <div class="small">${esc(msg)}</div>
+    </button>
+  </div>`;
+}
+
+function lockedMsg(msg){
+  alert('LOCKED\n\n'+msg)
+}
+
+async function choose(stage){
+  if(!eng.value)return failPopup('Engineer is required');
+
+  let label=STAGE_LABEL[stage]||stage;
+  let promptText='Confirm stage update: '+label+'?';
+
+  if(stage==='TESTING_PROGRESS') promptText='Start Testing now?';
+  if(stage==='TESTING_COMPLETED') promptText='Mark Testing as COMPLETED?';
+  if(stage==='HEATRUN_PROGRESS') promptText='Start Heatrun and timer now?';
+  if(stage==='HEATRUN_COMPLETED') promptText='Mark Heatrun as COMPLETED?';if(stage==='FAT_PROGRESS') promptText='Start FAT Testing now?';if(stage==='FAT_COMPLETED') promptText='Mark FAT Testing as COMPLETED?';
+
+  if(!confirm(promptText))return;
+
+  let {error}=await sb.rpc('p9k_prod_update_stage_v4',{
+    p_tracker_id:id,
+    p_stage:stage,
+    p_engineer:eng.value,
+    p_test_bay:bay.value||null,
+    p_expected_updated_at:state.last_updated_at,
+    p_remarks:null
+  });
+
+  if(error)return failPopup(error.message);
+
+  let success='Stage updated';
+  if(stage==='TESTING_PROGRESS') success='Testing started';
+  if(stage==='TESTING_COMPLETED') success='Testing completed';
+  if(stage==='HEATRUN_PROGRESS') success='Heatrun started';
+  if(stage==='HEATRUN_COMPLETED') success='Heatrun completed';if(stage==='FAT_PROGRESS') success='FAT Testing started';if(stage==='FAT_COMPLETED') success='FAT Testing completed';
+
+  ok(success);
+  setTimeout(load,550);
+}
+
+async function markFaulty(){if(!eng.value)return failPopup('Select engineer first');let reason=prompt('Fault reason: TESTING / MANUFACTURING / SUPPLIER / OTHER','TESTING');if(!reason)return;let remarks=prompt('Fault / RTA remarks (optional)','')||null;if(!confirm('Mark this UPS as FAULTY / RTA?'))return;let {error}=await sb.rpc('p9k_prod_mark_faulty_v4',{p_tracker_id:id,p_reason:reason,p_engineer:eng.value,p_test_bay:bay.value||null,p_remarks:remarks});if(error)return failPopup(error.message);ok('UPS marked Faulty / RTA');setTimeout(load,500)}async function returnTesting(){if(!eng.value)return failPopup('Select engineer first');let remarks=prompt('Correction / return-to-testing remarks (optional)','')||null;if(!confirm('Return this UPS to active testing?'))return;let {error}=await sb.rpc('p9k_prod_return_to_testing_v4',{p_tracker_id:id,p_engineer:eng.value,p_test_bay:bay.value||null,p_remarks:remarks});if(error)return failPopup(error.message);ok('UPS returned to Testing');setTimeout(load,500)}function ok(t){status.textContent='✅ '+t;status.className='success';showToast(t)}function fail(t){status.textContent='❌ '+t;status.className='error'}function failPopup(t){fail(t);alert('POWERUPS 9000\n\n'+t)}init();
 </script></body></html>
