@@ -52,8 +52,8 @@ function showStages(){
     </div>`;
   }else if(timerFinished){
     banner=`<div class="lockBanner">
-      <b>⏱ Heatrun Timer Complete</b>
-      <div class="small">Only <b>Heatrun — Completed</b> is available to close the Heatrun activity.</div>
+      <b>⏱ HEATRUN TIMER COMPLETED</b>
+      <div class="small"><b>Check the UPS and mark it as Heatrun — Completed.</b><br>Until you confirm completion, this UPS remains pending action.</div>
     </div>`;
   }
 
@@ -76,7 +76,7 @@ function showStages(){
 
     if(s.stage_code==='HEATRUN_PROGRESS'){
       if(heatDone) return activityClosedBlock('Heatrun','Heatrun activity closed');
-      if(heatStarted) return activityRunningBlock('Heatrun — In Progress',timerRunning?`${state.timer_left_minutes} minute(s) remaining`:'Timer complete — close Heatrun');
+      if(heatStarted) return activityRunningBlock(timerRunning?'Heatrun — In Progress':'⏱ Heatrun Timer Completed',timerRunning?`${state.timer_left_minutes} minute(s) remaining`:'Check UPS and mark Heatrun — Completed');
       if(state.is_faulty) return lockedBlock(s,'UPS is Faulty / RTA. Return to Testing first.');
       if(testActive) return lockedBlock(s,'Testing is in progress. Mark Testing Completed first.');
       return startBlock(s,'Start Heatrun');
@@ -210,5 +210,5 @@ async function choose(stage){
 async function updateAssignment(){if(!eng.value)return failPopup('Select engineer first');let {error}=await sb.rpc('p9k_prod_update_assignment_v5',{p_tracker_id:id,p_engineer:eng.value,p_test_bay:bay.value||null,p_expected_updated_at:state.last_updated_at});if(error)return failPopup(error.message);ok('Engineer / Test Bay updated');setTimeout(load,350)}
 async function markFaulty(){if(!eng.value)return failPopup('Select engineer first');let reason=prompt('Fault reason: TESTING / MANUFACTURING / SUPPLIER / OTHER','TESTING');if(!reason)return;let remarks=prompt('Fault / RTA remarks (optional)','')||null;if(!confirm('Mark this UPS as FAULTY / RTA? Current activity/timer will stop.'))return;let {error}=await sb.rpc('p9k_prod_mark_faulty_v5',{p_tracker_id:id,p_reason:reason,p_engineer:eng.value,p_test_bay:bay.value||null,p_expected_updated_at:state.last_updated_at,p_remarks:remarks});if(error)return failPopup(error.message);ok('UPS moved to Faulty / RTA; current activity suspended');setTimeout(load,400)}
 async function returnTesting(){if(!eng.value)return failPopup('Select engineer first');let opts=[['TESTING_PROGRESS','Testing — In Progress'],['HEATRUN_PROGRESS','Heatrun — In Progress']];if((state.project_code||'')&&projects.find(x=>x.project_code===state.project_code)?.fat_required)opts.push(['FAT_PROGRESS','FAT Testing — In Progress']);let msg='Restart from which activity?\n'+opts.map((x,i)=>`${i+1}. ${x[1]}`).join('\n');let n=parseInt(prompt(msg,'1'),10);if(!n||!opts[n-1])return;let restart=opts[n-1][0];let remarks=prompt('Correction / restart remarks (optional)','')||null;if(!confirm('Return this UPS to active testing from '+opts[n-1][1]+'? Timed activity will restart fresh.'))return;let {error}=await sb.rpc('p9k_prod_return_to_testing_v5',{p_tracker_id:id,p_restart_stage:restart,p_engineer:eng.value,p_test_bay:bay.value||null,p_expected_updated_at:state.last_updated_at,p_remarks:remarks});if(error)return failPopup(error.message);ok('UPS returned to '+opts[n-1][1]);setTimeout(load,400)}
-function ok(t){status.textContent='✅ '+t;status.className='success';showToast(t)}function fail(t){status.textContent='❌ '+t;status.className='error'}function failPopup(t){fail(t);alert('POWERUPS 9000\n\n'+t)}init();
+function ok(t){status.textContent='✅ '+t;status.className='success';showToast(t)}function fail(t){status.textContent='❌ '+t;status.className='error'}function failPopup(t){fail(t);alert('POWERUPS 9000\n\n'+t)}init();setInterval(()=>{if(state&&state.current_stage==='HEATRUN_PROGRESS'&&!state.is_faulty)load()},30000);
 </script></body></html>

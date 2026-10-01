@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>POWERUPS 9000 Monthly / Yearly Data</title>
+<link rel="stylesheet" href="pilot.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<style>
+.yearGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.monthDataCard{background:#0d263b;border:1px solid #284b67;border-radius:14px;padding:14px}
+.monthDataCard h3{margin:0 0 8px}.monthStats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.monthStats div{background:#0a1e2f;border-radius:10px;padding:9px}
+.monthStats span,.ratingRow span{font-size:11px;color:#8eb3cf}.monthStats b{font-size:22px}.ratingTable{margin-top:10px;display:grid;gap:5px}
+.ratingRow{display:grid;grid-template-columns:85px 1fr 1fr;gap:8px;padding:5px 7px;border-radius:8px;background:#0a1e2f}.ratingRow b{font-size:12px}
+.yearHero{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.yearHero .metric b{font-size:30px}
+@media(max-width:1050px){.yearGrid{grid-template-columns:repeat(2,1fr)}.yearHero{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.yearGrid,.yearHero{grid-template-columns:1fr}}
+</style>
+</head>
+<body><div class="app"><aside class="side" id="sidebar"></aside><main class="main">
+<div class="top"><div><h1>Monthly / Yearly Production Data</h1><div class="sub">Live POWERUPS 9000 receipt, testing completion and rating mix — updates throughout the month</div></div>
+<div class="actions"><div class="live"><span class="dot"></span>Live</div><select id="yearSel" class="monthSel" onchange="load()"></select><button class="btn" onclick="exportCSV()">Export Year CSV</button><a class="btn primary" href="pilot-dashboard.html">Dashboard</a></div></div>
+
+<div class="card"><div class="titleRow"><div><h2 id="yearTitle">Year Overview</h2><div class="small">Year totals are live; months do not need to be closed.</div></div></div>
+<div class="yearHero"><div class="metric"><span>Total UPS Received</span><b id="yReceived">0</b></div><div class="metric"><span>Total UPS Tested / Completed</span><b id="yCompleted">0</b></div><div class="metric"><span>Active from this Year</span><b id="yActive">0</b></div><div class="metric"><span>Completion vs Received</span><b id="yPct">0%</b></div></div>
+<div id="yearRatings" class="ratingTable"></div></div>
+
+<div class="card"><div class="titleRow"><div><h2>Month-by-Month Live Data</h2><div class="small">Each rating shows Received / Completed for that month.</div></div></div><div id="monthGrid" class="yearGrid"></div></div>
+</main></div>
+<script src="pilot-common.js"></script><script>
+sidebar.innerHTML=nav('dash');
+const ratings=[125,250,375,500,625,750,875,1000,1125,1250];
+let trackers=[],currentYear=new Date().getFullYear();
+
+function setupYears(){let y=new Date().getFullYear(),o='';for(let i=0;i<6;i++)o+=`<option value="${y-i}">${y-i}</option>`;yearSel.innerHTML=o}
+function inYear(dt,y){if(!dt)return false;let d=new Date(dt);return d.getFullYear()===y}
+function inMonth(dt,y,m){if(!dt)return false;let d=new Date(dt);return d.getFullYear()===y&&d.getMonth()===m}
+function rcount(arr,r){return arr.filter(x=>+x.rating_kva===r).length}
+async function load(){
+ currentYear=+yearSel.value;
+ let {data,error}=await sb.from('p9k_prod_trackers').select('*').order('received_at');
+ if(error)return showToast(error.message,false);
+ trackers=data||[];
+ render();
+}
+function render(){
+ let yr=trackers.filter(x=>inYear(x.received_at,currentYear)),
+     yc=trackers.filter(x=>inYear(x.completed_at,currentYear)),
+     ya=yr.filter(x=>!x.completed_at&&x.current_stage!=='TO_FINISHING'),
+     pct=yr.length?Math.round(yc.length/yr.length*100):0;
+ yearTitle.textContent=`${currentYear} Year Overview`;
+ yReceived.textContent=yr.length;yCompleted.textContent=yc.length;yActive.textContent=ya.length;yPct.textContent=pct+'%';
+ yearRatings.innerHTML=ratings.map(r=>`<div class="ratingRow"><b>${r} kVA</b><span>Received <b>${rcount(yr,r)}</b></span><span>Completed <b>${rcount(yc,r)}</b></span></div>`).join('');
+ monthGrid.innerHTML=[0,1,2,3,4,5,6,7,8,9,10,11].map(m=>{
+   let mr=trackers.filter(x=>inMonth(x.received_at,currentYear,m)),
+       mc=trackers.filter(x=>inMonth(x.completed_at,currentYear,m)),
+       mp=mr.length?Math.round(mc.length/mr.length*100):0,
+       rows=ratings.filter(r=>rcount(mr,r)||rcount(mc,r)).map(r=>`<div class="ratingRow"><b>${r} kVA</b><span>R: <b>${rcount(mr,r)}</b></span><span>C: <b>${rcount(mc,r)}</b></span></div>`).join('');
+   return `<div class="monthDataCard"><h3>${new Date(currentYear,m,1).toLocaleString([],{month:'long'})}</h3>
+     <div class="monthStats"><div><span>Received</span><b>${mr.length}</b></div><div><span>Tested / Completed</span><b>${mc.length}</b></div></div>
+     <div class="small" style="margin-top:8px">Completion vs receipt: <b>${mp}%</b></div>
+     <div class="ratingTable">${rows||'<div class="small">No rated UPS data yet.</div>'}</div></div>`
+ }).join('');
+}
+function exportCSV(){
+ let rows=[['Month','Received','Completed',...ratings.map(r=>r+'kVA Received'),...ratings.map(r=>r+'kVA Completed')]];
+ for(let m=0;m<12;m++){
+   let mr=trackers.filter(x=>inMonth(x.received_at,currentYear,m)),mc=trackers.filter(x=>inMonth(x.completed_at,currentYear,m));
+   rows.push([new Date(currentYear,m,1).toLocaleString([],{month:'long'}),mr.length,mc.length,...ratings.map(r=>rcount(mr,r)),...ratings.map(r=>rcount(mc,r))])
+ }
+ let csv=rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');
+ let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`POWERUPS9000_${currentYear}_Monthly_Data.csv`;a.click();URL.revokeObjectURL(a.href)
+}
+setupYears();load();subscribeTrackers(load);setInterval(load,30000);
+</script></body></html>
