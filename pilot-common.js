@@ -1,7 +1,7 @@
 const cfg=window.P9K_CONFIG||{};
 if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY){document.body.innerHTML='<div style="padding:30px">config.js missing.</div>';throw new Error('config missing')}
 const sb=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
-const STAGE_LABEL={RECEIVED:'Received',UNDER_TESTING:'Legacy Under Testing',TESTING_PROGRESS:'Testing — In Progress',TESTING_COMPLETED:'Testing — Completed',HEATRUN_PROGRESS:'Heatrun — In Progress',HEATRUN_COMPLETED:'Heatrun — Completed',FAT_PROGRESS:'FAT Testing — In Progress',FAT_COMPLETED:'FAT Testing — Completed',TO_FINISHING:'To Finishing / Completed'};
+const STAGE_LABEL={RECEIVED:'Received',UNDER_TESTING:'Legacy Under Testing',TESTING_PROGRESS:'Testing — In Progress',TESTING_COMPLETED:'Testing — Completed',HEATRUN_PROGRESS:'Heatrun — In Progress',HEATRUN_COMPLETED:'Heatrun — Completed',FAT_PROGRESS:'FAT Testing — In Progress',FAT_COMPLETED:'FAT Testing — Completed',FAULTY_RTA:'Faulty / RTA',TO_FINISHING:'To Finishing / Completed'};
 function dstr(v){if(!v)return '—';return new Date(v).toLocaleString([], {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}
 function stagePill(s){let c=(s==='TESTING_COMPLETED'||s==='HEATRUN_COMPLETED'||s==='FAT_COMPLETED'||s==='TO_FINISHING')?'green':s==='TESTING_PROGRESS'?'amber':s==='HEATRUN_PROGRESS'?'red':s==='FAT_PROGRESS'?'purple':'';return `<span class="pill ${c}">${STAGE_LABEL[s]||s}</span>`}
 function monthBounds(year,month){return [new Date(year,month-1,1),new Date(year,month,1)]}
