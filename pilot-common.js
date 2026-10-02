@@ -1,4 +1,4 @@
-(()=>{if(!document.querySelector('link[href="premium-v36.css"]')){let l=document.createElement('link');l.rel='stylesheet';l.href='premium-v36.css?v=36';document.head.appendChild(l)}})();
+(()=>{if(!document.querySelector('link[href="premium-v37.css"]')){let l=document.createElement('link');l.rel='stylesheet';l.href='premium-v37.css?v=37';document.head.appendChild(l)}})();
 const cfg=window.P9K_CONFIG||{};
 if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY){document.body.innerHTML='<div style="padding:30px">config.js missing.</div>';throw new Error('config missing')}
 const sb=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
@@ -7,17 +7,17 @@ function dstr(v){if(!v)return '—';return new Date(v).toLocaleString([], {day:'
 function stagePill(s){let c=(s==='TESTING_COMPLETED'||s==='HEATRUN_COMPLETED'||s==='FAT_COMPLETED'||s==='TO_FINISHING')?'green':s==='TESTING_PROGRESS'?'amber':s==='HEATRUN_PROGRESS'?'red':s==='FAT_PROGRESS'?'purple':'';return `<span class="pill ${c}">${STAGE_LABEL[s]||s}</span>`}
 function monthBounds(year,month){return [new Date(year,month-1,1),new Date(year,month,1)]}
 function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}
-function nav(active=''){return `<div class="brand brandV36">
-  <img class="vertivLogoV36" src="vertiv-logo.png" alt="VERTIV">
-  <div class="trackerTitleV36">POWERUPS 9000<br>TESTING TRACKER</div>
-</div><div class="nav navV36">
+function nav(active=''){return `<div class="brand brandV37">
+  <img class="vertivLogoV37" src="vertiv-wordmark.png" alt="VERTIV">
+  <div class="trackerTitleV37"><strong>POWERUPS 9000</strong><span>TESTING TRACKER</span></div>
+</div><div class="nav navV37">
 <a class="${active==='dash'?'active':''}" href="pilot-dashboard.html">⌂ Dashboard</a>
 <a class="${active==='active'?'active':''}" href="pilot-active.html">⚡ Active UPS / Live QR</a>
 <a class="${active==='scan'?'active':''}" href="pilot-scanner.html">⌗ Scan QR</a>
 <a class="${active==='qr'?'active':''}" href="pilot-qr-generator.html">▦ QR Generator</a>
 <a class="${active==='input'?'active':''}" href="pilot-input.html">▥ Input Distribution</a>
 <div class="navSep"></div><a class="${active==='admin'?'active':''}" href="pilot-admin.html">⚙ Admin</a></div>
-<div class="sidefoot sidefootV36">Reliable Power<br>for a Smarter World</div>`}
+<div class="sidefoot sidefootV37">Reliable Power<br>for a Smarter World</div>`}
 function showToast(msg,good=true){let t=document.getElementById('globalToast');if(!t){t=document.createElement('div');t.id='globalToast';t.className='toast';document.body.appendChild(t)}t.textContent=(good?'✅ ':'❌ ')+msg;t.className='toast show '+(good?'ok':'bad');setTimeout(()=>t.classList.remove('show'),4200)}
 function activeTracker(x){return !x.completed_at&&x.current_stage!=='TO_FINISHING'}
 function trackerBadge(x){let faulty=x?.is_faulty;return `<span class="trackerBadge ${faulty?'faulty':''}">${faulty?'⚠ ':''}${esc(x?.tracker_id||'—')}${faulty?' · FAULTY/RTA':''}</span>`}

@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>POWERUPS 9000 Management</title><link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium.css"><link rel="stylesheet" href="premium-v32.css"><link rel="stylesheet" href="premium-v34.css"><link rel="stylesheet" href="premium-v36.css?v=36">
+<link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium.css"><link rel="stylesheet" href="premium-v32.css"><link rel="stylesheet" href="premium-v34.css"><link rel="stylesheet" href="premium-v37.css?v=37">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script>
 <style id="v36-critical">
 /* Critical V36 overrides embedded directly so project cards cannot fall back to old white skin */
@@ -172,7 +172,7 @@ function renderChart(yy,mm,mt,dp){
    rows.push({day,planned,actual,near});
  }
  let max=Math.max(5,...rows.flatMap(r=>[r.planned,r.actual])),top=Math.max(5,Math.ceil(max/5)*5);
- let W=1200,H=330,L=52,R=24,T=24,B=46,pw=W-L-R,ph=H-T-B;
+ let W=1200,H=245,L=50,R=22,T=22,B=34,pw=W-L-R,ph=H-T-B;
  let x=i=>L+(i/(Math.max(1,days-1)))*pw, y=v=>T+ph-(v/top)*ph;
  let ticks=[0,top*.25,top*.5,top*.75,top].map(v=>Math.round(v));
  let planPts=rows.map((r,i)=>`${x(i)},${y(r.planned)}`).join(' ');
@@ -188,7 +188,7 @@ function renderChart(yy,mm,mt,dp){
    <polyline points="${planPts}" class="plannedLine"/>
    ${segments}${pts}
    <text x="${L}" y="${14}" class="axisTitle">UPS Qty</text>
-   <text x="${W/2}" y="${H-2}" text-anchor="middle" class="axisTitle">Day of Month</text>
+   <text x="${W/2}" y="${H-3}" text-anchor="middle" class="axisTitle">Day of Month</text>
  </svg>`;
 }
 function renderProjects(mt,mc,sod){

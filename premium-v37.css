@@ -1,0 +1,258 @@
+
+/* POWERUPS 9000 V3.6 EMERGENCY VISUAL FIX */
+/* Sidebar: fixed size, no clipping, local assets */
+.app{grid-template-columns:210px minmax(0,1fr)!important}
+.side{width:210px!important;min-width:210px!important;box-sizing:border-box!important;position:sticky!important;top:0!important;height:100vh!important;overflow:hidden!important;
+background:#031d33!important;border-right:1px solid #145d89!important;padding:0!important}
+.side:before{content:""!important;position:absolute!important;left:0!important;right:0!important;bottom:72px!important;height:49%!important;
+background:linear-gradient(180deg,rgba(3,29,51,.96) 0%,rgba(3,29,51,.50) 18%,rgba(3,29,51,.12) 50%,rgba(3,29,51,.78) 100%),url("powerups9000-sidebar.jpg") center bottom/cover no-repeat!important;
+opacity:.90!important;z-index:0!important}
+.side>*{position:relative!important;z-index:1!important}
+.brandV36{height:136px!important;box-sizing:border-box!important;padding:16px 18px 12px!important;border-bottom:1px solid rgba(53,162,224,.26)!important;background:linear-gradient(180deg,rgba(4,35,60,.96),rgba(3,29,51,.72))!important;overflow:hidden!important}
+.vertivLogoV36{display:block!important;width:175px!important;max-width:175px!important;height:50px!important;object-fit:contain!important;object-position:left center!important;margin:0!important}
+.trackerTitleV36{margin:7px 0 0 54px!important;color:#d7f0ff!important;font-size:8px!important;line-height:1.55!important;letter-spacing:3.1px!important;font-weight:800!important;white-space:nowrap!important}
+.navV36{padding-top:10px!important}
+.side .navV36 a{display:flex!important;align-items:center!important;min-height:47px!important;margin:4px 12px!important;padding:0 14px!important;border-radius:9px!important;color:#c5dceb!important;text-decoration:none!important;background:transparent!important;border:1px solid transparent!important;font-size:13px!important;box-sizing:border-box!important}
+.side .navV36 a.active{background:linear-gradient(90deg,#127cd2,#175ca2)!important;border-color:#25c8ff!important;color:#fff!important;box-shadow:inset 4px 0 0 #25e4ff,0 0 16px rgba(0,181,255,.16)!important}
+.side .navV36 a:hover{background:rgba(10,86,139,.40)!important;border-color:rgba(55,179,242,.28)!important}
+.sidefootV36{position:absolute!important;left:24px!important;bottom:24px!important;color:#f1f9ff!important;font-size:13px!important;line-height:1.42!important;text-shadow:0 2px 6px #001525!important}
+
+/* KPI: compact reference-style */
+.kpis8{grid-template-columns:repeat(8,minmax(0,1fr))!important;gap:8px!important}
+.kpis8 .kpi{min-height:92px!important;padding:12px 10px 10px 60px!important;border-radius:8px!important;background:linear-gradient(145deg,#08385e,#052b49)!important;border:1px solid #177fbb!important;box-shadow:inset 0 0 18px rgba(32,150,222,.10)!important}
+.kpis8 .kpi .kpiIcon{left:10px!important;top:11px!important;width:42px!important;height:42px!important;border-radius:9px!important}
+.kpis8 .kpi>span{font-size:10px!important;text-transform:none!important;letter-spacing:0!important;color:#d7efff!important}
+.kpis8 .kpi>b{font-size:27px!important;margin-top:5px!important}
+.kpis8 .kpi:after{transform:scale(.72);transform-origin:right bottom}
+
+/* Project section */
+.projectSection{background:linear-gradient(145deg,#082f50,#052944)!important;border:1px solid #177bae!important;border-radius:12px!important;padding:12px!important;overflow:visible!important}
+#projects.mockProjects{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}
+#projects .premiumProject{display:block!important;min-width:0!important;min-height:275px!important;padding:14px!important;border-radius:12px!important;color:#eef9ff!important;background:linear-gradient(155deg,#073456,#052946 58%,#04233d)!important;border:1px solid #129ee0!important;box-shadow:inset 0 0 25px rgba(0,149,230,.11),0 4px 16px rgba(0,0,0,.22)!important}
+#projects .premiumProject.reliance{border-color:#d6a029!important}
+#projects .premiumProject.adani{border-color:#e14699!important}
+#projects .premiumProject.standard{border-color:#14b9ee!important}
+#projects .projectTop{display:flex!important;justify-content:space-between!important;align-items:center!important;border-bottom:1px solid rgba(120,198,240,.18)!important;padding-bottom:8px!important}
+#projects .projectBrand{display:flex!important;align-items:center!important;gap:9px!important}
+#projects .projectLogo{width:105px!important;height:40px!important;object-fit:contain!important;background:#fff!important;border-radius:7px!important;padding:4px!important}
+#projects .brandMark{font-size:22px!important;font-weight:900!important;color:#fff!important}
+#projects .projectName{font-size:17px!important;font-weight:800!important;color:#fff!important}
+#projects .projectSub{font-size:10px!important;color:#9ed0ea!important}
+#projects .projectHint{width:31px!important;height:31px!important;border-radius:50%!important;display:grid!important;place-items:center!important;background:#0d679d!important;border:1px solid #42c4ff!important;color:#fff!important}
+#projects .projTopStats,#projects .projMidStats,#projects .projBottomStats{display:grid!important;gap:7px!important;margin-top:8px!important}
+#projects .projTopStats,#projects .projMidStats{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+#projects .projBottomStats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+#projects .projTopStats>div,#projects .projMidStats>div,#projects .projBottomStats>div{background:#062b49!important;border:1px solid rgba(105,182,225,.20)!important;border-radius:7px!important;padding:7px 8px!important;min-height:46px!important}
+#projects .premiumProject span{color:#9fcbe3!important;font-size:10px!important}
+#projects .premiumProject b{display:block!important;color:#fff!important;font-size:17px!important;margin-top:3px!important}
+#projects .projProgress{height:6px!important;background:#123b58!important;border-radius:8px!important;overflow:hidden!important;margin-top:9px!important}
+#projects .projProgress>div{height:100%!important;background:linear-gradient(90deg,#43dc98,#26a9ff)!important}
+#projects .projectFoot{display:flex!important;justify-content:space-between!important;margin-top:6px!important;font-size:10px!important}
+
+/* Admin current-project logo manager */
+.logoManagerV36{border-color:#168bc3!important;background:linear-gradient(145deg,#082f50,#052944)!important}
+.logoManagerV36 input[type=file],.logoManagerV36 select{min-height:42px!important}
+.adminProjectLogo{width:85px!important;height:36px!important;object-fit:contain!important;background:#fff!important;border-radius:6px!important;padding:3px!important}
+
+@media(max-width:1400px){
+ .kpis8{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+}
+@media(max-width:1180px){
+ #projects.mockProjects{grid-template-columns:1fr!important}
+}
+@media(max-width:820px){
+ .app{grid-template-columns:1fr!important}
+ .side{display:none!important}
+}
+
+
+/* =========================================================
+   POWERUPS 9000 V3.7 — VISUAL POLISH
+   Layout/skin only. No workflow logic changes.
+   ========================================================= */
+
+/* Sidebar top branding — cleaner wordmark, no circular V */
+.brandV37{
+  height:118px!important;
+  padding:16px 18px 12px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:flex-start!important;
+  gap:7px!important;
+  overflow:hidden!important;
+  border-bottom:1px solid rgba(53,162,224,.26)!important;
+  background:linear-gradient(180deg,rgba(4,35,60,.96),rgba(3,29,51,.72))!important;
+}
+.vertivLogoV37{
+  display:block!important;
+  width:146px!important;
+  height:36px!important;
+  object-fit:contain!important;
+  object-position:left center!important;
+  margin:0!important;
+}
+.trackerTitleV37{
+  display:flex!important;
+  align-items:baseline!important;
+  gap:7px!important;
+  margin:0!important;
+  white-space:nowrap!important;
+  color:#d7f0ff!important;
+}
+.trackerTitleV37 strong{
+  font-size:10px!important;
+  line-height:1!important;
+  letter-spacing:1.5px!important;
+  font-weight:900!important;
+  color:#fff!important;
+}
+.trackerTitleV37 span{
+  font-size:8px!important;
+  line-height:1!important;
+  letter-spacing:1.8px!important;
+  font-weight:700!important;
+  color:#8ec8e9!important;
+}
+.navV37{padding-top:8px!important}
+.side .navV37 a{
+  display:flex!important;
+  align-items:center!important;
+  min-height:44px!important;
+  margin:3px 12px!important;
+  padding:0 14px!important;
+  border-radius:9px!important;
+  color:#c5dceb!important;
+  text-decoration:none!important;
+  background:transparent!important;
+  border:1px solid transparent!important;
+  font-size:13px!important;
+  box-sizing:border-box!important;
+}
+.side .navV37 a.active{
+  background:linear-gradient(90deg,#127cd2,#175ca2)!important;
+  border-color:#25c8ff!important;
+  color:#fff!important;
+  box-shadow:inset 4px 0 0 #25e4ff,0 0 16px rgba(0,181,255,.16)!important;
+}
+.sidefootV37{
+  position:absolute!important;
+  left:24px!important;
+  bottom:24px!important;
+  color:#f1f9ff!important;
+  font-size:13px!important;
+  line-height:1.42!important;
+  text-shadow:0 2px 6px #001525!important;
+}
+
+/* KPI cards — tighter card, larger content, better balance */
+.kpis8{
+  gap:10px!important;
+  align-items:stretch!important;
+}
+.kpis8 .kpi{
+  min-height:102px!important;
+  height:102px!important;
+  padding:12px 10px 10px 62px!important;
+  border-radius:10px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+}
+.kpis8 .kpi .kpiIcon{
+  left:12px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  width:42px!important;
+  height:42px!important;
+  border-radius:10px!important;
+}
+.kpis8 .kpi .kpiIcon svg{
+  width:25px!important;
+  height:25px!important;
+}
+.kpis8 .kpi>span{
+  font-size:11px!important;
+  line-height:1.16!important;
+  font-weight:600!important;
+  color:#e3f4ff!important;
+  max-width:88px!important;
+}
+.kpis8 .kpi>b{
+  font-size:31px!important;
+  line-height:1!important;
+  margin-top:6px!important;
+  font-weight:800!important;
+}
+.kpis8 .kpi:after{
+  width:42px!important;
+  height:22px!important;
+  right:8px!important;
+  bottom:8px!important;
+  opacity:.52!important;
+}
+
+/* Input Distribution — compact, aligned, management-friendly */
+.inputPanel{
+  padding:14px 16px 10px!important;
+  margin-top:10px!important;
+}
+.inputPanel .mockPanelTitle{
+  margin-bottom:4px!important;
+}
+.inputPanel .mockPanelTitle h2{
+  font-size:21px!important;
+  margin:0!important;
+  line-height:1.15!important;
+}
+.inputPanel .mockPanelTitle .small{
+  margin-top:4px!important;
+  font-size:11px!important;
+  line-height:1.25!important;
+}
+.inputPanel .legend{
+  margin:6px 0 2px!important;
+  min-height:20px!important;
+  display:flex!important;
+  gap:16px!important;
+  align-items:center!important;
+  flex-wrap:wrap!important;
+}
+.dailyLineChart{
+  width:100%!important;
+  max-height:255px!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  margin-top:0!important;
+  padding:0!important;
+}
+.dailyLineChart svg{
+  width:100%!important;
+  min-width:880px!important;
+  height:245px!important;
+  display:block!important;
+  border-radius:8px!important;
+}
+.dailyLineChart .axisText text,
+.dailyLineChart .axisTitle{
+  font-size:10px!important;
+}
+.dailyLineChart .plannedLine{
+  stroke-width:2.4!important;
+}
+.dailyLineChart .actualSeg{
+  stroke-width:3.2!important;
+}
+.dailyLineChart .actualPt{
+  r:2.8px;
+}
+
+/* Desktop sizing */
+@media(min-width:1400px){
+  .app{grid-template-columns:210px minmax(0,1fr)!important}
+  .content{padding-left:12px!important;padding-right:12px!important}
+}
+@media(max-width:1399px){
+  .kpis8{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+}
