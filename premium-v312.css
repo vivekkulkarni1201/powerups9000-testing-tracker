@@ -659,3 +659,84 @@ opacity:.90!important;z-index:0!important}
   top:50%!important;
   transform:translateY(-50%)!important;
 }
+
+
+/* ==========================================================
+   V3.12.1 — Final micro polish
+   Requested only:
+   1) top-left sidebar branding fully inside box
+   2) project logos feel more integrated, not pasted
+   No logic changes.
+   ========================================================== */
+
+.brandV37{
+  height:132px!important;
+  padding:14px 16px 10px!important;
+  gap:5px!important;
+}
+.vertivLogoV37{
+  width:152px!important;
+  max-width:152px!important;
+  height:40px!important;
+}
+.trackerTitleV37{
+  display:block!important;
+  white-space:normal!important;
+  max-width:172px!important;
+  line-height:1!important;
+}
+.trackerTitleV37 strong{
+  display:block!important;
+  font-size:12px!important;
+  letter-spacing:1.15px!important;
+  white-space:nowrap!important;
+}
+.trackerTitleV37 span{
+  display:block!important;
+  margin-top:4px!important;
+  font-size:8px!important;
+  letter-spacing:1.55px!important;
+  white-space:nowrap!important;
+}
+
+.projectCompactHead{
+  min-height:78px!important;
+  padding:12px 44px 10px 14px!important;
+}
+.projectCompactIdentity{
+  gap:14px!important;
+}
+.projectLogoCompact{
+  width:96px!important;
+  height:50px!important;
+  max-width:96px!important;
+  max-height:50px!important;
+  object-fit:contain!important;
+  object-position:left center!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  padding:0!important;
+  opacity:.98!important;
+  filter:brightness(1.02) contrast(1.04) drop-shadow(0 1px 5px rgba(0,0,0,.14))!important;
+  mix-blend-mode:screen!important;
+}
+.projectCompactIdentity>div>b{
+  font-size:20px!important;
+}
+.projectCompactIdentity>div>span{
+  font-size:10.5px!important;
+}
+.projectMonthDoneIntegrated{
+  right:44px!important;
+  min-width:74px!important;
+}
+.projectMonthDoneIntegrated span{
+  font-size:8.5px!important;
+}
+.projectMonthDoneIntegrated b{
+  font-size:20px!important;
+}
+.projectArrowCompact{
+  right:10px!important;
+}
