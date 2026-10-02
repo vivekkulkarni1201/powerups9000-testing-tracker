@@ -35,7 +35,7 @@
    </div>
    <div class="mockPerfProgress"><div class="progress"><div id="prog"></div></div><b><span id="completedProgress">0 / 0</span> Completed</b></div>
    <div class="perfExtra" style="grid-template-columns:1fr 1fr;margin-top:8px">
-    <div><span>Need to Meet Target</span><b id="pNeed">0</b></div>
+    
     <div><span>Fault / RTA Hits This Month</span><b id="pFaultHits">0</b></div>
    </div>
   </div>
@@ -43,7 +43,7 @@
 </section>
 
 <section class="mockPanel weeklyPanel">
- <div class="mockPanelTitle"><div><h2>Weekly Progress (This Month)</h2><div class="small">Target vs Completed by week</div></div>
+ <div class="mockPanelTitle"><div><h2>Weekly Progress (This Month)</h2><div class="small">Testing Target vs Completed by week</div></div>
     <select id="weekSel" class="monthSel" onchange="renderWeeksFromSelection()">
       <option value="1">Week 1</option><option value="2">Week 2</option><option value="3">Week 3</option>
       <option value="4">Week 4</option><option value="5">Week 5</option>
@@ -55,8 +55,8 @@
 <div id="heatAlerts"></div>
 
 <section class="mockPanel inputPanel">
-  <div class="mockPanelTitle"><div><h2>Input Distribution — Planned vs Actual Received</h2><div class="small">Planned / Ideal Capacity vs Actual UPS Received · highlights uneven loading and month-end dumping</div></div><a class="arrowLink" href="pilot-input.html">View Daily Table →</a></div>
-  <div class="legend"><span><i class="lg ideal"></i>Ideal / Planned</span><span><i class="lg actual"></i>Actual Received</span></div>
+  <div class="mockPanelTitle"><div><h2>Input Distribution — Planned Receipt vs Actual Receipt</h2><div class="small">Planned Receipt vs Actual UPS Received · highlights uneven loading and month-end dumping</div></div><a class="arrowLink" href="pilot-input.html">View Daily Table →</a></div>
+  <div class="legend"><span><i class="lg ideal"></i>Planned Receipt</span><span><i class="lg actual"></i>Actual Receipt</span></div>
   <div id="chart"></div>
  </section>
 <section class="mockPanel projectSection">
@@ -86,7 +86,7 @@ let awaiting=live.filter(x=>!x.is_faulty&&x.current_stage==='RECEIVED'&&!x.test_
 testProg=live.filter(x=>!x.is_faulty&&x.current_stage==='TESTING_PROGRESS').length,
 heatProg=live.filter(x=>!x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&!heatExpiredLocal(x)).length,
 fatProg=live.filter(x=>!x.is_faulty&&x.current_stage==='FAT_PROGRESS').length,
-faultNow=live.filter(x=>x.is_faulty).length;kTodayRec.textContent=todayRec;kTodayComp.textContent=todayComp;kAwaitBay.textContent=awaiting;kFault.textContent=faultNow;kTestProg.textContent=testProg;kHeatProg.textContent=heatProg;kFatProg.textContent=fatProg;kActiveFloor.textContent=live.length;perfActive.textContent=live.length;target.textContent=tar;received.textContent=rec;completed.textContent=comp;pending.textContent=pend;pct.textContent=pc+'%';prog.style.width=pc+'%';ring.style.background=`conic-gradient(#3ef1c5 ${pc*3.6}deg,#14476e 0)`;pNeed.textContent=pend;pFpy.textContent=fpy===null?'—':fpy+'%';pFaultHits.textContent=faultHits;completedProgress.textContent=`${comp} / ${tar}`;fillTableFilters();renderHeatAlerts(expiredHeat);renderWeeks(yy,mm,mc,settings.weekly_target||0);renderChart(yy,mm,mt,dp||[]);renderProjects(mt,mc,sod);renderRows()}
+faultNow=live.filter(x=>x.is_faulty).length;kTodayRec.textContent=todayRec;kTodayComp.textContent=todayComp;kAwaitBay.textContent=awaiting;kFault.textContent=faultNow;kTestProg.textContent=testProg;kHeatProg.textContent=heatProg;kFatProg.textContent=fatProg;kActiveFloor.textContent=live.length;perfActive.textContent=live.length;target.textContent=tar;received.textContent=rec;completed.textContent=comp;pending.textContent=pend;pct.textContent=pc+'%';prog.style.width=pc+'%';ring.style.background=`conic-gradient(#3ef1c5 ${pc*3.6}deg,#14476e 0)`;pFpy.textContent=fpy===null?'—':fpy+'%';pFaultHits.textContent=faultHits;completedProgress.textContent=`${comp} / ${tar}`;fillTableFilters();renderHeatAlerts(expiredHeat);renderWeeks(yy,mm,mc,settings.weekly_target||0);renderChart(yy,mm,mt,dp||[]);renderProjects(mt,mc,sod);renderRows()}
 function renderHeatAlerts(items){
   heatAlerts.innerHTML=items.length?`<div class="card" style="border-color:#d99a22;background:#3b2b0d;margin-bottom:12px">
     <div class="titleRow"><div><h3>⏱ Heatrun Timer Completed — Action Required</h3>
