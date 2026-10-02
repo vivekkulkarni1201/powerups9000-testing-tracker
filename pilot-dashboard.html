@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>POWERUPS 9000 Management</title><link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium.css"><link rel="stylesheet" href="premium-v32.css"><link rel="stylesheet" href="premium-v34.css">
+<link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium.css"><link rel="stylesheet" href="premium-v32.css"><link rel="stylesheet" href="premium-v34.css"><link rel="stylesheet" href="premium-v35.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script></head><body>
 <div class="app"><aside class="side" id="sidebar"></aside><main class="main">
 <div class="top"><div><h1>POWERUPS 9000 Testing Tracker</h1><div class="sub">Live Production Testing Flow &nbsp;•&nbsp; QR Based Status Monitoring</div></div>
@@ -161,6 +161,46 @@ function renderChart(yy,mm,mt,dp){
    <text x="${L}" y="${14}" class="axisTitle">UPS Qty</text>
    <text x="${W/2}" y="${H-2}" text-anchor="middle" class="axisTitle">Day of Month</text>
  </svg>`;
+}
+function renderProjects(mt,mc,sod){
+ projects.innerHTML=projectsData.map(p=>{
+   let all=trackers.filter(x=>x.project_code===p.project_code),
+       act=all.filter(activeTracker),
+       todayR=all.filter(x=>new Date(x.received_at)>=sod).length,
+       todayC=all.filter(x=>x.completed_at&&new Date(x.completed_at)>=sod).length,
+       monthCompleted=mc.filter(x=>x.project_code===p.project_code).length + (
+         settings.opening_month_key===monthSel.value ? (+p.opening_completed_month||0) : 0
+       ),
+       monthTarget=+p.monthly_target||0,
+       totalReq=+p.total_requirement||0,
+       totalComp=(+p.opening_completed_till_date||0)+all.filter(x=>x.completed_at&&(!settings.opening_cutoff||new Date(x.completed_at)>new Date(settings.opening_cutoff))).length,
+       overallPending=Math.max(totalReq-totalComp,0),
+       overallPct=totalReq?Math.min(100,Math.round(totalComp/totalReq*100)):0,
+       cls=(p.project_code||'').toLowerCase().includes('reliance')?'reliance':((p.project_code||'').toLowerCase().includes('adani')?'adani':'standard'),
+       mark=p.logo_data?`<img class="projectLogo" src="${p.logo_data}" alt="${esc(p.project_name)} logo">`:`<span class="brandMark">${esc(p.project_name)}</span>`;
+   return `<div class="project mockProject premiumProject ${cls}" onclick="location.href='pilot-project.html?project=${encodeURIComponent(p.project_code)}'">
+    <div class="projectTop">
+      <div class="projectBrand">${mark}<div><div class="projectName">${esc(p.project_name)}</div><div class="projectSub">${p.fat_required?'With FAT Testing':'No FAT Testing'}</div></div></div>
+      <span class="projectHint">→</span>
+    </div>
+    <div class="projTopStats">
+      <div><span>Today Received</span><b>${todayR}</b></div>
+      <div><span>Today Completed</span><b>${todayC}</b></div>
+      <div><span>Live Testing</span><b>${act.length}</b></div>
+    </div>
+    <div class="projMidStats">
+      <div><span>Current Month Target</span><b>${monthTarget}</b></div>
+      <div><span>Current Month Completed</span><b>${monthCompleted}</b></div>
+      <div><span>Total Project Requirement</span><b>${totalReq}</b></div>
+    </div>
+    <div class="projBottomStats">
+      <div><span>Completed Till Date</span><b>${totalComp}</b></div>
+      <div><span>Overall Pending</span><b>${overallPending}</b></div>
+    </div>
+    <div class="projProgress"><div style="width:${overallPct}%"></div></div>
+    <div class="projectFoot"><span>${overallPct}% overall project complete</span><span>View Details →</span></div>
+   </div>`
+ }).join('')
 }
 function fillTableFilters(){
  let pval=tableProject?.value||'',sval=tableStage?.value||'';

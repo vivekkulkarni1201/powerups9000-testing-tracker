@@ -1,0 +1,214 @@
+
+/* POWERUPS 9000 V3.5 — actual portal skin refinement */
+
+/* ---------- Sidebar branding: actual Vertiv wordmark + official PowerUPS 9000 product image ---------- */
+.side {
+  position:relative;
+  overflow:hidden;
+  background:
+    linear-gradient(180deg, rgba(2,27,49,.96) 0%, rgba(2,28,50,.94) 42%, rgba(1,20,37,.86) 100%);
+}
+.side::before {
+  content:"";
+  position:absolute;
+  left:0; right:0; bottom:78px;
+  height:48%;
+  background:
+    linear-gradient(180deg, rgba(2,27,49,1) 0%, rgba(2,27,49,.38) 24%, rgba(2,21,39,.30) 75%, rgba(2,21,39,.86) 100%),
+    radial-gradient(circle at 45% 55%, rgba(0,174,255,.25), transparent 58%),
+    url("https://images.go.vertiv.com/EloquaImages/clients/VertivCo/%7B8a8c61d4-feb6-4bd3-8d03-af5e937c4260%7D_1000x1000-Vertiv_PowerUPS_9000_%281%29.png") center 70% / 125% auto no-repeat;
+  opacity:.72;
+  pointer-events:none;
+  z-index:0;
+  filter:saturate(.85) contrast(1.08);
+}
+.side::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,rgba(0,195,255,.08),transparent 34%,rgba(0,127,255,.05));
+  pointer-events:none;
+  z-index:0;
+}
+.side > * {position:relative;z-index:1}
+.brandV35 {
+  min-height:132px;
+  display:flex!important;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  gap:8px;
+  padding:18px 22px 20px!important;
+  border-bottom:1px solid rgba(85,180,238,.28);
+  background:linear-gradient(180deg,rgba(3,34,59,.82),rgba(3,30,53,.44));
+}
+.vertivLogoActual {
+  width:190px;
+  max-width:92%;
+  height:auto;
+  display:block;
+  filter:brightness(0) invert(1);
+}
+.brandV35 small {
+  display:block!important;
+  margin-left:56px;
+  color:#c8e9ff!important;
+  font-size:10px!important;
+  line-height:1.65!important;
+  letter-spacing:4px!important;
+  font-weight:800!important;
+}
+.side .nav {
+  margin-top:14px!important;
+}
+.side .nav a {
+  min-height:52px;
+  display:flex;
+  align-items:center;
+  border-radius:10px;
+  margin:5px 14px;
+  padding:0 15px;
+  font-size:15px;
+  border:1px solid transparent;
+  transition:.18s ease;
+}
+.side .nav a:hover {
+  background:rgba(8,89,144,.36);
+  border-color:rgba(47,183,255,.32);
+}
+.side .nav a.active {
+  background:linear-gradient(90deg,#117fd8,#155da8);
+  border:1px solid #27c9ff;
+  box-shadow:inset 4px 0 0 #22edff, 0 0 18px rgba(0,174,255,.18);
+}
+.sidefootV35 {
+  position:absolute!important;
+  left:26px!important;
+  bottom:27px!important;
+  color:#eefaff!important;
+  font-size:15px!important;
+  line-height:1.45!important;
+  text-shadow:0 1px 5px #001a2c;
+}
+
+/* ---------- KPI cards: same premium treatment as approved mock ---------- */
+.kpis8 {
+  gap:10px!important;
+  margin-top:10px;
+}
+.kpi {
+  min-height:118px!important;
+  position:relative;
+  border-radius:10px!important;
+  padding:15px 13px 13px 72px!important;
+  background:linear-gradient(145deg,rgba(8,53,86,.94),rgba(4,38,67,.92))!important;
+  border:1px solid rgba(55,164,235,.58)!important;
+  box-shadow:inset 0 0 22px rgba(8,105,171,.13),0 4px 18px rgba(0,0,0,.16);
+  overflow:hidden;
+}
+.kpi::after {
+  content:"";
+  position:absolute;right:12px;bottom:13px;width:52px;height:27px;opacity:.72;
+  background:linear-gradient(to top,
+    transparent 0 10%,#2ab9ff 10% 24%,transparent 24% 31%,
+    #2ab9ff 31% 49%,transparent 49% 56%,#2ab9ff 56% 77%,transparent 77% 84%,#2ab9ff 84% 100%);
+  clip-path:polygon(0 100%,0 78%,16% 78%,16% 62%,31% 62%,31% 47%,47% 47%,47% 31%,63% 31%,63% 18%,79% 18%,79% 7%,100% 7%,100% 100%);
+}
+.kpi .kpiIcon {
+  position:absolute!important;
+  left:13px;top:14px;
+  width:48px!important;height:48px!important;
+  border-radius:10px!important;
+  display:grid!important;place-items:center;
+  background:linear-gradient(145deg,rgba(22,122,197,.65),rgba(4,65,112,.78))!important;
+  box-shadow:inset 0 0 18px rgba(49,190,255,.24),0 0 14px rgba(16,138,218,.12);
+}
+.kpi .kpiIcon svg {width:28px!important;height:28px!important}
+.kpi>span {font-size:12px!important;color:#d9f0ff!important;line-height:1.2!important}
+.kpi>b {font-size:32px!important;line-height:1.05!important;margin-top:7px!important;color:#fff!important}
+.kpi.cyan {border-color:rgba(34,211,238,.65)!important}
+.kpi.amber {border-color:rgba(255,177,67,.72)!important}
+.kpi.red,.kpi.danger {border-color:rgba(255,93,108,.64)!important}
+.kpi.purple {border-color:rgba(167,103,255,.67)!important}
+.kpi.green {border-color:rgba(55,226,161,.62)!important}
+
+/* ---------- Project cards ---------- */
+.projectSection {overflow:visible!important}
+.mockProjects {
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:14px!important;
+}
+.premiumProject {
+  min-height:348px;
+  padding:16px!important;
+  border-radius:12px!important;
+  color:#f2f9ff!important;
+  background:
+    linear-gradient(160deg,rgba(5,46,78,.96),rgba(2,31,56,.98) 58%,rgba(3,37,66,.96))!important;
+  box-shadow:inset 0 0 28px rgba(0,146,227,.10),0 6px 22px rgba(0,0,0,.18)!important;
+  border:1px solid #148ed0!important;
+  cursor:pointer;
+}
+.premiumProject.reliance {border-color:#d7a22f!important;box-shadow:inset 0 0 24px rgba(215,162,47,.08),0 0 0 1px rgba(215,162,47,.25)!important}
+.premiumProject.adani {border-color:#d547a1!important;box-shadow:inset 0 0 24px rgba(213,71,161,.08),0 0 0 1px rgba(213,71,161,.22)!important}
+.premiumProject.standard {border-color:#1cbbf4!important;box-shadow:inset 0 0 24px rgba(28,187,244,.08),0 0 0 1px rgba(28,187,244,.20)!important}
+.projectTop {
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  padding-bottom:12px!important;border-bottom:1px solid rgba(124,194,236,.22);
+}
+.projectBrand {display:flex!important;align-items:center!important;gap:12px!important;min-width:0}
+.projectLogo {
+  width:118px!important;height:48px!important;max-width:118px!important;max-height:48px!important;
+  object-fit:contain!important;background:#fff!important;border-radius:8px!important;padding:5px!important;
+}
+.projectName {font-size:21px!important;font-weight:800!important;color:#fff!important}
+.projectSub {font-size:11px!important;color:#9ec8df!important;margin-top:2px}
+.projectHint {
+  width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
+  border:1px solid #36aef1;background:#0d578c;color:#fff;font-size:20px;
+  box-shadow:0 0 14px rgba(42,177,255,.2)
+}
+.projTopStats,.projMidStats,.projBottomStats {
+  display:grid;gap:8px;margin-top:10px;
+}
+.projTopStats {grid-template-columns:repeat(3,1fr)}
+.projMidStats {grid-template-columns:repeat(3,1fr)}
+.projBottomStats {grid-template-columns:repeat(2,1fr)}
+.projTopStats>div,.projMidStats>div,.projBottomStats>div {
+  min-height:58px;
+  padding:9px 10px;
+  border:1px solid rgba(108,178,219,.20);
+  border-radius:8px;
+  background:rgba(1,27,49,.28);
+}
+.premiumProject span {color:#a9cbe0}
+.premiumProject b {display:block;color:#fff;font-size:20px;margin-top:4px}
+.projProgress {height:7px!important;margin-top:12px!important;background:#123e5c!important;border-radius:10px;overflow:hidden}
+.projProgress>div {height:100%;background:linear-gradient(90deg,#43df9b,#25a7ff)!important;border-radius:10px}
+.projectFoot {display:flex!important;justify-content:space-between!important;margin-top:8px!important;font-size:11px!important;color:#acd0e6!important}
+
+/* ---------- Admin logo quick edit ---------- */
+.adminProjectLogo {
+  width:90px;height:40px;object-fit:contain;background:#fff;border-radius:6px;padding:3px;
+}
+.logoQuickEdit {
+  display:flex;gap:6px;align-items:center;min-width:255px;
+}
+.logoQuickEdit input[type=file] {
+  max-width:145px;font-size:11px;
+}
+.logoQuickEdit .btn {
+  padding:7px 9px!important;font-size:11px!important;white-space:nowrap;
+}
+
+/* responsive */
+@media(max-width:1280px){
+  .mockProjects{grid-template-columns:1fr!important}
+  .premiumProject{min-height:auto}
+}
+@media(max-width:760px){
+  .kpi{padding-left:65px!important}
+  .projTopStats,.projMidStats{grid-template-columns:1fr 1fr}
+  .vertivLogoActual{width:165px}
+}
