@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>POWERUPS 9000 Management</title><link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium.css"><link rel="stylesheet" href="premium-v32.css"><link rel="stylesheet" href="premium-v34.css"><link rel="stylesheet" href="premium-v311.css?v=311">
+<link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium.css"><link rel="stylesheet" href="premium-v32.css"><link rel="stylesheet" href="premium-v34.css"><link rel="stylesheet" href="premium-v312.css?v=312">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script>
 <style id="v36-critical">
 /* Critical V36 overrides embedded directly so project cards cannot fall back to old white skin */
@@ -284,7 +284,7 @@ function renderProjects(mt,mc,sod){
    return `<div class="project projectCompact ${cls}" onclick="location.href='pilot-project.html?project=${encodeURIComponent(p.project_code)}'">
      <div class="projectCompactHead">
        <div class="projectCompactIdentity">${mark}<div><b>${esc(p.project_name)}</b><span>${p.fat_required?'With FAT Testing':'No FAT Testing'}</span></div></div>
-       <div class="projectMonthDone"><span>Month Completed</span><b>${monthCompleted}</b></div>
+       <div class="projectMonthDoneIntegrated"><span>Month Completed</span><b>${monthCompleted}</b></div>
        <span class="projectArrowCompact">→</span>
      </div>
      <div class="projectLiveCompact">
