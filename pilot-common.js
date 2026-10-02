@@ -1,4 +1,4 @@
-(()=>{if(!document.querySelector('link[href="premium-v314.css"]')){let l=document.createElement('link');l.rel='stylesheet';l.href='premium-v314.css?v=314';document.head.appendChild(l)}})();
+(()=>{if(!document.querySelector('link[href="premium-v3141.css"]')){let l=document.createElement('link');l.rel='stylesheet';l.href='premium-v3141.css?v=3141';document.head.appendChild(l)}})();
 const cfg=window.P9K_CONFIG||{};
 if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY){document.body.innerHTML='<div style="padding:30px">config.js missing.</div>';throw new Error('config missing')}
 const sb=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
