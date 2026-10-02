@@ -1,7 +1,36 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>POWERUPS 9000 Management</title><link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium.css"><link rel="stylesheet" href="premium-v32.css"><link rel="stylesheet" href="premium-v34.css"><link rel="stylesheet" href="premium-v35.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script></head><body>
+<link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium.css"><link rel="stylesheet" href="premium-v32.css"><link rel="stylesheet" href="premium-v34.css"><link rel="stylesheet" href="premium-v36.css?v=36">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script>
+<style id="v36-critical">
+/* Critical V36 overrides embedded directly so project cards cannot fall back to old white skin */
+#projects.mockProjects{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}
+#projects .premiumProject{display:block!important;min-width:0!important;min-height:275px!important;padding:14px!important;border-radius:12px!important;color:#eef9ff!important;
+background:linear-gradient(155deg,#073456 0%,#052946 58%,#04233d 100%)!important;border:1px solid #129ee0!important;
+box-shadow:inset 0 0 25px rgba(0,149,230,.11),0 4px 16px rgba(0,0,0,.22)!important}
+#projects .premiumProject.reliance{border-color:#d6a029!important}
+#projects .premiumProject.adani{border-color:#e14699!important}
+#projects .premiumProject.standard{border-color:#14b9ee!important}
+#projects .projectTop{display:flex!important;justify-content:space-between!important;align-items:center!important;border-bottom:1px solid rgba(120,198,240,.18)!important;padding-bottom:8px!important}
+#projects .projectBrand{display:flex!important;align-items:center!important;gap:9px!important}
+#projects .projectLogo{width:105px!important;height:40px!important;object-fit:contain!important;background:#fff!important;border-radius:7px!important;padding:4px!important}
+#projects .brandMark{font-size:22px!important;font-weight:900!important;color:#fff!important}
+#projects .projectName{font-size:17px!important;font-weight:800!important;color:#fff!important}
+#projects .projectSub{font-size:10px!important;color:#9ed0ea!important}
+#projects .projectHint{width:31px!important;height:31px!important;border-radius:50%!important;display:grid!important;place-items:center!important;background:#0d679d!important;border:1px solid #42c4ff!important;color:#fff!important}
+#projects .projTopStats,#projects .projMidStats,#projects .projBottomStats{display:grid!important;gap:7px!important;margin-top:8px!important}
+#projects .projTopStats,#projects .projMidStats{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+#projects .projBottomStats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+#projects .projTopStats>div,#projects .projMidStats>div,#projects .projBottomStats>div{background:#062b49!important;border:1px solid rgba(105,182,225,.20)!important;border-radius:7px!important;padding:7px 8px!important;min-height:46px!important}
+#projects .premiumProject span{color:#9fcbe3!important;font-size:10px!important}
+#projects .premiumProject b{display:block!important;color:#fff!important;font-size:17px!important;margin-top:3px!important}
+#projects .projProgress{height:6px!important;background:#123b58!important;border-radius:8px!important;overflow:hidden!important;margin-top:9px!important}
+#projects .projProgress>div{height:100%!important;background:linear-gradient(90deg,#43dc98,#26a9ff)!important}
+#projects .projectFoot{display:flex!important;justify-content:space-between!important;margin-top:6px!important;font-size:10px!important}
+@media(max-width:1250px){#projects.mockProjects{grid-template-columns:1fr!important}}
+</style>
+
+</head><body>
 <div class="app"><aside class="side" id="sidebar"></aside><main class="main">
 <div class="top"><div><h1>POWERUPS 9000 Testing Tracker</h1><div class="sub">Live Production Testing Flow &nbsp;•&nbsp; QR Based Status Monitoring</div></div>
 <div class="actions"><div id="liveClock" class="liveClock"></div><div class="live"><span class="dot"></span>Live • Supabase Connected</div>
