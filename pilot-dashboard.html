@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>POWERUPS 9000 Management</title><link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium.css"><link rel="stylesheet" href="premium-v32.css"><link rel="stylesheet" href="premium-v34.css"><link rel="stylesheet" href="premium-v37.css?v=37">
+<link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium.css"><link rel="stylesheet" href="premium-v32.css"><link rel="stylesheet" href="premium-v34.css"><link rel="stylesheet" href="premium-v38.css?v=38">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script>
 <style id="v36-critical">
 /* Critical V36 overrides embedded directly so project cards cannot fall back to old white skin */
@@ -28,6 +28,80 @@ box-shadow:inset 0 0 25px rgba(0,149,230,.11),0 4px 16px rgba(0,0,0,.22)!importa
 #projects .projProgress>div{height:100%!important;background:linear-gradient(90deg,#43dc98,#26a9ff)!important}
 #projects .projectFoot{display:flex!important;justify-content:space-between!important;margin-top:6px!important;font-size:10px!important}
 @media(max-width:1250px){#projects.mockProjects{grid-template-columns:1fr!important}}
+</style>
+
+
+<style id="v38-critical">
+/* KPI force-layout: compact premium horizontal balance */
+.kpis8{display:grid!important;grid-template-columns:repeat(8,minmax(0,1fr))!important;gap:9px!important}
+.kpis8 .kpi{
+ position:relative!important;display:block!important;min-height:92px!important;height:92px!important;
+ padding:14px 8px 10px 62px!important;border-radius:10px!important;text-align:left!important;
+ background:linear-gradient(145deg,#0a4169 0%,#073456 58%,#052943 100%)!important;
+ border:1px solid #1a95d4!important;overflow:hidden!important;
+ box-shadow:inset 0 0 20px rgba(31,158,231,.12),0 4px 14px rgba(0,0,0,.15)!important
+}
+.kpis8 .kpi .kpiIcon{
+ position:absolute!important;left:12px!important;top:50%!important;transform:translateY(-50%)!important;
+ width:42px!important;height:42px!important;border-radius:10px!important;display:grid!important;place-items:center!important;
+ margin:0!important
+}
+.kpis8 .kpi>span{
+ display:block!important;font-size:10.5px!important;line-height:1.18!important;font-weight:650!important;
+ color:#e7f7ff!important;margin:0!important;max-width:92px!important;text-align:left!important
+}
+.kpis8 .kpi>b{
+ display:block!important;font-size:29px!important;line-height:1!important;font-weight:850!important;
+ color:#fff!important;margin:7px 0 0!important;text-align:left!important
+}
+.kpis8 .kpi:after{display:none!important}
+
+/* Project cards: return to dense premium reference look */
+.projectSection{padding:12px 14px 14px!important}
+#projects.mockProjects{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:14px!important}
+#projects .premiumProject{
+ min-height:300px!important;padding:13px 14px 12px!important;border-radius:12px!important;
+ background:
+  radial-gradient(circle at 82% 6%,rgba(30,144,214,.13),transparent 33%),
+  linear-gradient(150deg,#07395f 0%,#052c4b 52%,#042540 100%)!important;
+ color:#eefaff!important;box-shadow:inset 0 0 28px rgba(16,137,207,.10),0 5px 18px rgba(0,0,0,.20)!important
+}
+#projects .premiumProject.reliance{border:1.5px solid #d0a334!important}
+#projects .premiumProject.adani{border:1.5px solid #df4b9c!important}
+#projects .premiumProject.standard{border:1.5px solid #18b8ef!important}
+#projects .projectTop{min-height:61px!important;padding:0 0 10px!important}
+#projects .projectBrand{gap:10px!important}
+#projects .projectLogo{
+ width:112px!important;height:47px!important;max-width:112px!important;max-height:47px!important;
+ object-fit:contain!important;background:transparent!important;border-radius:0!important;padding:0!important
+}
+#projects .brandMark{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ min-width:112px!important;height:47px!important;font-size:20px!important;font-weight:900!important;color:#fff!important
+}
+#projects .projectName{font-size:19px!important;line-height:1.05!important;font-weight:850!important}
+#projects .projectSub{font-size:10px!important;margin-top:4px!important}
+#projects .projectHint{
+ width:32px!important;height:32px!important;font-size:17px!important;background:#0a6598!important;
+ border-color:#39c4ff!important
+}
+#projects .projTopStats,#projects .projMidStats,#projects .projBottomStats{gap:7px!important;margin-top:8px!important}
+#projects .projTopStats,#projects .projMidStats{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+#projects .projBottomStats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+#projects .projTopStats>div,#projects .projMidStats>div,#projects .projBottomStats>div{
+ min-height:52px!important;padding:8px 9px!important;border-radius:7px!important;
+ background:linear-gradient(145deg,rgba(5,47,80,.90),rgba(4,38,65,.92))!important;
+ border:1px solid rgba(100,181,228,.20)!important
+}
+#projects .premiumProject span{font-size:10px!important;line-height:1.18!important;color:#a9cfe5!important}
+#projects .premiumProject b{font-size:18px!important;line-height:1!important;margin-top:6px!important;color:#fff!important}
+#projects .projProgress{height:7px!important;margin:10px 1px 0!important;background:#133d59!important}
+#projects .projectFoot{margin-top:7px!important;font-size:10px!important}
+
+/* compact graph, consistent */
+.inputPanel{padding:12px 14px 8px!important}
+.dailyLineChart{max-height:230px!important}
+.dailyLineChart svg{height:225px!important;min-width:840px!important}
 </style>
 
 </head><body>
