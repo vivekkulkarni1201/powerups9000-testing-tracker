@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>POWERUPS 9000 Management</title><link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium.css"><link rel="stylesheet" href="premium-v32.css"><link rel="stylesheet" href="premium-v34.css"><link rel="stylesheet" href="premium-v312.css?v=312">
+<link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium.css"><link rel="stylesheet" href="premium-v32.css"><link rel="stylesheet" href="premium-v34.css"><link rel="stylesheet" href="premium-v313.css?v=313">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script>
 <style id="v36-critical">
 /* Critical V36 overrides embedded directly so project cards cannot fall back to old white skin */
@@ -192,7 +192,27 @@ sidebar.innerHTML=nav('dash');let trackers=[],projectsData=[],settings={},faults
 function setupMonths(){let n=new Date(),o='';for(let i=0;i<12;i++){let d=new Date(n.getFullYear(),n.getMonth()-i,1);o+=`<option value="${d.getFullYear()}-${d.getMonth()+1}">${d.toLocaleString([],{month:'long',year:'numeric'})}</option>`}monthSel.innerHTML=o}
 function weekOfMonth(d){return Math.floor((d.getDate()-1)/7)+1}
 async function load(){weekSel.dataset.userPicked='';let [yy,mm]=monthSel.value.split('-').map(Number),[a,b]=monthBounds(yy,mm);let [{data:t},{data:p},{data:s},{data:dp},{data:ms},{data:f},{data:stg}]=await Promise.all([sb.from('p9k_prod_trackers').select('*').order('last_updated_at',{ascending:false}),sb.from('p9k_prod_projects').select('*').eq('active',true).order('sort_order'),sb.from('p9k_prod_settings').select('*').eq('id',1).single(),sb.from('p9k_prod_daily_plan').select('*').gte('work_date',`${yy}-${String(mm).padStart(2,'0')}-01`).lt('work_date',`${b.getFullYear()}-${String(b.getMonth()+1).padStart(2,'0')}-01`),sb.from('p9k_prod_monthly_summary').select('*').eq('year',yy).eq('month',mm).maybeSingle(),sb.from('p9k_prod_fault_events').select('*').gte('created_at',a.toISOString()).lt('created_at',b.toISOString()),sb.from('p9k_prod_stages').select('stage_code,timer_minutes').eq('stage_code','HEATRUN_PROGRESS').maybeSingle()]);trackers=t||[];projectsData=p||[];settings=s||{};faults=f||[];
-let sod=new Date();sod.setHours(0,0,0,0);let monthKey=`${yy}-${String(mm).padStart(2,'0')}`,openingApplies=settings.opening_month_key===monthKey,cutoff=openingApplies&&settings.opening_cutoff?new Date(settings.opening_cutoff):null;let mtAll=trackers.filter(x=>new Date(x.received_at)>=a&&new Date(x.received_at)<b),mcAll=trackers.filter(x=>x.completed_at&&new Date(x.completed_at)>=a&&new Date(x.completed_at)<b),mt=openingApplies&&cutoff?mtAll.filter(x=>new Date(x.received_at)>cutoff):mtAll,mc=openingApplies&&cutoff?mcAll.filter(x=>new Date(x.completed_at)>cutoff):mcAll,live=trackers.filter(activeTracker);let projTarget=projectsData.reduce((n,x)=>n+(+x.monthly_target||0),0),tar=projTarget||ms?.target||settings.monthly_target||0,rec=(openingApplies?(+settings.opening_received||0):0)+mt.length,comp=(openingApplies?(+settings.opening_completed||0):0)+mc.length,pend=Math.max(tar-comp,0),pc=tar?Math.min(100,Math.round(comp/tar*100)):0;let todayRec=trackers.filter(x=>new Date(x.received_at)>=sod).length,todayComp=trackers.filter(x=>x.completed_at&&new Date(x.completed_at)>=sod).length,
+let sod=new Date();sod.setHours(0,0,0,0);
+let monthKey=`${yy}-${String(mm).padStart(2,'0')}`,
+    nowForMonth=new Date(),
+    isCurrentMonth=(yy===nowForMonth.getFullYear()&&mm===nowForMonth.getMonth()+1),
+    openingApplies=settings.opening_month_key===monthKey,
+    cutoff=openingApplies&&settings.opening_cutoff?new Date(settings.opening_cutoff):null;
+let mtAll=trackers.filter(x=>new Date(x.received_at)>=a&&new Date(x.received_at)<b),
+    mcAll=trackers.filter(x=>x.completed_at&&new Date(x.completed_at)>=a&&new Date(x.completed_at)<b),
+    mt=openingApplies&&cutoff?mtAll.filter(x=>new Date(x.received_at)>cutoff):mtAll,
+    mc=openingApplies&&cutoff?mcAll.filter(x=>new Date(x.completed_at)>cutoff):mcAll,
+    live=trackers.filter(activeTracker),
+    monthEndActive=trackers.filter(x=>{
+      let r=new Date(x.received_at);
+      let c=x.completed_at?new Date(x.completed_at):null;
+      return r<b&&(!c||c>=b);
+    }).length,
+    tar=isCurrentMonth?(+settings.monthly_target||0):(+ms?.target||0),
+    rec=(openingApplies?(+settings.opening_received||0):0)+mt.length,
+    comp=(openingApplies?(+settings.opening_completed||0):0)+mc.length,
+    pend=Math.max(tar-comp,0),
+    pc=tar?Math.min(100,Math.round(comp/tar*100)):0;let todayRec=trackers.filter(x=>new Date(x.received_at)>=sod).length,todayComp=trackers.filter(x=>x.completed_at&&new Date(x.completed_at)>=sod).length,
 yStart=new Date(sod.getTime()-86400000),yEnd=sod,
 yRec=trackers.filter(x=>new Date(x.received_at)>=yStart&&new Date(x.received_at)<yEnd).length,
 yComp=trackers.filter(x=>x.completed_at&&new Date(x.completed_at)>=yStart&&new Date(x.completed_at)<yEnd).length,faultHits=faults.filter(x=>x.event_type==='FAULTY').length;let completedIds=new Set(mc.map(x=>x.tracker_id)),faultedCompleted=new Set(faults.filter(x=>x.event_type==='FAULTY'&&completedIds.has(x.tracker_id)).map(x=>x.tracker_id)),fpy=comp?Math.round((comp-faultedCompleted.size)/comp*100):null;
@@ -204,7 +224,7 @@ testProg=live.filter(x=>!x.is_faulty&&x.current_stage==='TESTING_PROGRESS').leng
 heatProg=live.filter(x=>!x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&!heatExpiredLocal(x)).length,
 fatProg=live.filter(x=>!x.is_faulty&&x.current_stage==='FAT_PROGRESS').length,
 faultNow=live.filter(x=>x.is_faulty).length;kTodayRec.textContent=todayRec;kTodayComp.textContent=todayComp;
-kAwaitBay.textContent=awaiting;kFault.textContent=faultNow;kTestProg.textContent=testProg;kHeatProg.textContent=heatProg;kFatProg.textContent=fatProg;kActiveFloor.textContent=live.length;perfActive.textContent=live.length;target.textContent=tar;received.textContent=rec;completed.textContent=comp;pending.textContent=pend;pct.textContent=pc+'%';prog.style.width=pc+'%';ring.style.background=`conic-gradient(#3ef1c5 ${pc*3.6}deg,#14476e 0)`;pFpy.textContent=fpy===null?'—':fpy+'%';pFaultHits.textContent=faultHits;completedProgress.textContent=`${comp} / ${tar}`;fillTableFilters();renderHeatAlerts(expiredHeat);renderWeeks(yy,mm,mc,settings.weekly_target||0);renderChart(yy,mm,mt,dp||[]);renderProjects(mt,mc,sod);renderRows()}
+kAwaitBay.textContent=awaiting;kFault.textContent=faultNow;kTestProg.textContent=testProg;kHeatProg.textContent=heatProg;kFatProg.textContent=fatProg;kActiveFloor.textContent=live.length;perfActive.textContent=isCurrentMonth?live.length:monthEndActive;target.textContent=tar;received.textContent=rec;completed.textContent=comp;pending.textContent=pend;pct.textContent=pc+'%';prog.style.width=pc+'%';ring.style.background=`conic-gradient(#3ef1c5 ${pc*3.6}deg,#14476e 0)`;pFpy.textContent=fpy===null?'—':fpy+'%';pFaultHits.textContent=faultHits;completedProgress.textContent=`${comp} / ${tar}`;fillTableFilters();renderHeatAlerts(expiredHeat);renderWeeks(yy,mm,mc,settings.weekly_target||0);renderChart(yy,mm,mt,dp||[]);renderProjects(mt,mc,sod);renderRows()}
 function renderHeatAlerts(items){
   heatAlerts.innerHTML=items.length?`<div class="card" style="border-color:#d99a22;background:#3b2b0d;margin-bottom:12px">
     <div class="titleRow"><div><h3>⏱ Heatrun Timer Completed — Action Required</h3>
