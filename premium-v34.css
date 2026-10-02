@@ -1,0 +1,34 @@
+
+/* POWERUPS 9000 V3.4 */
+.kpis8{grid-template-columns:repeat(8,minmax(0,1fr))}
+.finishingFlag .kpiIcon svg path{stroke:currentColor;fill:none}
+.finishingFlag .kpiIcon svg path:nth-child(n+3){fill:currentColor;stroke:none}
+.projectSection{margin-top:10px}
+.projStats{grid-template-columns:repeat(4,1fr)!important}
+.projStats>div{min-width:0}
+.projectBrand img{max-height:42px!important;max-width:120px!important;background:#fff;border-radius:7px;padding:3px}
+.dailyLineChart{width:100%;overflow-x:auto;padding:4px 0 0}
+.dailyLineChart svg{width:100%;min-width:900px;height:auto;display:block;background:linear-gradient(180deg,rgba(5,34,58,.34),rgba(4,27,47,.15));border-radius:10px}
+.gridLine{stroke:#244d69;stroke-width:1;opacity:.7}
+.axisText text,.axisTitle{fill:#9fc1d8;font-size:12px}
+.axisTitle{font-weight:700}
+.toleranceBand{fill:rgba(49,218,153,.09);stroke:none}
+.plannedLine{fill:none;stroke:#45aef0;stroke-width:3;stroke-dasharray:8 6}
+.actualSeg{stroke-width:4;stroke-linecap:round}
+.actualSeg.ok{stroke:#38db99}
+.actualSeg.bad{stroke:#ff5d6c}
+.actualPt{stroke:#071b2b;stroke-width:1.5}
+.actualPt.ok{fill:#38db99}
+.actualPt.bad{fill:#ff5d6c}
+.legend .lg.actual.ok{background:#38db99}
+.legend .lg.actual.bad{background:#ff5d6c}
+.weeklyTargetGrid{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:10px;margin:12px 0}
+@media(max-width:1200px){
+ .kpis8{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .weeklyTargetGrid{grid-template-columns:repeat(2,minmax(140px,1fr))}
+ .projStats{grid-template-columns:repeat(2,1fr)!important}
+}
+@media(max-width:700px){
+ .kpis8{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .weeklyTargetGrid{grid-template-columns:1fr}
+}

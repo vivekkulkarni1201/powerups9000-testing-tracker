@@ -1,4 +1,19 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>POWERUPS 9000 Admin</title><link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium-v32.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script><script src="config.js"></script></head><body><div class="app"><aside class="side" id="sidebar"></aside><main class="main"><div class="top"><div><h1>Admin Control Centre</h1><div class="small" style="margin-top:4px">Live Master Data · Projects · Engineers · Stages · Test Bays</div><div class="sub">V2.5 Pre-Live controls · targets, till-date opening data, bays, serials, QR, access, export</div></div><div class="actions"><a class="btn" href="pilot-active.html">Active UPS</a><a class="btn primary" href="pilot-dashboard.html">Dashboard</a></div></div><div id="msg" class="small"></div><div class="card"><div class="titleRow"><div><h2>Production Targets</h2><div class="small">Set monthly/weekly testing targets and the default planned receipt per working day</div></div></div><div class="targetCards"><div class="targetEdit"><span>Monthly Target</span><input id="opsMonthly" type="number"><b>Month</b></div><div class="targetEdit"><span>Weekly Target</span><input id="opsWeekly" type="number"><b>Week</b></div><div class="targetEdit"><span>Planned Receipt / Day</span><input id="opsDaily" type="number"><b>Working Day</b></div></div><button class="btn primary" onclick="saveOpsTargets()">Save Production Targets</button></div>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>POWERUPS 9000 Admin</title><link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium-v32.css"><link rel="stylesheet" href="premium-v34.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script><script src="config.js"></script></head><body><div class="app"><aside class="side" id="sidebar"></aside><main class="main"><div class="top"><div><h1>Admin Control Centre</h1><div class="small" style="margin-top:4px">Live Master Data · Projects · Engineers · Stages · Test Bays</div><div class="sub">V2.5 Pre-Live controls · targets, till-date opening data, bays, serials, QR, access, export</div></div><div class="actions"><a class="btn" href="pilot-active.html">Active UPS</a><a class="btn primary" href="pilot-dashboard.html">Dashboard</a></div></div><div id="msg" class="small"></div><div class="card">
+<div class="titleRow"><div><h2>Production Targets</h2><div class="small">Set monthly testing target, individual W1–W5 targets, and planned daily receipt.</div></div></div>
+<div class="targetCards">
+  <div class="targetEdit"><span>Monthly Target</span><input id="opsMonthly" type="number"><b>Month</b></div>
+  <div class="targetEdit"><span>Planned Receipt / Day</span><input id="opsDaily" type="number"><b>Working Day</b></div>
+  <div class="targetEdit"><span>Input Tolerance</span><input id="inputTolerance" type="number" min="0" max="100"><b>% ± Plan</b></div>
+</div>
+<div class="weeklyTargetGrid">
+  <div class="field"><label>Week 1 Target</label><input id="weekTarget1" type="number" min="0"></div>
+  <div class="field"><label>Week 2 Target</label><input id="weekTarget2" type="number" min="0"></div>
+  <div class="field"><label>Week 3 Target</label><input id="weekTarget3" type="number" min="0"></div>
+  <div class="field"><label>Week 4 Target</label><input id="weekTarget4" type="number" min="0"></div>
+  <div class="field"><label>Week 5 Target</label><input id="weekTarget5" type="number" min="0"></div>
+</div>
+<button class="btn primary" onclick="saveOpsTargets()">Save Production Targets</button>
+</div>
 <div class="card" style="border-color:#1b78b6">
   <div class="titleRow"><div>
     <h2>GO-LIVE START DATA</h2>
@@ -61,7 +76,13 @@ if(est || !st || !st.length){
 if(es||ep||est||ee||er||eb||etb){
   say('Admin data load warning: '+[es,ep,est,ee,er,eb,etb].filter(Boolean).map(x=>x.message).join(' | '),false)
 }
-projects=p||[];stages=st||[];engineers=e||[];remarkCats=r||[];testBays=tb||[];opsMonthly.value=s?.monthly_target||0;opsWeekly.value=s?.weekly_target||0;opsDaily.value=s?.ideal_daily_capacity||0;accessMode.value=s?.access_mode||'OPEN_TEST';getMyRole().then(x=>myRoleBox.textContent=x);monthlyTarget.value=s?.monthly_target||0;idealDaily.value=s?.ideal_daily_capacity||0;serialMode.value=s?.serial_mode||'AUTO';serialCounter.value=s?.serial_counter||1;serialPrefix.value=s?.serial_prefix||'P9S';qrCounter.value=s?.qr_counter||1;
+projects=p||[];stages=st||[];engineers=e||[];remarkCats=r||[];testBays=tb||[];opsMonthly.value=s?.monthly_target||0;opsDaily.value=s?.ideal_daily_capacity||0;
+weekTarget1.value=s?.week_target_1??s?.weekly_target??0;
+weekTarget2.value=s?.week_target_2??s?.weekly_target??0;
+weekTarget3.value=s?.week_target_3??s?.weekly_target??0;
+weekTarget4.value=s?.week_target_4??s?.weekly_target??0;
+weekTarget5.value=s?.week_target_5??s?.weekly_target??0;
+inputTolerance.value=s?.input_tolerance_pct??10;accessMode.value=s?.access_mode||'OPEN_TEST';getMyRole().then(x=>myRoleBox.textContent=x);monthlyTarget.value=s?.monthly_target||0;idealDaily.value=s?.ideal_daily_capacity||0;serialMode.value=s?.serial_mode||'AUTO';serialCounter.value=s?.serial_counter||1;serialPrefix.value=s?.serial_prefix||'P9S';qrCounter.value=s?.qr_counter||1;
 goMonth.value=s?.opening_month_key||new Date().toISOString().slice(0,7);
 goReceived.value=s?.opening_received||0;
 goCompleted.value=s?.opening_completed||0;
@@ -102,7 +123,20 @@ async function saveProjectTarget(code){let v=+document.getElementById('pt-'+code
   say(error?error.message:`${code} updated`,!error);
   if(!error)load()
 }
-async function saveTimer(code){let v=+document.getElementById('tm-'+code).value,{error}=await sb.rpc('p9k_prod_set_stage_timer',{p_code:code,p_minutes:v});say(error?error.message:`Timer saved: ${v} min`,!error);if(!error)load()}async function addStage(){if(!sCode.value.trim()||!sName.value.trim())return say('Stage code and name required',false);let {error}=await sb.rpc('p9k_prod_upsert_stage',{p_code:sCode.value,p_name:sName.value,p_sort_order:+sOrder.value,p_mandatory:sMandatory.value==='true',p_adani_only:sProjectSpecific.value==='true',p_is_finishing:false,p_timer_minutes:+sTimer.value,p_active:true});say(error?error.message:'Stage added / updated',!error);if(!error)load()}async function saveRemarkCategory(){if(!rCode.value.trim()||!rMeaning.value.trim())return say('Remark code and meaning required',false);let {error}=await sb.rpc('p9k_prod_upsert_remark_category',{p_code:rCode.value,p_meaning:rMeaning.value,p_active:true});say(error?error.message:'Remark category saved',!error);if(!error)load()}async function toggleRemarkCategory(code,on){let x=remarkCats.find(r=>r.code===code);let {error}=await sb.rpc('p9k_prod_upsert_remark_category',{p_code:code,p_meaning:x?.meaning||code,p_active:on});say(error?error.message:`Remark ${on?'enabled':'disabled'}`,!error);if(!error)load()}async function saveDaily(){if(!dDate.value)return say('Date required',false);let codes=[...dRemarks.querySelectorAll('input:checked')].map(x=>x.value);let {error}=await sb.rpc('p9k_prod_save_daily_plan_v5',{p_work_date:dDate.value,p_ideal_capacity:dIdeal.value===''?null:+dIdeal.value,p_manual_received_qty:+dReceived.value,p_remark_codes:codes,p_remark_text:dText.value});say(error?error.message:'Daily input override saved',!error)}async function saveOpsTargets(){let {error}=await sb.rpc('p9k_prod_save_ops_targets',{p_monthly:+opsMonthly.value,p_weekly:+opsWeekly.value,p_daily:+opsDaily.value});say(error?error.message:'Production targets saved',!error);if(!error)load()}async function saveGoLiveStart(){
+async function saveTimer(code){let v=+document.getElementById('tm-'+code).value,{error}=await sb.rpc('p9k_prod_set_stage_timer',{p_code:code,p_minutes:v});say(error?error.message:`Timer saved: ${v} min`,!error);if(!error)load()}async function addStage(){if(!sCode.value.trim()||!sName.value.trim())return say('Stage code and name required',false);let {error}=await sb.rpc('p9k_prod_upsert_stage',{p_code:sCode.value,p_name:sName.value,p_sort_order:+sOrder.value,p_mandatory:sMandatory.value==='true',p_adani_only:sProjectSpecific.value==='true',p_is_finishing:false,p_timer_minutes:+sTimer.value,p_active:true});say(error?error.message:'Stage added / updated',!error);if(!error)load()}async function saveRemarkCategory(){if(!rCode.value.trim()||!rMeaning.value.trim())return say('Remark code and meaning required',false);let {error}=await sb.rpc('p9k_prod_upsert_remark_category',{p_code:rCode.value,p_meaning:rMeaning.value,p_active:true});say(error?error.message:'Remark category saved',!error);if(!error)load()}async function toggleRemarkCategory(code,on){let x=remarkCats.find(r=>r.code===code);let {error}=await sb.rpc('p9k_prod_upsert_remark_category',{p_code:code,p_meaning:x?.meaning||code,p_active:on});say(error?error.message:`Remark ${on?'enabled':'disabled'}`,!error);if(!error)load()}async function saveDaily(){if(!dDate.value)return say('Date required',false);let codes=[...dRemarks.querySelectorAll('input:checked')].map(x=>x.value);let {error}=await sb.rpc('p9k_prod_save_daily_plan_v5',{p_work_date:dDate.value,p_ideal_capacity:dIdeal.value===''?null:+dIdeal.value,p_manual_received_qty:+dReceived.value,p_remark_codes:codes,p_remark_text:dText.value});say(error?error.message:'Daily input override saved',!error)}async function saveOpsTargets(){
+ let {error}=await sb.rpc('p9k_prod_save_ops_targets_v34',{
+   p_monthly:+opsMonthly.value||0,
+   p_daily:+opsDaily.value||0,
+   p_w1:+weekTarget1.value||0,
+   p_w2:+weekTarget2.value||0,
+   p_w3:+weekTarget3.value||0,
+   p_w4:+weekTarget4.value||0,
+   p_w5:+weekTarget5.value||0,
+   p_tolerance:+inputTolerance.value||10
+ });
+ say(error?error.message:'Production targets saved',!error);if(!error)load()
+}
+async function saveGoLiveStart(){
   if(!goMonth.value)return say('Start / Opening Month is required',false);
   if(!goCutoff.value)return say('Actual Data Cut-off Date & Time is required',false);
   let e=null;
