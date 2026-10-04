@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>POWERUPS 9000 Management</title><link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium.css"><link rel="stylesheet" href="premium-v32.css"><link rel="stylesheet" href="premium-v34.css"><link rel="stylesheet" href="premium-v3141.css?v=3141">
+<link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium.css"><link rel="stylesheet" href="premium-v32.css"><link rel="stylesheet" href="premium-v34.css"><link rel="stylesheet" href="premium-v314.css?v=314">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script>
 <style id="v36-critical">
 /* Critical V36 overrides embedded directly so project cards cannot fall back to old white skin */
@@ -220,7 +220,7 @@ heatTimerMinutes=+(stg?.timer_minutes||240);
 let heatExpiredLocal=x=>!x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&x.stage_started_at&&((Date.now()-new Date(x.stage_started_at).getTime())/60000)>=heatTimerMinutes;
 let expiredHeat=live.filter(heatExpiredLocal);
 let awaiting=live.filter(x=>!x.is_faulty&&x.current_stage==='RECEIVED'&&!x.test_bay).length,
-testProg=live.filter(x=>!x.is_faulty&&x.current_stage==='TESTING_PROGRESS').length,
+testProg=live.filter(x=>!x.is_faulty&&x.testing_started&&!x.testing_completed).length,
 heatProg=live.filter(x=>!x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&!heatExpiredLocal(x)).length,
 fatProg=live.filter(x=>!x.is_faulty&&x.current_stage==='FAT_PROGRESS').length,
 faultNow=live.filter(x=>x.is_faulty).length;kTodayRec.textContent=todayRec;kTodayComp.textContent=todayComp;
