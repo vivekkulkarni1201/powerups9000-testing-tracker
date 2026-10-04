@@ -190,7 +190,45 @@ box-shadow:inset 0 0 25px rgba(0,149,230,.11),0 4px 16px rgba(0,0,0,.22)!importa
 <script src="pilot-common.js"></script><script>
 sidebar.innerHTML=nav('dash');let trackers=[],projectsData=[],settings={},faults=[],heatTimerMinutes=240;function heatExpired(x){return !x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&x.stage_started_at&&((Date.now()-new Date(x.stage_started_at).getTime())/60000)>=heatTimerMinutes}
 function setupMonths(){let n=new Date(),o='';for(let i=0;i<12;i++){let d=new Date(n.getFullYear(),n.getMonth()-i,1);o+=`<option value="${d.getFullYear()}-${d.getMonth()+1}">${d.toLocaleString([],{month:'long',year:'numeric'})}</option>`}monthSel.innerHTML=o}
-function weekOfMonth(d){return Math.floor((d.getDate()-1)/7)+1}
+function getProductionWeeks(yy,mm){
+  const daysInMonth=new Date(yy,mm,0).getDate();
+  const weeks=[];
+  let day=1;
+
+  // Production week = Monday to Saturday. Sunday is excluded.
+  // W1 may be a partial week from the 1st of the month up to the first Saturday.
+  while(day<=daysInMonth){
+    while(day<=daysInMonth && new Date(yy,mm-1,day).getDay()===0) day++;
+    if(day>daysInMonth) break;
+
+    const start=day;
+    let end=day;
+    while(end<daysInMonth){
+      const next=end+1, dow=new Date(yy,mm-1,next).getDay();
+      if(dow===0) break;
+      end=next;
+    }
+
+    weeks.push({start,end});
+    day=end+1;
+  }
+
+  // Admin master has W1-W5 targets. If a rare month creates a sixth
+  // partial production block, merge it into W5 rather than inventing W6.
+  if(weeks.length>5){
+    weeks[4].end=weeks[weeks.length-1].end;
+    weeks.length=5;
+  }
+  return weeks;
+}
+function productionWeekOfDate(d,weeks){
+  if(d.getDay()===0) return 0; // Sunday is not part of a production week
+  const day=d.getDate();
+  for(let i=0;i<weeks.length;i++){
+    if(day>=weeks[i].start && day<=weeks[i].end) return i+1;
+  }
+  return 0;
+}
 async function load(){weekSel.dataset.userPicked='';let [yy,mm]=monthSel.value.split('-').map(Number),[a,b]=monthBounds(yy,mm);let [{data:t},{data:p},{data:s},{data:dp},{data:ms},{data:f},{data:stg}]=await Promise.all([sb.from('p9k_prod_trackers').select('*').order('last_updated_at',{ascending:false}),sb.from('p9k_prod_projects').select('*').eq('active',true).order('sort_order'),sb.from('p9k_prod_settings').select('*').eq('id',1).single(),sb.from('p9k_prod_daily_plan').select('*').gte('work_date',`${yy}-${String(mm).padStart(2,'0')}-01`).lt('work_date',`${b.getFullYear()}-${String(b.getMonth()+1).padStart(2,'0')}-01`),sb.from('p9k_prod_monthly_summary').select('*').eq('year',yy).eq('month',mm).maybeSingle(),sb.from('p9k_prod_fault_events').select('*').gte('created_at',a.toISOString()).lt('created_at',b.toISOString()),sb.from('p9k_prod_stages').select('stage_code,timer_minutes').eq('stage_code','HEATRUN_PROGRESS').maybeSingle()]);trackers=t||[];projectsData=p||[];settings=s||{};faults=f||[];
 let sod=new Date();sod.setHours(0,0,0,0);
 let monthKey=`${yy}-${String(mm).padStart(2,'0')}`,
@@ -235,10 +273,34 @@ function renderHeatAlerts(items){
 let weeklyCache={yy:null,mm:null,weeks:[],targets:[0,0,0,0,0]};
 function renderWeeks(yy,mm,mc,weeklyTarget){
  let fallback=+weeklyTarget||0;
+ let prodWeeks=getProductionWeeks(yy,mm);
  let targets=[1,2,3,4,5].map(w=>+(settings['week_target_'+w] ?? fallback) || 0);
- weeklyCache={yy,mm,targets,weeks:[1,2,3,4,5].map(w=>({w,c:0}))};
- mc.forEach(x=>{let d=new Date(x.completed_at);if(d.getFullYear()===yy&&d.getMonth()===mm-1){let w=weekOfMonth(d);if(weeklyCache.weeks[w-1])weeklyCache.weeks[w-1].c++}});
- let now=new Date(),defaultWeek=(now.getFullYear()===yy&&now.getMonth()===mm-1)?Math.min(5,weekOfMonth(now)):1;
+ let weeks=[1,2,3,4,5].map(w=>({
+   w,
+   c:0,
+   start:prodWeeks[w-1]?.start||0,
+   end:prodWeeks[w-1]?.end||0
+ }));
+ weeklyCache={yy,mm,targets,weeks};
+
+ mc.forEach(x=>{
+   let d=new Date(x.completed_at);
+   if(d.getFullYear()===yy&&d.getMonth()===mm-1){
+     let w=productionWeekOfDate(d,prodWeeks);
+     if(w&&weeklyCache.weeks[w-1]) weeklyCache.weeks[w-1].c++;
+   }
+ });
+
+ let now=new Date(),defaultWeek=1;
+ if(now.getFullYear()===yy&&now.getMonth()===mm-1){
+   let current=productionWeekOfDate(now,prodWeeks);
+   if(current) defaultWeek=Math.min(5,current);
+   else {
+     // On Sunday, keep the selector on the production week that just ended.
+     let prev=new Date(now); prev.setDate(prev.getDate()-1);
+     defaultWeek=Math.min(5,productionWeekOfDate(prev,prodWeeks)||1);
+   }
+ }
  if(!weekSel.dataset.userPicked){weekSel.value=String(defaultWeek)}
  renderWeeksFromSelection();
 }
@@ -248,8 +310,8 @@ function renderWeeksFromSelection(){
  let mx=Math.max(1,...targets,...weeks.map(x=>x.c));
  weekChart.innerHTML=weeks.map(x=>{
    let wt=targets[x.w-1]||0,th=Math.max(2,Math.round(wt/mx*150)),dh=Math.max(2,Math.round(x.c/mx*150));
-   let a=(x.w-1)*7+1,b=Math.min(x.w*7,new Date(yy,mm,0).getDate());
-   return `<div class="weekGroup ${x.w===sel?'selected':''}"><div class="weekColumns"><div class="weekBar target" style="height:${th}px"><i>${wt}</i></div><div class="weekBar done" style="height:${dh}px"><i>${x.c}</i></div></div><strong>W${x.w}</strong><small>(${a}-${b})</small></div>`
+   let range=x.start&&x.end?`(${x.start}-${x.end})`:'(—)';
+   return `<div class="weekGroup ${x.w===sel?'selected':''}"><div class="weekColumns"><div class="weekBar target" style="height:${th}px"><i>${wt}</i></div><div class="weekBar done" style="height:${dh}px"><i>${x.c}</i></div></div><strong>W${x.w}</strong><small>${range}</small></div>`
  }).join('');
  let sw=weeks[sel-1]||{c:0},wt=targets[sel-1]||0,pending=Math.max(wt-sw.c,0);
  weekSide.innerHTML=`<div class="weekStat target"><span>Weekly Target</span><b>${wt}</b></div><div class="weekStat done"><span>Weekly Completed</span><b>${sw.c}</b></div><div class="weekStat pending"><span>Weekly Pending</span><b>${pending}</b></div>`;
