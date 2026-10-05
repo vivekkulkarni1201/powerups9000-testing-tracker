@@ -35,7 +35,7 @@ async function signOutP9K(){try{await sb.auth.signOut()}catch(e){}location.href=
    Checks version.json every 30 seconds. No forced refresh while
    an engineer may be entering data; user confirms Refresh Now.
    ========================================================== */
-const P9K_BUILD_VERSION='3.15.2';
+const P9K_BUILD_VERSION='3.15.3';
 let p9kUpdateNoticeShown=false;
 function p9kShowUpdateNotice(serverVersion){
   if(p9kUpdateNoticeShown) return;

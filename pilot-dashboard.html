@@ -229,7 +229,7 @@ function productionWeekOfDate(d,weeks){
   }
   return 0;
 }
-async function load(){weekSel.dataset.userPicked='';let [yy,mm]=monthSel.value.split('-').map(Number),[a,b]=monthBounds(yy,mm);let [{data:t},{data:p},{data:s},{data:dp},{data:ms},{data:f},{data:stg}]=await Promise.all([sb.from('p9k_prod_trackers').select('*').order('last_updated_at',{ascending:false}),sb.from('p9k_prod_projects').select('*').eq('active',true).order('sort_order'),sb.from('p9k_prod_settings').select('*').eq('id',1).single(),sb.from('p9k_prod_daily_plan').select('*').gte('work_date',`${yy}-${String(mm).padStart(2,'0')}-01`).lt('work_date',`${b.getFullYear()}-${String(b.getMonth()+1).padStart(2,'0')}-01`),sb.from('p9k_prod_monthly_summary').select('*').eq('year',yy).eq('month',mm).maybeSingle(),sb.from('p9k_prod_fault_events').select('*').gte('created_at',a.toISOString()).lt('created_at',b.toISOString()),sb.from('p9k_prod_stages').select('stage_code,timer_minutes').eq('stage_code','HEATRUN_PROGRESS').maybeSingle()]);trackers=t||[];projectsData=p||[];settings=s||{};faults=f||[];
+async function load(){weekSel.dataset.userPicked='';let [yy,mm]=monthSel.value.split('-').map(Number),[a,b]=monthBounds(yy,mm);let [{data:t},{data:p},{data:s},{data:dp},{data:ms},{data:f},{data:stg},{data:hist}]=await Promise.all([sb.from('p9k_prod_trackers').select('*').order('last_updated_at',{ascending:false}),sb.from('p9k_prod_projects').select('*').eq('active',true).order('sort_order'),sb.from('p9k_prod_settings').select('*').eq('id',1).single(),sb.from('p9k_prod_daily_plan').select('*').gte('work_date',`${yy}-${String(mm).padStart(2,'0')}-01`).lt('work_date',`${b.getFullYear()}-${String(b.getMonth()+1).padStart(2,'0')}-01`),sb.from('p9k_prod_monthly_summary').select('*').eq('year',yy).eq('month',mm).maybeSingle(),sb.from('p9k_prod_fault_events').select('*').gte('created_at',a.toISOString()).lt('created_at',b.toISOString()),sb.from('p9k_prod_stages').select('stage_code,timer_minutes').eq('stage_code','HEATRUN_PROGRESS').maybeSingle(),sb.from('p9k_prod_history').select('tracker_id,stage,created_at').order('created_at',{ascending:true})]);trackers=t||[];projectsData=p||[];settings=s||{};faults=f||[];hist=hist||[];
 let sod=new Date();sod.setHours(0,0,0,0);
 let monthKey=`${yy}-${String(mm).padStart(2,'0')}`,
     nowForMonth=new Date(),
@@ -257,8 +257,25 @@ yComp=trackers.filter(x=>x.completed_at&&new Date(x.completed_at)>=yStart&&new D
 heatTimerMinutes=+(stg?.timer_minutes||240);
 let heatExpiredLocal=x=>!x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&x.stage_started_at&&((Date.now()-new Date(x.stage_started_at).getTime())/60000)>=heatTimerMinutes;
 let expiredHeat=live.filter(heatExpiredLocal);
+let activityState={};
+hist.forEach(h=>{
+  if(!h?.tracker_id||!h?.stage)return;
+  let a=activityState[h.tracker_id]||(activityState[h.tracker_id]={testStart:0,testDone:0});
+  let ts=new Date(h.created_at).getTime()||0;
+  if(h.stage==='TESTING_PROGRESS') a.testStart=Math.max(a.testStart,ts);
+  if(h.stage==='TESTING_COMPLETED') a.testDone=Math.max(a.testDone,ts);
+});
+let testingIsActive=x=>{
+  if(x.is_faulty)return false;
+  // Direct current-stage fallback fixes live units that are already under Testing.
+  if(x.current_stage==='TESTING_PROGRESS')return true;
+  // For Testing + Heatrun overlap, history preserves Testing In Progress
+  // until a later Testing Completed event is recorded.
+  let a=activityState[x.tracker_id];
+  return !!(a&&a.testStart>a.testDone);
+};
 let awaiting=live.filter(x=>!x.is_faulty&&x.current_stage==='RECEIVED'&&!x.test_bay).length,
-testProg=live.filter(x=>!x.is_faulty&&x.testing_started&&!x.testing_completed).length,
+testProg=live.filter(testingIsActive).length,
 heatProg=live.filter(x=>!x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&!heatExpiredLocal(x)).length,
 fatProg=live.filter(x=>!x.is_faulty&&x.current_stage==='FAT_PROGRESS').length,
 faultNow=live.filter(x=>x.is_faulty).length;kTodayRec.textContent=todayRec;kTodayComp.textContent=todayComp;
