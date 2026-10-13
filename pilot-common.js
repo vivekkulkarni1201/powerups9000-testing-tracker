@@ -35,7 +35,7 @@ async function signOutP9K(){try{await sb.auth.signOut()}catch(e){}location.href=
    Checks version.json every 30 seconds. No forced refresh while
    an engineer may be entering data; user confirms Refresh Now.
    ========================================================== */
-const P9K_BUILD_VERSION='3.15.8';
+const P9K_BUILD_VERSION='3.15.9';
 let p9kUpdateNoticeShown=false;
 function p9kShowUpdateNotice(serverVersion){
   if(p9kUpdateNoticeShown) return;
@@ -51,9 +51,22 @@ function p9kShowUpdateNotice(serverVersion){
     <div style="margin-top:10px;text-align:center;font-size:10px;color:#89aec6">Current ${P9K_BUILD_VERSION} · New ${String(serverVersion||'')}</div>
   </div>`;
   document.body.appendChild(wrap);
-  document.getElementById('p9kRefreshNow').onclick=()=>{
+  document.getElementById('p9kRefreshNow').onclick=async()=>{
+    const btn=document.getElementById('p9kRefreshNow');
+    if(btn){btn.disabled=true;btn.textContent='Updating...';}
+    try{
+      if('serviceWorker' in navigator){
+        const regs=await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r=>r.unregister()));
+      }
+      if(window.caches){
+        const keys=await caches.keys();
+        await Promise.all(keys.map(k=>caches.delete(k)));
+      }
+    }catch(e){}
     const u=new URL(window.location.href);
     u.searchParams.set('_portalv',String(serverVersion||Date.now()));
+    u.searchParams.set('_cb',String(Date.now()));
     window.location.replace(u.toString());
   };
 }
