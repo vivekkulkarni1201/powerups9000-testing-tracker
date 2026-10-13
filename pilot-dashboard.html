@@ -1,4 +1,13 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>
+(function(){
+  const ua=navigator.userAgent||'';
+  const isPhone=/iPhone|iPod|Android.*Mobile|Windows Phone/i.test(ua);
+  const touchPhone=(navigator.maxTouchPoints||0)>0 && Math.min(screen.width,screen.height)<=600;
+  if(isPhone||touchPhone) document.documentElement.classList.add('p9k-mobile');
+})();
+</script>
+
 <title>POWERUPS 9000 Management</title><link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium.css"><link rel="stylesheet" href="premium-v32.css"><link rel="stylesheet" href="premium-v34.css"><link rel="stylesheet" href="premium-v314.css?v=314">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script>
@@ -397,8 +406,124 @@ box-shadow:inset 0 0 25px rgba(0,149,230,.11),0 4px 16px rgba(0,0,0,.22)!importa
 }
 </style>
 
+
+<style id="v3160-phone-final">
+/* Phone/PWA overrides use a JS-added class, so they work even when Safari
+   or an installed web app reports a wide CSS viewport. */
+html.p9k-mobile, html.p9k-mobile body{
+  width:100%!important;max-width:100%!important;overflow-x:hidden!important;
+}
+html.p9k-mobile .app{
+  display:block!important;width:100%!important;min-width:0!important;
+}
+html.p9k-mobile .side{display:none!important}
+html.p9k-mobile .main{
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  margin:0!important;padding:10px 9px 22px!important;box-sizing:border-box!important;
+}
+html.p9k-mobile .top{
+  display:block!important;margin:0 0 10px!important;padding:0 0 9px!important;
+}
+html.p9k-mobile .top h1{
+  font-size:21px!important;line-height:1.08!important;margin:0!important;
+}
+html.p9k-mobile .top .sub{
+  font-size:10px!important;line-height:1.3!important;margin-top:5px!important;
+}
+html.p9k-mobile .actions{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:7px!important;width:100%!important;margin-top:9px!important;
+}
+html.p9k-mobile .actions .liveClock{display:none!important}
+html.p9k-mobile .actions .live,
+html.p9k-mobile .actions .btn{
+  width:100%!important;min-width:0!important;min-height:38px!important;
+  box-sizing:border-box!important;padding:8px 6px!important;margin:0!important;
+  font-size:10.5px!important;line-height:1.15!important;text-align:center!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  white-space:normal!important;
+}
+
+/* KPI: exactly 2 cards per row; no clipped labels. */
+html.p9k-mobile .kpis8{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;width:100%!important;margin:0 0 10px!important;
+}
+html.p9k-mobile .kpis8 .kpi{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:34px minmax(0,1fr)!important;
+  column-gap:7px!important;
+  align-items:center!important;
+  width:100%!important;min-width:0!important;
+  height:96px!important;min-height:96px!important;
+  padding:9px 8px!important;
+  box-sizing:border-box!important;overflow:hidden!important;
+}
+html.p9k-mobile .kpis8 .kpi .kpiIcon{
+  position:static!important;left:auto!important;
+  width:30px!important;height:30px!important;min-width:30px!important;
+  margin:0!important;align-self:center!important;
+}
+html.p9k-mobile .kpis8 .kpi .kpiBody{
+  min-width:0!important;width:100%!important;max-width:100%!important;
+  display:flex!important;flex-direction:column!important;
+  align-items:center!important;justify-content:center!important;
+  overflow:visible!important;
+}
+html.p9k-mobile .kpis8 .kpi .kpiBody>span{
+  display:block!important;width:100%!important;max-width:100%!important;
+  margin:0!important;padding:0!important;
+  font-size:10px!important;line-height:1.12!important;font-weight:800!important;
+  text-align:center!important;white-space:normal!important;
+  word-break:normal!important;overflow-wrap:normal!important;
+  color:#fff!important;
+}
+html.p9k-mobile .kpis8 .kpi .kpiBody>b{
+  display:block!important;margin:6px 0 0!important;
+  font-size:25px!important;line-height:1!important;text-align:center!important;
+}
+
+/* Stack major panels and keep them inside the phone width. */
+html.p9k-mobile .mockPerfGrid{
+  display:grid!important;grid-template-columns:1fr!important;gap:10px!important;
+}
+html.p9k-mobile .mockPanel,
+html.p9k-mobile .projectSection,
+html.p9k-mobile .inputPanel,
+html.p9k-mobile .currentPanel{
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  box-sizing:border-box!important;overflow:hidden!important;padding:11px!important;
+}
+html.p9k-mobile .mockPanelTitle{
+  display:flex!important;flex-wrap:wrap!important;align-items:flex-start!important;gap:7px!important;
+}
+html.p9k-mobile .mockPanelTitle h2{font-size:18px!important;line-height:1.12!important}
+html.p9k-mobile .mockPanelTitle .small{font-size:10px!important}
+html.p9k-mobile .mockPanelTitle .monthSel{
+  margin-left:auto!important;min-width:122px!important;max-width:48%!important;
+}
+html.p9k-mobile .mockPerfBody{
+  display:grid!important;grid-template-columns:1fr!important;gap:9px!important;
+}
+html.p9k-mobile .mockRing{
+  width:128px!important;height:128px!important;min-width:128px!important;margin:3px auto!important;
+}
+html.p9k-mobile .mockRingInner{width:96px!important;height:96px!important}
+html.p9k-mobile .mockSummaryGrid{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;
+}
+html.p9k-mobile .mockMetric{min-width:0!important;padding:9px 7px!important}
+html.p9k-mobile .mockMetric span{font-size:9.3px!important;line-height:1.12!important}
+html.p9k-mobile .mockMetric b{font-size:21px!important}
+html.p9k-mobile #projects.mockProjects{
+  display:grid!important;grid-template-columns:1fr!important;gap:10px!important;
+}
+</style>
+
 </head><body>
-<div id="p9kLiveLoading"><div class="loadBox"><div class="spinner"></div><b>Loading live UPS data…</b><span>Connecting to POWERUPS 9000 tracker</span></div></div>
+
 <div class="app"><aside class="side" id="sidebar"></aside><main class="main">
 <div class="top"><div><h1>POWERUPS 9000 Testing Tracker</h1><div class="sub">Live Production Testing Flow &nbsp;•&nbsp; QR Based Status Monitoring</div></div>
 <div class="actions"><div id="liveClock" class="liveClock"></div><div class="live"><span class="dot"></span>Live • Supabase Connected</div>
@@ -481,19 +606,8 @@ box-shadow:inset 0 0 25px rgba(0,149,230,.11),0 4px 16px rgba(0,0,0,.22)!importa
 
 
 </main></div>
-<script src="pilot-common.js?v=3159"></script><script>
-sidebar.innerHTML=nav('dash');let p9kFirstLiveLoad=true;
-function showLiveLoading(){
-  if(!p9kFirstLiveLoad)return;
-  const el=document.getElementById('p9kLiveLoading');
-  if(el){el.style.display='flex';clearTimeout(window.__p9kLoadFallback);window.__p9kLoadFallback=setTimeout(()=>{el.style.display='none';p9kFirstLiveLoad=false},8000)}
-}
-function hideLiveLoading(){
-  const el=document.getElementById('p9kLiveLoading');
-  if(el)el.style.display='none';
-  clearTimeout(window.__p9kLoadFallback);
-  p9kFirstLiveLoad=false;
-}
+<script src="pilot-common.js?v=3160"></script><script>
+sidebar.innerHTML=nav('dash');
 let trackers=[],projectsData=[],settings={},faults=[],heatTimerMinutes=240;function heatExpired(x){return !x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&x.stage_started_at&&((Date.now()-new Date(x.stage_started_at).getTime())/60000)>=heatTimerMinutes}
 function setupMonths(){let n=new Date(),o='';for(let i=0;i<12;i++){let d=new Date(n.getFullYear(),n.getMonth()-i,1);o+=`<option value="${d.getFullYear()}-${d.getMonth()+1}">${d.toLocaleString([],{month:'long',year:'numeric'})}</option>`}monthSel.innerHTML=o}
 function getProductionWeeks(yy,mm){
@@ -535,7 +649,7 @@ function productionWeekOfDate(d,weeks){
   }
   return 0;
 }
-async function load(){showLiveLoading();weekSel.dataset.userPicked='';let [yy,mm]=monthSel.value.split('-').map(Number),[a,b]=monthBounds(yy,mm);let [{data:t},{data:p},{data:s},{data:dp},{data:ms},{data:f},{data:stg},{data:hist}]=await Promise.all([sb.from('p9k_prod_trackers').select('*').order('last_updated_at',{ascending:false}),sb.from('p9k_prod_projects').select('*').eq('active',true).order('sort_order'),sb.from('p9k_prod_settings').select('*').eq('id',1).single(),sb.from('p9k_prod_daily_plan').select('*').gte('work_date',`${yy}-${String(mm).padStart(2,'0')}-01`).lt('work_date',`${b.getFullYear()}-${String(b.getMonth()+1).padStart(2,'0')}-01`),sb.from('p9k_prod_monthly_summary').select('*').eq('year',yy).eq('month',mm).maybeSingle(),sb.from('p9k_prod_fault_events').select('*').gte('created_at',a.toISOString()).lt('created_at',b.toISOString()),sb.from('p9k_prod_stages').select('stage_code,timer_minutes').eq('stage_code','HEATRUN_PROGRESS').maybeSingle(),sb.from('p9k_prod_history').select('tracker_id,stage,created_at').order('created_at',{ascending:true})]);trackers=t||[];projectsData=p||[];settings=s||{};faults=f||[];hist=hist||[];
+async function load(){weekSel.dataset.userPicked='';let [yy,mm]=monthSel.value.split('-').map(Number),[a,b]=monthBounds(yy,mm);let [{data:t},{data:p},{data:s},{data:dp},{data:ms},{data:f},{data:stg},{data:hist}]=await Promise.all([sb.from('p9k_prod_trackers').select('*').order('last_updated_at',{ascending:false}),sb.from('p9k_prod_projects').select('*').eq('active',true).order('sort_order'),sb.from('p9k_prod_settings').select('*').eq('id',1).single(),sb.from('p9k_prod_daily_plan').select('*').gte('work_date',`${yy}-${String(mm).padStart(2,'0')}-01`).lt('work_date',`${b.getFullYear()}-${String(b.getMonth()+1).padStart(2,'0')}-01`),sb.from('p9k_prod_monthly_summary').select('*').eq('year',yy).eq('month',mm).maybeSingle(),sb.from('p9k_prod_fault_events').select('*').gte('created_at',a.toISOString()).lt('created_at',b.toISOString()),sb.from('p9k_prod_stages').select('stage_code,timer_minutes').eq('stage_code','HEATRUN_PROGRESS').maybeSingle(),sb.from('p9k_prod_history').select('tracker_id,stage,created_at').order('created_at',{ascending:true})]);trackers=t||[];projectsData=p||[];settings=s||{};faults=f||[];hist=hist||[];
 let sod=new Date();sod.setHours(0,0,0,0);
 let monthKey=`${yy}-${String(mm).padStart(2,'0')}`,
     nowForMonth=new Date(),
@@ -585,7 +699,7 @@ testProg=live.filter(testingIsActive).length,
 heatProg=live.filter(x=>!x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&!heatExpiredLocal(x)).length,
 fatProg=live.filter(x=>!x.is_faulty&&x.current_stage==='FAT_PROGRESS').length,
 faultNow=live.filter(x=>x.is_faulty).length;kTodayRec.textContent=todayRec;kTodayComp.textContent=todayComp;
-kAwaitBay.textContent=awaiting;kFault.textContent=faultNow;kTestProg.textContent=testProg;kHeatProg.textContent=heatProg;kFatProg.textContent=fatProg;kActiveFloor.textContent=live.length;perfActive.textContent=isCurrentMonth?live.length:monthEndActive;target.textContent=tar;received.textContent=rec;completed.textContent=comp;pending.textContent=pend;pct.textContent=pc+'%';prog.style.width=pc+'%';ring.style.background=`conic-gradient(#3ef1c5 ${pc*3.6}deg,#14476e 0)`;pFpy.textContent=fpy===null?'—':fpy+'%';pFaultHits.textContent=faultHits;completedProgress.textContent=`${comp} / ${tar}`;fillTableFilters();renderHeatAlerts(expiredHeat);renderWeeks(yy,mm,mc,settings.weekly_target||0);renderChart(yy,mm,mt,dp||[]);renderProjects(mt,mc,sod);renderRows();hideLiveLoading()}
+kAwaitBay.textContent=awaiting;kFault.textContent=faultNow;kTestProg.textContent=testProg;kHeatProg.textContent=heatProg;kFatProg.textContent=fatProg;kActiveFloor.textContent=live.length;perfActive.textContent=isCurrentMonth?live.length:monthEndActive;target.textContent=tar;received.textContent=rec;completed.textContent=comp;pending.textContent=pend;pct.textContent=pc+'%';prog.style.width=pc+'%';ring.style.background=`conic-gradient(#3ef1c5 ${pc*3.6}deg,#14476e 0)`;pFpy.textContent=fpy===null?'—':fpy+'%';pFaultHits.textContent=faultHits;completedProgress.textContent=`${comp} / ${tar}`;fillTableFilters();renderHeatAlerts(expiredHeat);renderWeeks(yy,mm,mc,settings.weekly_target||0);renderChart(yy,mm,mt,dp||[]);renderProjects(mt,mc,sod);renderRows()}
 function renderHeatAlerts(items){
   heatAlerts.innerHTML=items.length?`<div class="card" style="border-color:#d99a22;background:#3b2b0d;margin-bottom:12px">
     <div class="titleRow"><div><h3>⏱ Heatrun Timer Completed — Action Required</h3>

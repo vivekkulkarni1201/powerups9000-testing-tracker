@@ -1,7 +1,16 @@
 <!doctype html>
 <html>
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>
+(function(){
+  const ua=navigator.userAgent||'';
+  const isPhone=/iPhone|iPod|Android.*Mobile|Windows Phone/i.test(ua);
+  const touchPhone=(navigator.maxTouchPoints||0)>0 && Math.min(screen.width,screen.height)<=600;
+  if(isPhone||touchPhone) document.documentElement.classList.add('p9k-mobile');
+})();
+</script>
+
 <title>POWERUPS 9000 Monthly / Yearly Data</title>
 <link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -50,6 +59,80 @@
 }
 </style>
 
+
+<style id="v3160-monthly-final">
+.monthStats{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
+  margin-top:10px!important;
+}
+.monthStats div{
+  display:flex!important;flex-direction:column!important;justify-content:center!important;
+  min-height:74px!important;padding:11px 12px!important;box-sizing:border-box!important;
+}
+.monthStats span{
+  display:block!important;font-size:11px!important;line-height:1.2!important;
+  margin:0 0 7px!important;color:#a9cce3!important;
+}
+.monthStats b{
+  display:block!important;font-size:25px!important;line-height:1!important;margin:0!important;
+}
+.ratingRepairWrap{
+  margin-top:12px!important;padding-top:10px!important;border-top:1px solid rgba(93,165,208,.18)!important;
+  align-items:center!important;gap:10px!important;flex-wrap:wrap!important;
+}
+.ratingRepairPanel{width:100%!important;margin-top:8px!important}
+.repairList{display:grid;gap:7px}
+.repairRow{
+  display:grid;grid-template-columns:minmax(160px,1fr) 150px 80px;gap:8px;align-items:center;
+  padding:8px;border-radius:9px;background:#0a1e2f;
+}
+.repairId{display:flex;flex-direction:column;gap:2px;min-width:0}
+.repairId b{font-size:12px}.repairId span{font-size:10px;color:#8eb3cf}
+.repairRow select{width:100%;min-width:0}
+
+html.p9k-mobile .app{display:block!important}
+html.p9k-mobile .side{display:none!important}
+html.p9k-mobile .main{
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  margin:0!important;padding:10px!important;box-sizing:border-box!important;
+}
+html.p9k-mobile .top{display:block!important}
+html.p9k-mobile .top h1{font-size:22px!important;line-height:1.08!important}
+html.p9k-mobile .top .sub{font-size:10px!important;line-height:1.3!important}
+html.p9k-mobile .actions{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;
+  width:100%!important;margin-top:9px!important;
+}
+html.p9k-mobile .actions>*{
+  width:100%!important;min-width:0!important;min-height:38px!important;
+  box-sizing:border-box!important;padding:8px 6px!important;font-size:10.5px!important;
+}
+html.p9k-mobile .card{
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  padding:11px!important;box-sizing:border-box!important;
+}
+html.p9k-mobile .yearHero{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;
+}
+html.p9k-mobile .yearGrid{display:grid!important;grid-template-columns:1fr!important;gap:9px!important}
+html.p9k-mobile .monthDataCard{padding:12px!important}
+html.p9k-mobile .monthDataCard h3{font-size:20px!important;margin:0 0 8px!important}
+html.p9k-mobile .monthStats{gap:8px!important}
+html.p9k-mobile .monthStats div{min-height:72px!important;padding:10px!important}
+html.p9k-mobile .monthStats span{font-size:10px!important;margin-bottom:6px!important}
+html.p9k-mobile .monthStats b{font-size:24px!important}
+html.p9k-mobile .ratingRow{
+  grid-template-columns:72px minmax(0,1fr) minmax(0,1fr)!important;
+  gap:5px!important;padding:7px 6px!important;
+}
+html.p9k-mobile .ratingRow span{font-size:9px!important}
+html.p9k-mobile .repairRow{
+  grid-template-columns:1fr!important;gap:6px!important;
+}
+</style>
+
 </head>
 <body><div class="app"><aside class="side" id="sidebar"></aside><main class="main">
 <div class="top"><div><h1>Monthly / Yearly Production Data</h1><div class="sub">Live POWERUPS 9000 receipt, testing completion and rating mix — updates throughout the month</div></div>
@@ -57,11 +140,16 @@
 
 <div class="card"><div class="titleRow"><div><h2 id="yearTitle">Year Overview</h2><div class="small">Year totals are live; months do not need to be closed.</div></div></div>
 <div class="yearHero"><div class="metric"><span>Total UPS Received</span><b id="yReceived">0</b></div><div class="metric"><span>Total UPS Tested / Completed</span><b id="yCompleted">0</b></div><div class="metric"><span>Active from this Year</span><b id="yActive">0</b></div><div class="metric"><span>Completion vs Received</span><b id="yPct">0%</b></div></div>
-<div id="yearRatings" class="ratingTable"></div></div>
+<div id="yearRatings" class="ratingTable"></div>
+<div id="ratingRepairWrap" class="ratingRepairWrap" style="display:none">
+  <button id="ratingRepairBtn" class="btn" type="button" onclick="toggleRatingRepair()">Fix Missing Ratings</button>
+  <span id="ratingRepairNote" class="small"></span>
+  <div id="ratingRepairPanel" class="ratingRepairPanel" style="display:none"></div>
+</div></div>
 
 <div class="card"><div class="titleRow"><div><h2>Month-by-Month Live Data</h2><div class="small">Each rating shows Received / Completed for that month.</div></div></div><div id="monthGrid" class="yearGrid"></div></div>
 </main></div>
-<script src="pilot-common.js?v=3159"></script><script>
+<script src="pilot-common.js?v=3160"></script><script>
 sidebar.innerHTML=nav('dash');
 const ratings=[125,250,375,500,625,750,875,1000,1125,1250];
 let trackers=[],currentYear=new Date().getFullYear();
@@ -99,22 +187,62 @@ function render(){
  yearTitle.textContent=`${currentYear} Year Overview`;
  yReceived.textContent=yr.length;yCompleted.textContent=yc.length;yActive.textContent=ya.length;yPct.textContent=pct+'%';
  let yuR=unratedCount(yr),yuC=unratedCount(yc);
- yearRatings.innerHTML=
-   (yuR||yuC?`<div class="ratingRow" style="border:1px solid rgba(255,191,91,.38)"><b>Rating pending</b><span>Received <b>${yuR}</b></span><span>Completed <b>${yuC}</b></span></div>`:'')+
-   ratings.map(r=>`<div class="ratingRow"><b>${r} kVA</b><span>Received <b>${rcount(yr,r)}</b></span><span>Completed <b>${rcount(yc,r)}</b></span></div>`).join('');
+ const actualYearRows=ratings.filter(r=>rcount(yr,r)||rcount(yc,r));
+ yearRatings.innerHTML=actualYearRows.length
+   ? actualYearRows.map(r=>`<div class="ratingRow"><b>${r} kVA</b><span>Received <b>${rcount(yr,r)}</b></span><span>Completed <b>${rcount(yc,r)}</b></span></div>`).join('')
+   : '';
+ const repairWrap=document.getElementById('ratingRepairWrap');
+ const repairNote=document.getElementById('ratingRepairNote');
+ if(yuR>0){
+   repairWrap.style.display='flex';
+   repairNote.textContent=`${yuR} UPS need rating assignment for the rating-wise breakup.`;
+ }else{
+   repairWrap.style.display='none';
+ }
  monthGrid.innerHTML=[0,1,2,3,4,5,6,7,8,9,10,11].map(m=>{
    let mr=trackers.filter(x=>inMonth(x.received_at,currentYear,m)),
        mc=trackers.filter(x=>inMonth(x.completed_at,currentYear,m)),
        mp=mr.length?Math.round(mc.length/mr.length*100):0,
        ur=unratedCount(mr),uc=unratedCount(mc),
-       rows=(ur||uc?`<div class="ratingRow" style="border:1px solid rgba(255,191,91,.38)"><b>Rating pending</b><span>R: <b>${ur}</b></span><span>C: <b>${uc}</b></span></div>`:'')+
-       ratings.filter(r=>rcount(mr,r)||rcount(mc,r)).map(r=>`<div class="ratingRow"><b>${r} kVA</b><span>R: <b>${rcount(mr,r)}</b></span><span>C: <b>${rcount(mc,r)}</b></span></div>`).join('');
+       rows=ratings.filter(r=>rcount(mr,r)||rcount(mc,r)).map(r=>`<div class="ratingRow"><b>${r} kVA</b><span>Received <b>${rcount(mr,r)}</b></span><span>Completed <b>${rcount(mc,r)}</b></span></div>`).join('');
    return `<div class="monthDataCard"><h3>${new Date(currentYear,m,1).toLocaleString([],{month:'long'})}</h3>
      <div class="monthStats"><div><span>Received</span><b>${mr.length}</b></div><div><span>Tested / Completed</span><b>${mc.length}</b></div></div>
      <div class="small" style="margin-top:8px">Completion vs receipt: <b>${mp}%</b></div>
-     <div class="ratingTable">${rows||'<div class="small">No rated UPS data yet.</div>'}</div></div>`
+     <div class="ratingTable">${rows}</div></div>`
  }).join('');
 }
+
+function toggleRatingRepair(){
+  const panel=document.getElementById('ratingRepairPanel');
+  const open=panel.style.display!=='none';
+  panel.style.display=open?'none':'block';
+  if(!open) renderRatingRepair();
+}
+function renderRatingRepair(){
+  const panel=document.getElementById('ratingRepairPanel');
+  const missing=trackers.filter(x=>inYear(x.received_at,currentYear)&&!trackerRating(x));
+  if(!missing.length){
+    panel.innerHTML='<div class="small">All ratings are assigned.</div>';
+    return;
+  }
+  const opts=ratings.map(r=>`<option value="${r}">${r} kVA</option>`).join('');
+  panel.innerHTML=`<div class="repairList">${missing.map(x=>`
+    <div class="repairRow">
+      <div class="repairId"><b>${x.serial_number||x.serial_no||x.tracker_id||'—'}</b><span>${x.tracker_id||''} · ${x.project_code||x.project_name||'—'}</span></div>
+      <select id="rr_${String(x.tracker_id).replace(/[^A-Za-z0-9_]/g,'_')}"><option value="">Select rating</option>${opts}</select>
+      <button class="btn" type="button" onclick="saveRepairRating('${String(x.tracker_id).replaceAll("'","\\'")}','rr_${String(x.tracker_id).replace(/[^A-Za-z0-9_]/g,'_')}')">Save</button>
+    </div>`).join('')}</div>`;
+}
+async function saveRepairRating(trackerId,selectId){
+  const el=document.getElementById(selectId);
+  if(!el?.value)return showToast('Select UPS rating first',false);
+  const {error}=await sb.rpc('p9k_prod_set_rating',{p_tracker_id:trackerId,p_rating_kva:+el.value});
+  if(error)return showToast(error.message,false);
+  showToast('UPS rating saved');
+  await load();
+  renderRatingRepair();
+}
+
 function exportCSV(){
  let rows=[['Month','Received','Completed',...ratings.map(r=>r+'kVA Received'),...ratings.map(r=>r+'kVA Completed')]];
  for(let m=0;m<12;m++){
