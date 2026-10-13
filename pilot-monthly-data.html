@@ -14,6 +14,42 @@
 .yearHero{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.yearHero .metric b{font-size:30px}
 @media(max-width:1050px){.yearGrid{grid-template-columns:repeat(2,1fr)}.yearHero{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.yearGrid,.yearHero{grid-template-columns:1fr}}
 </style>
+
+<style id="v3157-monthly-mobile">
+@media(max-width:720px){
+  html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
+  .app{display:block!important;grid-template-columns:1fr!important}
+  .side{display:none!important}
+  .main{width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:10px!important;box-sizing:border-box!important}
+  .top{display:block!important;margin-bottom:10px!important}
+  .top h1{font-size:22px!important;line-height:1.08!important;margin:0!important}
+  .top .sub{font-size:10.5px!important;line-height:1.3!important;margin-top:5px!important}
+  .actions{
+    display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;
+    width:100%!important;margin-top:10px!important
+  }
+  .actions>*{
+    width:100%!important;min-width:0!important;box-sizing:border-box!important;
+    min-height:39px!important;margin:0!important;padding:8px 6px!important;
+    font-size:11px!important;display:flex!important;align-items:center!important;justify-content:center!important
+  }
+  .card{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;padding:11px!important;border-radius:13px!important}
+  .card h2{font-size:19px!important;line-height:1.15!important}
+  .yearHero{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+  .yearHero .metric{min-width:0!important;padding:10px!important}
+  .yearHero .metric span{font-size:9px!important}
+  .yearHero .metric b{font-size:24px!important}
+  .ratingRow{grid-template-columns:72px minmax(0,1fr) minmax(0,1fr)!important;gap:5px!important;padding:7px 6px!important}
+  .ratingRow b{font-size:11px!important}
+  .ratingRow span{font-size:9.5px!important}
+  .yearGrid{grid-template-columns:1fr!important;gap:9px!important}
+  .monthDataCard{padding:11px!important;border-radius:12px!important}
+  .monthStats{gap:6px!important}
+  .monthStats div{padding:8px!important}
+  .monthStats b{font-size:19px!important}
+}
+</style>
+
 </head>
 <body><div class="app"><aside class="side" id="sidebar"></aside><main class="main">
 <div class="top"><div><h1>Monthly / Yearly Production Data</h1><div class="sub">Live POWERUPS 9000 receipt, testing completion and rating mix — updates throughout the month</div></div>
@@ -33,7 +69,14 @@ let trackers=[],currentYear=new Date().getFullYear();
 function setupYears(){let y=new Date().getFullYear(),o='';for(let i=0;i<6;i++)o+=`<option value="${y-i}">${y-i}</option>`;yearSel.innerHTML=o}
 function inYear(dt,y){if(!dt)return false;let d=new Date(dt);return d.getFullYear()===y}
 function inMonth(dt,y,m){if(!dt)return false;let d=new Date(dt);return d.getFullYear()===y&&d.getMonth()===m}
-function rcount(arr,r){return arr.filter(x=>+x.rating_kva===r).length}
+function trackerRating(x){
+  const raw = x?.rating_kva ?? x?.rating ?? x?.ups_rating ?? x?.kva_rating ?? x?.rated_kva ?? null;
+  if(raw===null || raw===undefined || raw==='') return 0;
+  if(typeof raw==='number') return +raw || 0;
+  const m=String(raw).replace(/,/g,'').match(/(\d+(?:\.\d+)?)/);
+  return m ? +m[1] : 0;
+}
+function rcount(arr,r){return arr.filter(x=>trackerRating(x)===r).length}
 async function load(){
  currentYear=+yearSel.value;
  let {data,error}=await sb.from('p9k_prod_trackers').select('*').order('received_at');

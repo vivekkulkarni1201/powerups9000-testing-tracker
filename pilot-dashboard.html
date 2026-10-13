@@ -104,7 +104,179 @@ box-shadow:inset 0 0 25px rgba(0,149,230,.11),0 4px 16px rgba(0,0,0,.22)!importa
 .dailyLineChart svg{height:225px!important;min-width:840px!important}
 </style>
 
+
+<style id="v3157-mobile-app">
+/* ==========================================================
+   V3.15.7 — MOBILE APP VIEW
+   Desktop visuals are untouched. Overrides apply only <= 720px.
+   ========================================================== */
+#p9kLiveLoading{
+  position:fixed;inset:0;z-index:2147483000;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#041d32 0%,#062b49 100%);
+  color:#fff;font-family:inherit
+}
+#p9kLiveLoading .loadBox{
+  width:min(320px,86vw);text-align:center;padding:22px 18px;
+  border:1px solid rgba(67,190,246,.45);border-radius:16px;
+  background:rgba(5,43,73,.92);box-shadow:0 18px 55px rgba(0,0,0,.34)
+}
+#p9kLiveLoading .spinner{
+  width:34px;height:34px;margin:0 auto 12px;border-radius:50%;
+  border:3px solid rgba(111,210,255,.22);border-top-color:#35d9ff;
+  animation:p9kSpin .8s linear infinite
+}
+#p9kLiveLoading b{display:block;font-size:16px}
+#p9kLiveLoading span{display:block;margin-top:6px;font-size:12px;color:#a9d9f3}
+@keyframes p9kSpin{to{transform:rotate(360deg)}}
+
+@media (max-width:720px){
+  html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
+  body{background:#031b2e!important}
+  .app{display:block!important;grid-template-columns:1fr!important;width:100%!important;min-width:0!important}
+  .side{display:none!important}
+  .main{
+    display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;
+    margin:0!important;padding:10px 9px 22px!important;box-sizing:border-box!important
+  }
+
+  /* Mobile app header */
+  .top{
+    display:block!important;margin:0 0 10px!important;padding:2px 1px 10px!important;
+    border-bottom:1px solid rgba(64,173,229,.22)!important
+  }
+  .top>div:first-child h1{
+    margin:0!important;font-size:22px!important;line-height:1.08!important;letter-spacing:-.3px!important
+  }
+  .top .sub{font-size:10.5px!important;line-height:1.35!important;margin-top:5px!important}
+  .actions{
+    display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;
+    width:100%!important;margin-top:10px!important;align-items:stretch!important
+  }
+  .actions .liveClock{display:none!important}
+  .actions .live,.actions .btn{
+    min-width:0!important;width:100%!important;box-sizing:border-box!important;
+    min-height:39px!important;height:auto!important;padding:8px 7px!important;
+    margin:0!important;border-radius:10px!important;font-size:11px!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    white-space:normal!important;text-align:center!important;line-height:1.15!important
+  }
+
+  /* KPI cards: clean 2-column app grid */
+  .kpis8{
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;margin:0 0 10px!important
+  }
+  .kpis8 .kpi{
+    width:auto!important;min-width:0!important;height:82px!important;min-height:82px!important;
+    padding:11px 8px 9px 50px!important;border-radius:11px!important
+  }
+  .kpis8 .kpi .kpiIcon{
+    left:8px!important;width:34px!important;height:34px!important;border-radius:8px!important
+  }
+  .kpis8 .kpi>span,.kpis8 .kpi .kpiBody>span{
+    max-width:none!important;font-size:9.5px!important;line-height:1.15!important
+  }
+  .kpis8 .kpi>b,.kpis8 .kpi .kpiBody>b{
+    font-size:25px!important;margin-top:5px!important
+  }
+
+  /* Main panels stack like an app, never desktop-width */
+  .mockPerfGrid{display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
+  .mockPanel,.projectSection,.inputPanel,.currentPanel{
+    width:100%!important;max-width:100%!important;min-width:0!important;
+    box-sizing:border-box!important;border-radius:13px!important;padding:11px!important;
+    overflow:hidden!important
+  }
+  .mockPanelTitle{
+    display:flex!important;align-items:flex-start!important;gap:8px!important;
+    flex-wrap:wrap!important;margin-bottom:8px!important
+  }
+  .mockPanelTitle h2{font-size:18px!important;line-height:1.12!important;margin:0!important}
+  .mockPanelTitle .small{font-size:10.5px!important;line-height:1.3!important;margin-top:3px!important}
+  .mockPanelTitle .monthSel{
+    margin-left:auto!important;min-width:125px!important;max-width:46%!important;
+    height:38px!important;font-size:11px!important
+  }
+
+  /* Monthly Performance: compact app card */
+  .mockPerfBody{
+    display:grid!important;grid-template-columns:1fr!important;gap:10px!important;
+    min-width:0!important
+  }
+  .mockRing{
+    width:132px!important;height:132px!important;min-width:132px!important;
+    margin:2px auto 4px!important
+  }
+  .mockRingInner{width:100px!important;height:100px!important}
+  .mockRingInner b{font-size:28px!important}
+  .mockSummaryGrid{
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important
+  }
+  .mockMetric{
+    min-width:0!important;min-height:68px!important;padding:9px 8px!important;
+    border-radius:9px!important;box-sizing:border-box!important
+  }
+  .mockMetric .miniIcon{font-size:16px!important;min-width:20px!important}
+  .mockMetric span{font-size:9.5px!important;line-height:1.15!important}
+  .mockMetric b{font-size:21px!important}
+  .mockPerfProgress{margin-top:8px!important}
+  .mockPerfProgress>b{font-size:10.5px!important}
+  .perfExtra{grid-template-columns:1fr!important}
+
+  /* Weekly chart remains readable without page zoom */
+  .weekChartWrap{
+    display:grid!important;grid-template-columns:1fr!important;gap:8px!important;
+    width:100%!important;min-width:0!important
+  }
+  .weekBars{
+    width:100%!important;min-width:0!important;overflow:hidden!important;
+    display:flex!important;justify-content:space-between!important;gap:3px!important
+  }
+  .weekGroup{min-width:0!important;flex:1 1 0!important}
+  .weekColumns{gap:2px!important}
+  .weekBar{width:16px!important}
+  .weekGroup strong{font-size:10px!important}
+  .weekGroup small{font-size:7.5px!important}
+  .weekSide{
+    display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:6px!important;width:100%!important
+  }
+  .weekStat{min-width:0!important;padding:8px 6px!important}
+  .weekStat span{font-size:8.5px!important}
+  .weekStat b{font-size:20px!important}
+
+  /* Project cards */
+  #projects.mockProjects{display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
+  #projects .premiumProject{min-height:0!important;padding:11px!important}
+  #projects .projectLogo,#projects .brandMark{width:84px!important;min-width:84px!important;height:38px!important}
+  #projects .projectName{font-size:17px!important}
+  #projects .projTopStats,#projects .projMidStats{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  #projects .projBottomStats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #projects .projTopStats>div,#projects .projMidStats>div,#projects .projBottomStats>div{
+    min-width:0!important;padding:7px!important
+  }
+  #projects .premiumProject span{font-size:8.7px!important}
+  #projects .premiumProject b{font-size:16px!important}
+
+  /* Daily graph and live table scroll only inside their cards */
+  .dailyLineChart,.tableWrap{width:100%!important;max-width:100%!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+  .dailyLineChart svg{min-width:650px!important}
+  .panelTools{
+    width:100%!important;display:grid!important;grid-template-columns:1fr 1fr!important;
+    gap:6px!important
+  }
+  .panelTools input{grid-column:1/-1!important;width:100%!important;box-sizing:border-box!important}
+  .panelTools select{width:100%!important;min-width:0!important}
+  .currentPanel table{min-width:1050px!important}
+
+  .arrowLink{font-size:10px!important}
+}
+</style>
+
 </head><body>
+<div id="p9kLiveLoading"><div class="loadBox"><div class="spinner"></div><b>Loading live UPS data…</b><span>Connecting to POWERUPS 9000 tracker</span></div></div>
 <div class="app"><aside class="side" id="sidebar"></aside><main class="main">
 <div class="top"><div><h1>POWERUPS 9000 Testing Tracker</h1><div class="sub">Live Production Testing Flow &nbsp;•&nbsp; QR Based Status Monitoring</div></div>
 <div class="actions"><div id="liveClock" class="liveClock"></div><div class="live"><span class="dot"></span>Live • Supabase Connected</div>
@@ -188,7 +360,16 @@ box-shadow:inset 0 0 25px rgba(0,149,230,.11),0 4px 16px rgba(0,0,0,.22)!importa
 
 </main></div>
 <script src="pilot-common.js"></script><script>
-sidebar.innerHTML=nav('dash');let trackers=[],projectsData=[],settings={},faults=[],heatTimerMinutes=240;function heatExpired(x){return !x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&x.stage_started_at&&((Date.now()-new Date(x.stage_started_at).getTime())/60000)>=heatTimerMinutes}
+sidebar.innerHTML=nav('dash');function showLiveLoading(){
+  const el=document.getElementById('p9kLiveLoading');
+  if(el){el.style.display='flex';clearTimeout(window.__p9kLoadFallback);window.__p9kLoadFallback=setTimeout(()=>{el.style.display='none'},8000)}
+}
+function hideLiveLoading(){
+  const el=document.getElementById('p9kLiveLoading');
+  if(el)el.style.display='none';
+  clearTimeout(window.__p9kLoadFallback);
+}
+let trackers=[],projectsData=[],settings={},faults=[],heatTimerMinutes=240;function heatExpired(x){return !x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&x.stage_started_at&&((Date.now()-new Date(x.stage_started_at).getTime())/60000)>=heatTimerMinutes}
 function setupMonths(){let n=new Date(),o='';for(let i=0;i<12;i++){let d=new Date(n.getFullYear(),n.getMonth()-i,1);o+=`<option value="${d.getFullYear()}-${d.getMonth()+1}">${d.toLocaleString([],{month:'long',year:'numeric'})}</option>`}monthSel.innerHTML=o}
 function getProductionWeeks(yy,mm){
   const daysInMonth=new Date(yy,mm,0).getDate();
@@ -229,7 +410,7 @@ function productionWeekOfDate(d,weeks){
   }
   return 0;
 }
-async function load(){weekSel.dataset.userPicked='';let [yy,mm]=monthSel.value.split('-').map(Number),[a,b]=monthBounds(yy,mm);let [{data:t},{data:p},{data:s},{data:dp},{data:ms},{data:f},{data:stg},{data:hist}]=await Promise.all([sb.from('p9k_prod_trackers').select('*').order('last_updated_at',{ascending:false}),sb.from('p9k_prod_projects').select('*').eq('active',true).order('sort_order'),sb.from('p9k_prod_settings').select('*').eq('id',1).single(),sb.from('p9k_prod_daily_plan').select('*').gte('work_date',`${yy}-${String(mm).padStart(2,'0')}-01`).lt('work_date',`${b.getFullYear()}-${String(b.getMonth()+1).padStart(2,'0')}-01`),sb.from('p9k_prod_monthly_summary').select('*').eq('year',yy).eq('month',mm).maybeSingle(),sb.from('p9k_prod_fault_events').select('*').gte('created_at',a.toISOString()).lt('created_at',b.toISOString()),sb.from('p9k_prod_stages').select('stage_code,timer_minutes').eq('stage_code','HEATRUN_PROGRESS').maybeSingle(),sb.from('p9k_prod_history').select('tracker_id,stage,created_at').order('created_at',{ascending:true})]);trackers=t||[];projectsData=p||[];settings=s||{};faults=f||[];hist=hist||[];
+async function load(){showLiveLoading();weekSel.dataset.userPicked='';let [yy,mm]=monthSel.value.split('-').map(Number),[a,b]=monthBounds(yy,mm);let [{data:t},{data:p},{data:s},{data:dp},{data:ms},{data:f},{data:stg},{data:hist}]=await Promise.all([sb.from('p9k_prod_trackers').select('*').order('last_updated_at',{ascending:false}),sb.from('p9k_prod_projects').select('*').eq('active',true).order('sort_order'),sb.from('p9k_prod_settings').select('*').eq('id',1).single(),sb.from('p9k_prod_daily_plan').select('*').gte('work_date',`${yy}-${String(mm).padStart(2,'0')}-01`).lt('work_date',`${b.getFullYear()}-${String(b.getMonth()+1).padStart(2,'0')}-01`),sb.from('p9k_prod_monthly_summary').select('*').eq('year',yy).eq('month',mm).maybeSingle(),sb.from('p9k_prod_fault_events').select('*').gte('created_at',a.toISOString()).lt('created_at',b.toISOString()),sb.from('p9k_prod_stages').select('stage_code,timer_minutes').eq('stage_code','HEATRUN_PROGRESS').maybeSingle(),sb.from('p9k_prod_history').select('tracker_id,stage,created_at').order('created_at',{ascending:true})]);trackers=t||[];projectsData=p||[];settings=s||{};faults=f||[];hist=hist||[];
 let sod=new Date();sod.setHours(0,0,0,0);
 let monthKey=`${yy}-${String(mm).padStart(2,'0')}`,
     nowForMonth=new Date(),
@@ -279,7 +460,7 @@ testProg=live.filter(testingIsActive).length,
 heatProg=live.filter(x=>!x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&!heatExpiredLocal(x)).length,
 fatProg=live.filter(x=>!x.is_faulty&&x.current_stage==='FAT_PROGRESS').length,
 faultNow=live.filter(x=>x.is_faulty).length;kTodayRec.textContent=todayRec;kTodayComp.textContent=todayComp;
-kAwaitBay.textContent=awaiting;kFault.textContent=faultNow;kTestProg.textContent=testProg;kHeatProg.textContent=heatProg;kFatProg.textContent=fatProg;kActiveFloor.textContent=live.length;perfActive.textContent=isCurrentMonth?live.length:monthEndActive;target.textContent=tar;received.textContent=rec;completed.textContent=comp;pending.textContent=pend;pct.textContent=pc+'%';prog.style.width=pc+'%';ring.style.background=`conic-gradient(#3ef1c5 ${pc*3.6}deg,#14476e 0)`;pFpy.textContent=fpy===null?'—':fpy+'%';pFaultHits.textContent=faultHits;completedProgress.textContent=`${comp} / ${tar}`;fillTableFilters();renderHeatAlerts(expiredHeat);renderWeeks(yy,mm,mc,settings.weekly_target||0);renderChart(yy,mm,mt,dp||[]);renderProjects(mt,mc,sod);renderRows()}
+kAwaitBay.textContent=awaiting;kFault.textContent=faultNow;kTestProg.textContent=testProg;kHeatProg.textContent=heatProg;kFatProg.textContent=fatProg;kActiveFloor.textContent=live.length;perfActive.textContent=isCurrentMonth?live.length:monthEndActive;target.textContent=tar;received.textContent=rec;completed.textContent=comp;pending.textContent=pend;pct.textContent=pc+'%';prog.style.width=pc+'%';ring.style.background=`conic-gradient(#3ef1c5 ${pc*3.6}deg,#14476e 0)`;pFpy.textContent=fpy===null?'—':fpy+'%';pFaultHits.textContent=faultHits;completedProgress.textContent=`${comp} / ${tar}`;fillTableFilters();renderHeatAlerts(expiredHeat);renderWeeks(yy,mm,mc,settings.weekly_target||0);renderChart(yy,mm,mt,dp||[]);renderProjects(mt,mc,sod);renderRows();hideLiveLoading()}
 function renderHeatAlerts(items){
   heatAlerts.innerHTML=items.length?`<div class="card" style="border-color:#d99a22;background:#3b2b0d;margin-bottom:12px">
     <div class="titleRow"><div><h3>⏱ Heatrun Timer Completed — Action Required</h3>
