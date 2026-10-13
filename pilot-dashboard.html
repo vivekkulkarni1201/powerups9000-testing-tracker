@@ -606,8 +606,53 @@ html.p9k-mobile #projects.mockProjects{
 
 
 </main></div>
-<script src="pilot-common.js?v=3160"></script><script>
+<script src="pilot-common.js?v=3161"></script><script>
 sidebar.innerHTML=nav('dash');
+const P9K_DASH_CACHE_KEY='p9k_dashboard_last_render_v1';
+
+function restoreDashboardCache(){
+  try{
+    const snap=JSON.parse(localStorage.getItem(P9K_DASH_CACHE_KEY)||'null');
+    if(!snap||!snap.html||!snap.savedAt)return false;
+    // Keep the cache short-lived; it is only used to eliminate the zero flash
+    // while fresh Supabase data is loading in the background.
+    if(Date.now()-snap.savedAt>12*60*60*1000)return false;
+    Object.entries(snap.html).forEach(([id,html])=>{
+      const el=document.getElementById(id);
+      if(el && typeof html==='string') el.innerHTML=html;
+    });
+    return true;
+  }catch(e){return false}
+}
+
+function saveDashboardCache(){
+  try{
+    const ids=[
+      'kpis','perfRing','perfMetrics','perfProgress','perfExtra',
+      'weekChart','weekSide','projects','dailyChart','currentRows'
+    ];
+    const html={};
+    ids.forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)html[id]=el.innerHTML;
+    });
+    localStorage.setItem(P9K_DASH_CACHE_KEY,JSON.stringify({
+      savedAt:Date.now(),
+      html
+    }));
+  }catch(e){}
+}
+
+const __p9kHadCachedDashboard=restoreDashboardCache();
+if(!__p9kHadCachedDashboard){
+  const liveBadge=document.querySelector('.actions .live');
+  if(liveBadge){
+    liveBadge.dataset.originalText=liveBadge.textContent;
+    liveBadge.textContent='● Connecting…';
+  }
+}
+
+
 let trackers=[],projectsData=[],settings={},faults=[],heatTimerMinutes=240;function heatExpired(x){return !x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&x.stage_started_at&&((Date.now()-new Date(x.stage_started_at).getTime())/60000)>=heatTimerMinutes}
 function setupMonths(){let n=new Date(),o='';for(let i=0;i<12;i++){let d=new Date(n.getFullYear(),n.getMonth()-i,1);o+=`<option value="${d.getFullYear()}-${d.getMonth()+1}">${d.toLocaleString([],{month:'long',year:'numeric'})}</option>`}monthSel.innerHTML=o}
 function getProductionWeeks(yy,mm){
@@ -699,7 +744,12 @@ testProg=live.filter(testingIsActive).length,
 heatProg=live.filter(x=>!x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&!heatExpiredLocal(x)).length,
 fatProg=live.filter(x=>!x.is_faulty&&x.current_stage==='FAT_PROGRESS').length,
 faultNow=live.filter(x=>x.is_faulty).length;kTodayRec.textContent=todayRec;kTodayComp.textContent=todayComp;
-kAwaitBay.textContent=awaiting;kFault.textContent=faultNow;kTestProg.textContent=testProg;kHeatProg.textContent=heatProg;kFatProg.textContent=fatProg;kActiveFloor.textContent=live.length;perfActive.textContent=isCurrentMonth?live.length:monthEndActive;target.textContent=tar;received.textContent=rec;completed.textContent=comp;pending.textContent=pend;pct.textContent=pc+'%';prog.style.width=pc+'%';ring.style.background=`conic-gradient(#3ef1c5 ${pc*3.6}deg,#14476e 0)`;pFpy.textContent=fpy===null?'—':fpy+'%';pFaultHits.textContent=faultHits;completedProgress.textContent=`${comp} / ${tar}`;fillTableFilters();renderHeatAlerts(expiredHeat);renderWeeks(yy,mm,mc,settings.weekly_target||0);renderChart(yy,mm,mt,dp||[]);renderProjects(mt,mc,sod);renderRows()}
+kAwaitBay.textContent=awaiting;kFault.textContent=faultNow;kTestProg.textContent=testProg;kHeatProg.textContent=heatProg;kFatProg.textContent=fatProg;kActiveFloor.textContent=live.length;perfActive.textContent=isCurrentMonth?live.length:monthEndActive;target.textContent=tar;received.textContent=rec;completed.textContent=comp;pending.textContent=pend;pct.textContent=pc+'%';prog.style.width=pc+'%';ring.style.background=`conic-gradient(#3ef1c5 ${pc*3.6}deg,#14476e 0)`;pFpy.textContent=fpy===null?'—':fpy+'%';pFaultHits.textContent=faultHits;completedProgress.textContent=`${comp} / ${tar}`;fillTableFilters();renderHeatAlerts(expiredHeat);renderWeeks(yy,mm,mc,settings.weekly_target||0);renderChart(yy,mm,mt,dp||[]);renderProjects(mt,mc,sod);renderRows();saveDashboardCache();
+const liveBadge=document.querySelector('.actions .live');
+if(liveBadge&&liveBadge.dataset.originalText){
+  liveBadge.textContent=liveBadge.dataset.originalText;
+  delete liveBadge.dataset.originalText;
+}}
 function renderHeatAlerts(items){
   heatAlerts.innerHTML=items.length?`<div class="card" style="border-color:#d99a22;background:#3b2b0d;margin-bottom:12px">
     <div class="titleRow"><div><h3>⏱ Heatrun Timer Completed — Action Required</h3>
