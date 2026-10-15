@@ -22,7 +22,17 @@ function showToast(msg,good=true){let t=document.getElementById('globalToast');i
 function activeTracker(x){return !x.completed_at&&x.current_stage!=='TO_FINISHING'}
 function trackerBadge(x){let faulty=x?.is_faulty;return `<span class="trackerBadge ${faulty?'faulty':''}">${faulty?'⚠ ':''}${esc(x?.tracker_id||'—')}${faulty?' · FAULTY/RTA':''}</span>`}
 function validateQRId(id){return /^P9K-Q\d{4,6}$/.test(String(id||'').toUpperCase())}
-function subscribeTrackers(cb){try{return sb.channel('p9k-trackers-ui').on('postgres_changes',{event:'*',schema:'public',table:'p9k_prod_trackers'},()=>cb()).subscribe()}catch(e){return null}}
+function subscribeTrackers(cb){
+  try{
+    let t=null;
+    return sb.channel('p9k-trackers-ui')
+      .on('postgres_changes',{event:'*',schema:'public',table:'p9k_prod_trackers'},()=>{
+        clearTimeout(t);
+        t=setTimeout(()=>cb(),350);
+      })
+      .subscribe()
+  }catch(e){return null}
+}
 
 function startLiveClock(el){const tick=()=>{if(el)el.textContent=new Date().toLocaleString([],{weekday:'short',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'})};tick();return setInterval(tick,1000)}
 async function getSessionUser(){try{const {data}=await sb.auth.getSession();return data?.session?.user||null}catch(e){return null}}
@@ -30,12 +40,26 @@ async function getMyRole(){try{const {data,error}=await sb.rpc('p9k_prod_my_role
 async function signOutP9K(){try{await sb.auth.signOut()}catch(e){}location.href='pilot-login.html'}
 
 
+
+function p9kShowVersionBadge(){
+  if(document.getElementById('p9kVersionBadge')) return;
+  const b=document.createElement('div');
+  b.id='p9kVersionBadge';
+  b.textContent='v'+P9K_BUILD_VERSION;
+  b.title='POWERUPS 9000 Portal Version '+P9K_BUILD_VERSION;
+  b.style.cssText='position:fixed;right:8px;bottom:7px;z-index:9999;padding:3px 7px;border:1px solid rgba(110,194,238,.28);border-radius:7px;background:rgba(3,27,46,.78);color:#8fc9e8;font:700 9px/1.2 Arial,sans-serif;letter-spacing:.25px;pointer-events:none;backdrop-filter:blur(4px)';
+  document.body.appendChild(b);
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',p9kShowVersionBadge,{once:true});
+else p9kShowVersionBadge();
+
+
 /* ==========================================================
    V3.15.1 — Portal update notifier
    Checks version.json every 30 seconds. No forced refresh while
    an engineer may be entering data; user confirms Refresh Now.
    ========================================================== */
-const P9K_BUILD_VERSION='3.16.1';
+const P9K_BUILD_VERSION='3.16.2';
 let p9kUpdateNoticeShown=false;
 function p9kShowUpdateNotice(serverVersion){
   if(p9kUpdateNoticeShown) return;

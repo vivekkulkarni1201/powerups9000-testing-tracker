@@ -606,7 +606,7 @@ html.p9k-mobile #projects.mockProjects{
 
 
 </main></div>
-<script src="pilot-common.js?v=3161"></script><script>
+<script src="pilot-common.js?v=3162"></script><script>
 sidebar.innerHTML=nav('dash');
 const P9K_DASH_CACHE_KEY='p9k_dashboard_last_render_v1';
 
@@ -694,7 +694,56 @@ function productionWeekOfDate(d,weeks){
   }
   return 0;
 }
-async function load(){weekSel.dataset.userPicked='';let [yy,mm]=monthSel.value.split('-').map(Number),[a,b]=monthBounds(yy,mm);let [{data:t},{data:p},{data:s},{data:dp},{data:ms},{data:f},{data:stg},{data:hist}]=await Promise.all([sb.from('p9k_prod_trackers').select('*').order('last_updated_at',{ascending:false}),sb.from('p9k_prod_projects').select('*').eq('active',true).order('sort_order'),sb.from('p9k_prod_settings').select('*').eq('id',1).single(),sb.from('p9k_prod_daily_plan').select('*').gte('work_date',`${yy}-${String(mm).padStart(2,'0')}-01`).lt('work_date',`${b.getFullYear()}-${String(b.getMonth()+1).padStart(2,'0')}-01`),sb.from('p9k_prod_monthly_summary').select('*').eq('year',yy).eq('month',mm).maybeSingle(),sb.from('p9k_prod_fault_events').select('*').gte('created_at',a.toISOString()).lt('created_at',b.toISOString()),sb.from('p9k_prod_stages').select('stage_code,timer_minutes').eq('stage_code','HEATRUN_PROGRESS').maybeSingle(),sb.from('p9k_prod_history').select('tracker_id,stage,created_at').order('created_at',{ascending:true})]);trackers=t||[];projectsData=p||[];settings=s||{};faults=f||[];hist=hist||[];
+let p9kLoadRunning=false;
+let p9kLoadAgain=false;
+let p9kMasterCache=null;
+let p9kMasterCacheAt=0;
+
+async function getDashboardMasters(){
+  const now=Date.now();
+  if(p9kMasterCache && (now-p9kMasterCacheAt)<60000) return p9kMasterCache;
+  const [{data:p},{data:s},{data:stg}]=await Promise.all([
+    sb.from('p9k_prod_projects').select('*').eq('active',true).order('sort_order'),
+    sb.from('p9k_prod_settings').select('*').eq('id',1).single(),
+    sb.from('p9k_prod_stages').select('stage_code,timer_minutes').eq('stage_code','HEATRUN_PROGRESS').maybeSingle()
+  ]);
+  p9kMasterCache={p:p||[],s:s||{},stg:stg||null};
+  p9kMasterCacheAt=now;
+  return p9kMasterCache;
+}
+
+async function load(){
+  if(p9kLoadRunning){p9kLoadAgain=true;return}
+  p9kLoadRunning=true;
+  p9kLoadAgain=false;
+  try{
+    weekSel.dataset.userPicked='';let [yy,mm]=monthSel.value.split('-').map(Number),[a,b]=monthBounds(yy,mm);
+const mastersPromise=getDashboardMasters();
+const [{data:t},{data:dp},{data:ms},{data:f},masters]=await Promise.all([
+  sb.from('p9k_prod_trackers').select('*').order('last_updated_at',{ascending:false}),
+  sb.from('p9k_prod_daily_plan').select('*').gte('work_date',`${yy}-${String(mm).padStart(2,'0')}-01`).lt('work_date',`${b.getFullYear()}-${String(b.getMonth()+1).padStart(2,'0')}-01`),
+  sb.from('p9k_prod_monthly_summary').select('*').eq('year',yy).eq('month',mm).maybeSingle(),
+  sb.from('p9k_prod_fault_events').select('*').gte('created_at',a.toISOString()).lt('created_at',b.toISOString()),
+  mastersPromise
+]);
+trackers=t||[];
+projectsData=masters.p||[];
+settings=masters.s||{};
+faults=f||[];
+let stg=masters.stg||null;
+
+/* Only fetch Testing history for currently-active UPS.
+   This replaces the old query that downloaded the complete history table every refresh. */
+const liveTrackerIds=trackers.filter(activeTracker).map(x=>x.tracker_id).filter(Boolean);
+let hist=[];
+if(liveTrackerIds.length){
+  const {data:h}=await sb.from('p9k_prod_history')
+    .select('tracker_id,stage,created_at')
+    .in('tracker_id',liveTrackerIds)
+    .in('stage',['TESTING_PROGRESS','TESTING_COMPLETED'])
+    .order('created_at',{ascending:true});
+  hist=h||[];
+}
 let sod=new Date();sod.setHours(0,0,0,0);
 let monthKey=`${yy}-${String(mm).padStart(2,'0')}`,
     nowForMonth=new Date(),
@@ -749,7 +798,14 @@ const liveBadge=document.querySelector('.actions .live');
 if(liveBadge&&liveBadge.dataset.originalText){
   liveBadge.textContent=liveBadge.dataset.originalText;
   delete liveBadge.dataset.originalText;
-}}
+}
+  }catch(e){
+    console.error('Dashboard refresh failed',e);
+  }finally{
+    p9kLoadRunning=false;
+    if(p9kLoadAgain){p9kLoadAgain=false;setTimeout(load,100)}
+  }
+}
 function renderHeatAlerts(items){
   heatAlerts.innerHTML=items.length?`<div class="card" style="border-color:#d99a22;background:#3b2b0d;margin-bottom:12px">
     <div class="titleRow"><div><h3>⏱ Heatrun Timer Completed — Action Required</h3>
@@ -888,5 +944,14 @@ function renderRows(){
  let active=trackers.filter(activeTracker).filter(x=>(!q||String(x.tracker_id||'').toLowerCase().includes(q)||String(x.serial_no||'').toLowerCase().includes(q))&&(!pr||x.project_code===pr)&&(!st||x.current_stage===st)).slice(0,40);
  upsRows.innerHTML=active.length?active.map((x,i)=>{let hx=heatExpired(x);return `<tr class="${x.is_faulty?'faultyRow':(hx?'heatExpiredRow':'')}"><td>${i+1}</td><td><a class="clickable" href="pilot-scan.html?id=${encodeURIComponent(x.tracker_id)}">${trackerBadge(x)}</a></td><td>${x.serial_no?`<a class="clickable" href="pilot-scan.html?id=${encodeURIComponent(x.tracker_id)}">${esc(x.serial_no)}</a>`:'—'}</td><td>${esc(x.project_code||'—')}</td><td>${x.rating_kva?x.rating_kva+' kVA':'—'}</td><td>${x.is_faulty?'<span class="pill red">FAULTY / RTA</span>':(hx?'<span class="pill amber">⚠ Heatrun Timer Completed</span>':stagePill(x.current_stage))}</td><td>${x.is_faulty?'<span class="pill red">FAULTY / RTA</span>':(hx?'<span class="pill amber">⚠ Check & Take Action</span>':'<span class="pill green">Active</span>')}</td><td>${esc(x.test_bay||'—')}</td><td>${dstr(x.last_updated_at)}</td><td>${esc(x.last_engineer||'—')}</td><td><a class="rowAction" href="pilot-scan.html?id=${encodeURIComponent(x.tracker_id)}">${hx?'Take Action →':'Update →'}</a></td></tr>`}).join(''):`<tr><td colspan="11" class="emptyState">No UPS currently under active testing.</td></tr>`
 }
-setupMonths();startLiveClock(liveClock);load();subscribeTrackers(load);setInterval(load,30000);if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+setupMonths();
+startLiveClock(liveClock);
+load();
+subscribeTrackers(load);
+
+/* Realtime updates are primary. Poll only as a safety net, and never while hidden. */
+setInterval(()=>{if(!document.hidden)load()},60000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});
+
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script></body></html>
