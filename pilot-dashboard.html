@@ -522,6 +522,24 @@ html.p9k-mobile #projects.mockProjects{
 }
 </style>
 
+
+<style id="v3163-mobile-weekly-graph">
+html.p9k-mobile .weekChartWrap{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow:visible!important;}
+html.p9k-mobile .weekBars{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px!important;width:100%!important;max-width:100%!important;min-width:0!important;height:210px!important;overflow:visible!important;padding:8px 2px 0!important;box-sizing:border-box!important;}
+html.p9k-mobile .weekGroup{position:relative!important;min-width:0!important;width:100%!important;height:100%!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-end!important;overflow:visible!important;}
+html.p9k-mobile .weekColumns{height:156px!important;min-height:156px!important;width:100%!important;display:flex!important;align-items:flex-end!important;justify-content:center!important;gap:3px!important;overflow:visible!important;}
+html.p9k-mobile .weekBar{position:relative!important;width:13px!important;max-width:13px!important;min-width:10px!important;border-radius:4px 4px 0 0!important;overflow:visible!important;}
+html.p9k-mobile .weekBar i{position:absolute!important;left:50%!important;transform:translateX(-50%)!important;top:-15px!important;width:max-content!important;max-width:38px!important;font-size:8px!important;line-height:1!important;white-space:nowrap!important;text-align:center!important;}
+html.p9k-mobile .weekGroup strong{display:block!important;margin-top:5px!important;font-size:9px!important;line-height:1!important;white-space:nowrap!important;}
+html.p9k-mobile .weekGroup small{display:block!important;margin-top:3px!important;font-size:6.8px!important;line-height:1!important;white-space:nowrap!important;letter-spacing:-.1px!important;}
+html.p9k-mobile .weekGroup.selected{border-radius:8px!important;}
+html.p9k-mobile .weekSide{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;width:100%!important;margin-top:0!important;}
+html.p9k-mobile .weekStat{min-width:0!important;padding:8px 5px!important;box-sizing:border-box!important;}
+html.p9k-mobile .weekStat span{display:block!important;font-size:8px!important;line-height:1.1!important;white-space:normal!important;}
+html.p9k-mobile .weekStat b{font-size:19px!important;line-height:1!important;}
+@media(max-width:390px){html.p9k-mobile .weekBars{gap:2px!important;padding-left:0!important;padding-right:0!important;}html.p9k-mobile .weekBar{width:11px!important;min-width:9px!important;}html.p9k-mobile .weekBar i{font-size:7.5px!important;}html.p9k-mobile .weekGroup small{font-size:6.3px!important;}}
+</style>
+
 </head><body>
 
 <div class="app"><aside class="side" id="sidebar"></aside><main class="main">
@@ -606,7 +624,7 @@ html.p9k-mobile #projects.mockProjects{
 
 
 </main></div>
-<script src="pilot-common.js?v=3162"></script><script>
+<script src="pilot-common.js?v=3163"></script><script>
 sidebar.innerHTML=nav('dash');
 const P9K_DASH_CACHE_KEY='p9k_dashboard_last_render_v1';
 
