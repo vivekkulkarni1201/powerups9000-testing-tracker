@@ -624,7 +624,7 @@ html.p9k-mobile .weekStat b{font-size:19px!important;line-height:1!important;}
 
 
 </main></div>
-<script src="pilot-common.js?v=3163"></script><script>
+<script src="pilot-common.js?v=3165"></script><script>
 sidebar.innerHTML=nav('dash');
 const P9K_DASH_CACHE_KEY='p9k_dashboard_last_render_v1';
 
@@ -917,9 +917,13 @@ function renderProjects(mt,mc,sod){
          settings.opening_month_key===monthSel.value ? (+p.opening_completed_month||0) : 0
        ),
        monthTarget=+p.monthly_target||0,
-       totalReq=+p.total_requirement||0,
-       totalComp=(+p.opening_completed_till_date||0)+all.filter(x=>x.completed_at&&(!settings.opening_cutoff||new Date(x.completed_at)>new Date(settings.opening_cutoff))).length,
-       overallPending=Math.max(totalReq-totalComp,0),
+       isStandard=(p.project_code||'').toUpperCase()==='STANDARD',
+       monthReceived=mt.filter(x=>x.project_code===p.project_code).length,
+       normalTotalReq=+p.total_requirement||0,
+       normalTotalComp=(+p.opening_completed_till_date||0)+all.filter(x=>x.completed_at&&(!settings.opening_cutoff||new Date(x.completed_at)>new Date(settings.opening_cutoff))).length,
+       totalReq=isStandard?monthTarget:normalTotalReq,
+       totalComp=isStandard?monthCompleted:normalTotalComp,
+       overallPending=isStandard?Math.max(monthTarget-monthCompleted,0):Math.max(normalTotalReq-normalTotalComp,0),
        overallPct=totalReq?Math.min(100,Math.round(totalComp/totalReq*100)):0,
        pendingPct=totalReq?Math.min(100,Math.round(overallPending/totalReq*100)):0,
        cls=(p.project_code||'').toLowerCase().includes('reliance')?'reliance':((p.project_code||'').toLowerCase().includes('adani')?'adani':'standard'),
@@ -937,14 +941,14 @@ function renderProjects(mt,mc,sod){
      </div>
      <div class="projectTargetsCompact">
        <div><span>Current Month Target</span><b><i class="targetMark">◎</i>${monthTarget}</b></div>
-       <div><span>Total Project Requirement</span><b><i class="stackMark">◆</i>${totalReq}</b></div>
+       <div><span>${isStandard?'Monthly Received':'Total Project Requirement'}</span><b><i class="stackMark">◆</i>${isStandard?monthReceived:totalReq}</b></div>
      </div>
      <div class="compactBarBlock">
-       <div class="compactBarHead"><span>Completed Till Date</span><div><b>${totalComp}</b><em>${overallPct}%</em></div></div>
+       <div class="compactBarHead"><span>${isStandard?'Monthly Completed':'Completed Till Date'}</span><div><b>${totalComp}</b><em>${overallPct}%</em></div></div>
        <div class="compactBarTrack"><i class="compactDone" style="width:${overallPct}%"></i></div>
      </div>
      <div class="compactBarBlock">
-       <div class="compactBarHead"><span>Overall Pending</span><div><b>${overallPending}</b><em>${pendingPct}%</em></div></div>
+       <div class="compactBarHead"><span>${isStandard?'Pending to Target':'Overall Pending'}</span><div><b>${overallPending}</b><em>${pendingPct}%</em></div></div>
        <div class="compactBarTrack"><i class="compactPending" style="width:${pendingPct}%"></i></div>
      </div>
    </div>`

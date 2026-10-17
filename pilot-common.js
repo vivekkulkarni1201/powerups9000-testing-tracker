@@ -59,7 +59,7 @@ else p9kShowVersionBadge();
    Checks version.json every 30 seconds. No forced refresh while
    an engineer may be entering data; user confirms Refresh Now.
    ========================================================== */
-const P9K_BUILD_VERSION='3.16.4';
+const P9K_BUILD_VERSION='3.16.5';
 let p9kUpdateNoticeShown=false;
 function p9kShowUpdateNotice(serverVersion){
   if(p9kUpdateNoticeShown) return;
@@ -72,7 +72,7 @@ function p9kShowUpdateNotice(serverVersion){
     <div style="font-size:20px;font-weight:900;line-height:1.2;margin-bottom:8px">New version available</div>
     <div style="font-size:13px;line-height:1.5;color:#d5e9f6;margin-bottom:18px">A new portal patch has been deployed. Refresh once to continue with the latest version.</div>
     <button id="p9kRefreshNow" style="width:100%;border:0;border-radius:10px;padding:12px 16px;background:#ef6c25;color:#fff;font-weight:900;font-size:14px;cursor:pointer">Refresh Now</button>
-    <div style="margin-top:10px;text-align:center;font-size:10px;color:#89aec6">Current ${P9K_BUILD_VERSION} · New ${String(serverVersion||'')}</div>
+    <div style="margin-top:10px;text-align:center;font-size:10px;color:#89aec6">Current ${String(window.P9K_PAGE_BUILD||P9K_BUILD_VERSION)} · New ${String(serverVersion||'')}</div>
   </div>`;
   document.body.appendChild(wrap);
   document.getElementById('p9kRefreshNow').onclick=async()=>{
@@ -100,7 +100,8 @@ async function p9kCheckPortalVersion(){
     if(!r.ok) return;
     const j=await r.json();
     const v=String(j?.version||'').trim();
-    if(v && v!==P9K_BUILD_VERSION) p9kShowUpdateNotice(v);
+    const current=String(window.P9K_PAGE_BUILD||P9K_BUILD_VERSION||'').trim();
+    if(v && v!==current) p9kShowUpdateNotice(v);
   }catch(e){}
 }
 function p9kStartUpdateWatch(){
