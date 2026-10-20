@@ -59,7 +59,7 @@ else p9kShowVersionBadge();
    Checks version.json every 30 seconds. No forced refresh while
    an engineer may be entering data; user confirms Refresh Now.
    ========================================================== */
-const P9K_BUILD_VERSION='3.16.5';
+const P9K_BUILD_VERSION='3.16.6';
 let p9kUpdateNoticeShown=false;
 function p9kShowUpdateNotice(serverVersion){
   if(p9kUpdateNoticeShown) return;

@@ -1,63 +1,62 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><title>Project Detail</title><link rel="stylesheet" href="pilot.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><style>
-html,body{max-width:100%;overflow-x:hidden}
-.main{min-width:0}
-#hero .projectHero{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,720px);gap:18px;align-items:stretch}
-#hero .projectHero > div:first-child > div{display:flex;align-items:center;gap:14px;min-width:0}
-#hero .projectLogo{display:flex;align-items:center;gap:14px;min-width:0}
-#hero .projectLogo img{max-width:84px;max-height:84px;object-fit:contain;display:block}
-#hero .projectLogo .logoFallback{max-width:84px;min-width:84px;height:84px;border-radius:18px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;padding:10px}
-#hero .projectLogo b{display:block;font-size:clamp(20px,2vw,42px);line-height:1.1;word-break:break-word}
-#hero .projectLogo .small{opacity:.9;line-height:1.35}
-.projectSummaryGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.projectSummaryGrid .metric{min-width:0}
-.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:16px}
-.projectTables{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,0.95fr);gap:16px}
-.projectTables .span2{grid-column:1 / -1}
-.card{min-width:0}
-.chartBox{overflow-x:auto;overflow-y:hidden}
-#trend{display:flex;align-items:flex-end;gap:10px;min-width:640px;padding-bottom:8px}
-.tableWrap{overflow:auto}
-.tableWrap table{min-width:720px}
-.top .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.top .actions > *{min-width:0}
-@media (max-width: 1100px){
-  #hero .projectHero{grid-template-columns:1fr}
-  .grid2,.projectTables{grid-template-columns:1fr}
-  .projectTables .span2{grid-column:auto}
-}
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><title>Project Detail</title><link rel="stylesheet" href="pilot.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script>
+<style id="v3166-project-mobile-corrected">
+/* Desktop unchanged. Mobile project detail is rebuilt as normal document flow. */
 @media (max-width: 760px){
-  .app{display:block !important}
-  .side{display:none !important}
-  .main{padding:12px !important}
-  .top{display:flex;flex-direction:column;align-items:stretch !important;gap:12px}
-  .top h1,#title{font-size:clamp(28px,7.2vw,46px);line-height:1.08;margin:0}
-  .sub,#subtitle{font-size:13px;line-height:1.35}
-  .top .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
-  .top .actions .monthSel,.top .actions .btn{width:100% !important}
-  #hero .projectHero > div:first-child > div{align-items:flex-start}
-  .projectSummaryGrid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:10px}
-  .metric{padding:12px !important}
-  .metric span{font-size:12px !important;line-height:1.2}
-  .metric b{font-size:15px !important;line-height:1.15}
-  .card{padding:14px !important;border-radius:18px}
-  #trend{min-width:520px}
-  .tableWrap table{min-width:640px}
+  html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
+  body{margin:0!important}
+  .app{display:block!important;width:100%!important;min-width:0!important}
+  .side{display:none!important}
+  .main{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:10px!important;box-sizing:border-box!important;overflow:visible!important}
+
+  .top{position:static!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;width:100%!important;margin:0 0 10px!important;padding:0!important;transform:none!important}
+  .top>div:first-child{position:static!important;width:100%!important;min-width:0!important}
+  #title{font-size:24px!important;line-height:1.08!important;margin:0!important;white-space:normal!important}
+  #subtitle{font-size:11px!important;line-height:1.35!important;margin-top:5px!important}
+  .top .actions{position:static!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;width:100%!important;margin:0!important;transform:none!important}
+  .top .actions .monthSel,.top .actions .btn{position:static!important;width:100%!important;max-width:none!important;min-width:0!important;height:40px!important;margin:0!important;box-sizing:border-box!important}
+
+  #hero{position:static!important;display:block!important;width:100%!important;min-width:0!important;margin:0 0 10px!important;transform:none!important}
+  #hero>.card{position:static!important;display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important;min-height:0!important;margin:0!important;padding:12px!important;box-sizing:border-box!important;overflow:visible!important;transform:none!important}
+  #hero .projectHero{position:static!important;display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;transform:none!important;overflow:visible!important}
+  #hero .projectHero>div{position:static!important;display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important;margin:0!important;padding:0!important;transform:none!important;float:none!important}
+  #hero .projectLogo{position:static!important;display:flex!important;align-items:center!important;gap:10px!important;width:100%!important;min-width:0!important;margin:0!important;padding:0 0 12px!important;transform:none!important}
+  #hero .projectLogo img{position:static!important;width:60px!important;max-width:60px!important;height:44px!important;max-height:44px!important;object-fit:contain!important;flex:0 0 60px!important;margin:0!important}
+  #hero .logoFallback{position:static!important;width:60px!important;min-width:60px!important;height:44px!important;padding:5px!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;overflow:hidden!important}
+  #hero .projectLogo>div:last-child{min-width:0!important;flex:1 1 auto!important}
+  #hero .projectLogo b{display:block!important;font-size:18px!important;line-height:1.1!important;white-space:normal!important}
+  #hero .projectLogo .small{font-size:10.5px!important;line-height:1.25!important;white-space:normal!important}
+
+  #hero .projectSummaryGrid{position:static!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important;margin:0!important;padding:0!important;transform:none!important;overflow:visible!important;float:none!important}
+  #hero .projectSummaryGrid>.metric{position:static!important;display:flex!important;flex-direction:column!important;justify-content:center!important;width:auto!important;max-width:none!important;min-width:0!important;height:74px!important;min-height:74px!important;margin:0!important;padding:9px!important;box-sizing:border-box!important;transform:none!important;float:none!important;overflow:hidden!important}
+  #hero .projectSummaryGrid>.metric span{display:block!important;font-size:9px!important;line-height:1.15!important;white-space:normal!important;overflow:visible!important}
+  #hero .projectSummaryGrid>.metric b{display:block!important;margin-top:5px!important;font-size:20px!important;line-height:1!important;white-space:normal!important}
+
+  .grid2{position:static!important;display:grid!important;grid-template-columns:1fr!important;gap:10px!important;width:100%!important;min-width:0!important;margin:0 0 10px!important;transform:none!important}
+  .grid2>.card{position:static!important;width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important;margin:0!important;padding:12px!important;box-sizing:border-box!important;overflow:hidden!important;transform:none!important}
+  .grid2 h2,.projectTables h2{font-size:18px!important;line-height:1.15!important;margin:0 0 10px!important}
+  #summary.projectSummaryGrid{position:static!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;width:100%!important;min-width:0!important;margin:0!important;transform:none!important}
+  #summary.projectSummaryGrid>.metric{position:static!important;width:auto!important;min-width:0!important;height:72px!important;min-height:72px!important;margin:0!important;padding:9px!important;box-sizing:border-box!important;transform:none!important;overflow:hidden!important}
+  #summary .metric span{font-size:9px!important;line-height:1.15!important;white-space:normal!important}
+  #summary .metric b{font-size:19px!important;line-height:1!important;margin-top:5px!important}
+  .progress{position:static!important;width:100%!important;margin-top:10px!important;transform:none!important}
+
+  .chartBox{position:static!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;transform:none!important}
+  #trend{position:static!important;display:flex!important;align-items:flex-end!important;gap:8px!important;min-width:560px!important;width:max-content!important;min-height:180px!important;padding:10px 4px 4px!important;box-sizing:border-box!important;transform:none!important}
+
+  .projectTables{position:static!important;display:grid!important;grid-template-columns:1fr!important;gap:10px!important;width:100%!important;min-width:0!important;margin:0!important;transform:none!important}
+  .projectTables>.card,.projectTables>.span2{position:static!important;grid-column:auto!important;width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important;margin:0!important;padding:12px!important;box-sizing:border-box!important;overflow:hidden!important;transform:none!important}
+  .tableWrap{position:static!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:auto!important;overflow-y:visible!important;-webkit-overflow-scrolling:touch!important;transform:none!important}
+  .tableWrap table{position:static!important;min-width:680px!important;width:680px!important;max-width:none!important;transform:none!important}
 }
-@media (max-width: 480px){
-  .main{padding:10px !important}
-  .top .actions{grid-template-columns:1fr}
-  #hero .projectLogo img{max-width:64px;max-height:64px}
-  #hero .projectLogo .logoFallback{max-width:64px;min-width:64px;height:64px;border-radius:16px;font-size:14px}
-  #hero .projectLogo b{font-size:18px}
-  #hero .projectLogo .small{font-size:12px}
-  .projectSummaryGrid{grid-template-columns:1fr !important}
-  .metric{padding:11px !important}
-  .metric span{font-size:11px !important}
-  .metric b{font-size:18px !important}
-  #trend{min-width:460px}
+@media (max-width: 390px){
+  #title{font-size:22px!important}
+  .main{padding:8px!important}
+  #hero .projectSummaryGrid,#summary.projectSummaryGrid{grid-template-columns:1fr 1fr!important;gap:7px!important}
+  #hero .projectSummaryGrid>.metric,#summary.projectSummaryGrid>.metric{height:70px!important;min-height:70px!important;padding:8px!important}
+  #hero .projectSummaryGrid>.metric span,#summary .metric span{font-size:8.5px!important}
 }
 </style>
-</head><body><div class="app"><aside class="side" id="sidebar"></aside><main class="main"><div class="top"><div><h1 id="title">Project Dashboard</h1><div class="sub" id="subtitle"></div></div><div class="actions"><select id="monthSel" class="monthSel" onchange="load()"></select><a class="btn" href="pilot-dashboard.html">← Dashboard</a></div></div><div id="hero"></div><section class="grid2"><div class="card"><h2>Project Monthly Progress</h2><div id="summary" class="projectSummaryGrid" style="margin-top:12px"></div><div class="progress"><div id="pbar"></div></div></div><div class="card"><h2>Daily Received vs Completed</h2><div id="trend" class="chartBox"></div></div></section><section class="projectTables"><div class="card"><h2>Active UPS</h2><div class="tableWrap"><table><thead><tr><th>Tracker</th><th>Serial</th><th>Stage</th><th>Status</th><th>Test Bay</th><th>Engineer</th><th>Open</th></tr></thead><tbody id="activeRows"></tbody></table></div></div><div class="card"><h2>Completed UPS</h2><div class="tableWrap"><table><thead><tr><th>Serial</th><th>Completed</th><th>Cycle Time</th><th>Fault</th></tr></thead><tbody id="completedRows"></tbody></table></div></div><div class="card span2"><h2>Faulty / RTA History</h2><div class="tableWrap"><table><thead><tr><th>Serial</th><th>Tracker</th><th>Stage</th><th>Reason</th><th>Engineer</th><th>Date/Time</th><th>Event</th></tr></thead><tbody id="faultRows"></tbody></table></div></div></section></main></div><script>window.P9K_PAGE_BUILD='3.16.5';</script><script src="pilot-common.js?v=3165"></script><script>
+</head><body><div class="app"><aside class="side" id="sidebar"></aside><main class="main"><div class="top"><div><h1 id="title">Project Dashboard</h1><div class="sub" id="subtitle"></div></div><div class="actions"><select id="monthSel" class="monthSel" onchange="load()"></select><a class="btn" href="pilot-dashboard.html">← Dashboard</a></div></div><div id="hero"></div><section class="grid2"><div class="card"><h2>Project Monthly Progress</h2><div id="summary" class="projectSummaryGrid" style="margin-top:12px"></div><div class="progress"><div id="pbar"></div></div></div><div class="card"><h2>Daily Received vs Completed</h2><div id="trend" class="chartBox"></div></div></section><section class="projectTables"><div class="card"><h2>Active UPS</h2><div class="tableWrap"><table><thead><tr><th>Tracker</th><th>Serial</th><th>Stage</th><th>Status</th><th>Test Bay</th><th>Engineer</th><th>Open</th></tr></thead><tbody id="activeRows"></tbody></table></div></div><div class="card"><h2>Completed UPS</h2><div class="tableWrap"><table><thead><tr><th>Serial</th><th>Completed</th><th>Cycle Time</th><th>Fault</th></tr></thead><tbody id="completedRows"></tbody></table></div></div><div class="card span2"><h2>Faulty / RTA History</h2><div class="tableWrap"><table><thead><tr><th>Serial</th><th>Tracker</th><th>Stage</th><th>Reason</th><th>Engineer</th><th>Date/Time</th><th>Event</th></tr></thead><tbody id="faultRows"></tbody></table></div></div></section></main></div><script>window.P9K_PAGE_BUILD='3.16.6';</script><script src="pilot-common.js?v=3166"></script><script>
 sidebar.innerHTML=nav('');const code=(new URLSearchParams(location.search).get('project')||'').toUpperCase();let project={},trackers=[],faults=[];
 function months(){let n=new Date(),o='';for(let i=0;i<12;i++){let d=new Date(n.getFullYear(),n.getMonth()-i,1);o+=`<option value="${d.getFullYear()}-${d.getMonth()+1}">${d.toLocaleString([],{month:'long',year:'numeric'})}</option>`}monthSel.innerHTML=o}
 function dur(a,b){if(!a||!b)return'—';let h=Math.round((new Date(b)-new Date(a))/36e5*10)/10;return h+' h'}
