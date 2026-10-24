@@ -624,52 +624,57 @@ html.p9k-mobile .weekStat b{font-size:19px!important;line-height:1!important;}
 
 
 </main></div>
-<script src="pilot-common.js?v=3165"></script><script>
+<script src="pilot-common.js?v=3168"></script><script>
 sidebar.innerHTML=nav('dash');
-const P9K_DASH_CACHE_KEY='p9k_dashboard_last_render_v1';
+const P9K_DASH_CACHE_KEY='p9k_dashboard_last_render_v2';
+const P9K_DASH_CACHE_IDS=[
+  'kTodayRec','kTodayComp','kAwaitBay','kTestProg','kHeatProg','kFatProg','kFault','kActiveFloor',
+  'ring','pct','target','completed','pending','received','perfActive','pFpy','prog','completedProgress','pFaultHits',
+  'weekChart','weekSide','projects','heatAlerts','chart','upsRows'
+];
 
 function restoreDashboardCache(){
   try{
     const snap=JSON.parse(localStorage.getItem(P9K_DASH_CACHE_KEY)||'null');
-    if(!snap||!snap.html||!snap.savedAt)return false;
-    // Keep the cache short-lived; it is only used to eliminate the zero flash
-    // while fresh Supabase data is loading in the background.
-    if(Date.now()-snap.savedAt>12*60*60*1000)return false;
-    Object.entries(snap.html).forEach(([id,html])=>{
+    if(!snap||!snap.values||!snap.savedAt)return false;
+    // Persist long enough to survive closing/reopening the mobile app.
+    if(Date.now()-snap.savedAt>7*24*60*60*1000)return false;
+    let restored=0;
+    Object.entries(snap.values).forEach(([id,v])=>{
       const el=document.getElementById(id);
-      if(el && typeof html==='string') el.innerHTML=html;
+      if(!el)return;
+      if(v && typeof v==='object' && v.kind==='html') el.innerHTML=v.value;
+      else el.textContent=String(v?.value ?? v ?? '');
+      restored++;
     });
-    return true;
+    return restored>0;
   }catch(e){return false}
 }
 
 function saveDashboardCache(){
   try{
-    const ids=[
-      'kpis','perfRing','perfMetrics','perfProgress','perfExtra',
-      'weekChart','weekSide','projects','dailyChart','currentRows'
-    ];
-    const html={};
-    ids.forEach(id=>{
+    const htmlIds=new Set(['ring','prog','weekChart','weekSide','projects','heatAlerts','chart','upsRows']);
+    const values={};
+    P9K_DASH_CACHE_IDS.forEach(id=>{
       const el=document.getElementById(id);
-      if(el)html[id]=el.innerHTML;
+      if(!el)return;
+      values[id]={kind:htmlIds.has(id)?'html':'text',value:htmlIds.has(id)?el.innerHTML:el.textContent};
     });
-    localStorage.setItem(P9K_DASH_CACHE_KEY,JSON.stringify({
-      savedAt:Date.now(),
-      html
-    }));
+    localStorage.setItem(P9K_DASH_CACHE_KEY,JSON.stringify({savedAt:Date.now(),values}));
   }catch(e){}
 }
 
 const __p9kHadCachedDashboard=restoreDashboardCache();
 if(!__p9kHadCachedDashboard){
+  // Never show fake zero values while first live query is still running.
+  ['kTodayRec','kTodayComp','kAwaitBay','kTestProg','kHeatProg','kFatProg','kFault','kActiveFloor',
+   'target','completed','pending','received','perfActive','pFpy','pFaultHits'].forEach(id=>{
+    const el=document.getElementById(id); if(el)el.textContent='—';
+  });
+  const pctEl=document.getElementById('pct'); if(pctEl)pctEl.textContent='—';
   const liveBadge=document.querySelector('.actions .live');
-  if(liveBadge){
-    liveBadge.dataset.originalText=liveBadge.textContent;
-    liveBadge.textContent='● Connecting…';
-  }
+  if(liveBadge){liveBadge.dataset.originalText=liveBadge.textContent;liveBadge.textContent='● Connecting…';}
 }
-
 
 let trackers=[],projectsData=[],settings={},faults=[],heatTimerMinutes=240;function heatExpired(x){return !x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&x.stage_started_at&&((Date.now()-new Date(x.stage_started_at).getTime())/60000)>=heatTimerMinutes}
 function setupMonths(){let n=new Date(),o='';for(let i=0;i<12;i++){let d=new Date(n.getFullYear(),n.getMonth()-i,1);o+=`<option value="${d.getFullYear()}-${d.getMonth()+1}">${d.toLocaleString([],{month:'long',year:'numeric'})}</option>`}monthSel.innerHTML=o}
@@ -811,7 +816,7 @@ testProg=live.filter(testingIsActive).length,
 heatProg=live.filter(x=>!x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&!heatExpiredLocal(x)).length,
 fatProg=live.filter(x=>!x.is_faulty&&x.current_stage==='FAT_PROGRESS').length,
 faultNow=live.filter(x=>x.is_faulty).length;kTodayRec.textContent=todayRec;kTodayComp.textContent=todayComp;
-kAwaitBay.textContent=awaiting;kFault.textContent=faultNow;kTestProg.textContent=testProg;kHeatProg.textContent=heatProg;kFatProg.textContent=fatProg;kActiveFloor.textContent=live.length;perfActive.textContent=isCurrentMonth?live.length:monthEndActive;target.textContent=tar;received.textContent=rec;completed.textContent=comp;pending.textContent=pend;pct.textContent=pc+'%';prog.style.width=pc+'%';ring.style.background=`conic-gradient(#3ef1c5 ${pc*3.6}deg,#14476e 0)`;pFpy.textContent=fpy===null?'—':fpy+'%';pFaultHits.textContent=faultHits;completedProgress.textContent=`${comp} / ${tar}`;fillTableFilters();renderHeatAlerts(expiredHeat);renderWeeks(yy,mm,mc,settings.weekly_target||0);renderChart(yy,mm,mt,dp||[]);renderProjects(mt,mc,sod);renderRows();saveDashboardCache();
+kAwaitBay.textContent=awaiting;kFault.textContent=faultNow;kTestProg.textContent=testProg;kHeatProg.textContent=heatProg;kFatProg.textContent=fatProg;kActiveFloor.textContent=live.length;perfActive.textContent=isCurrentMonth?live.length:monthEndActive;target.textContent=tar;received.textContent=rec;completed.textContent=comp;pending.textContent=pend;pct.textContent=pc+'%';prog.style.width=pc+'%';ring.style.background=`conic-gradient(#3ef1c5 ${pc*3.6}deg,#14476e 0)`;pFpy.textContent=fpy===null?'—':fpy+'%';pFaultHits.textContent=faultHits;completedProgress.textContent=`${comp} / ${tar}`;fillTableFilters();renderHeatAlerts(expiredHeat);renderWeeks(yy,mm,mc,settings.weekly_target||0);renderChart(yy,mm,mt,dp||[]);renderProjects(mt,mc,sod);renderRows();saveDashboardCache();const __lb=document.querySelector('.actions .live');if(__lb&&__lb.dataset.originalText){__lb.textContent=__lb.dataset.originalText;delete __lb.dataset.originalText;};
 const liveBadge=document.querySelector('.actions .live');
 if(liveBadge&&liveBadge.dataset.originalText){
   liveBadge.textContent=liveBadge.dataset.originalText;
