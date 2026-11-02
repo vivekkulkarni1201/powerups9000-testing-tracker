@@ -624,7 +624,7 @@ html.p9k-mobile .weekStat b{font-size:19px!important;line-height:1!important;}
 
 
 </main></div>
-<script src="pilot-common.js?v=3168"></script><script>
+<script src="pilot-common.js?v=3169"></script><script>
 sidebar.innerHTML=nav('dash');
 const P9K_DASH_CACHE_KEY='p9k_dashboard_last_render_v2';
 const P9K_DASH_CACHE_IDS=[
@@ -633,11 +633,17 @@ const P9K_DASH_CACHE_IDS=[
   'weekChart','weekSide','projects','heatAlerts','chart','upsRows'
 ];
 
+function currentCalendarMonthKey(){
+  const n=new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+}
 function restoreDashboardCache(){
   try{
     const snap=JSON.parse(localStorage.getItem(P9K_DASH_CACHE_KEY)||'null');
     if(!snap||!snap.values||!snap.savedAt)return false;
-    // Persist long enough to survive closing/reopening the mobile app.
+    // Never restore a previous-month dashboard after calendar month rollover.
+    if(snap.monthKey!==currentCalendarMonthKey())return false;
+    // Persist long enough to survive closing/reopening the mobile app within the same month.
     if(Date.now()-snap.savedAt>7*24*60*60*1000)return false;
     let restored=0;
     Object.entries(snap.values).forEach(([id,v])=>{
@@ -660,7 +666,7 @@ function saveDashboardCache(){
       if(!el)return;
       values[id]={kind:htmlIds.has(id)?'html':'text',value:htmlIds.has(id)?el.innerHTML:el.textContent};
     });
-    localStorage.setItem(P9K_DASH_CACHE_KEY,JSON.stringify({savedAt:Date.now(),values}));
+    localStorage.setItem(P9K_DASH_CACHE_KEY,JSON.stringify({savedAt:Date.now(),monthKey:currentCalendarMonthKey(),values}));
   }catch(e){}
 }
 
@@ -677,7 +683,16 @@ if(!__p9kHadCachedDashboard){
 }
 
 let trackers=[],projectsData=[],settings={},faults=[],heatTimerMinutes=240;function heatExpired(x){return !x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&x.stage_started_at&&((Date.now()-new Date(x.stage_started_at).getTime())/60000)>=heatTimerMinutes}
-function setupMonths(){let n=new Date(),o='';for(let i=0;i<12;i++){let d=new Date(n.getFullYear(),n.getMonth()-i,1);o+=`<option value="${d.getFullYear()}-${d.getMonth()+1}">${d.toLocaleString([],{month:'long',year:'numeric'})}</option>`}monthSel.innerHTML=o}
+function setupMonths(forceCurrent=true){
+  let n=new Date(),o='',current=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+  for(let i=0;i<12;i++){
+    let d=new Date(n.getFullYear(),n.getMonth()-i,1),v=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    o+=`<option value="${v}">${d.toLocaleString([],{month:'long',year:'numeric'})}</option>`
+  }
+  monthSel.innerHTML=o;
+  if(forceCurrent)monthSel.value=current;
+  return current;
+}
 function getProductionWeeks(yy,mm){
   const daysInMonth=new Date(yy,mm,0).getDate();
   const weeks=[];
@@ -933,6 +948,9 @@ function renderProjects(mt,mc,sod){
        pendingPct=totalReq?Math.min(100,Math.round(overallPending/totalReq*100)):0,
        cls=(p.project_code||'').toLowerCase().includes('reliance')?'reliance':((p.project_code||'').toLowerCase().includes('adani')?'adani':'standard'),
        mark=p.logo_data?`<img class="projectLogoCompact" src="${p.logo_data}" alt="${esc(p.project_name)} logo">`:`<span class="projectLogoFallback">${esc(p.project_name).slice(0,1)}</span>`;
+   // Finite project-specific cards disappear from the main page once fully completed.
+   // STANDARD is a rolling monthly bucket and is never hidden by lifetime completion.
+   if(!isStandard && totalReq>0 && totalComp>=totalReq)return '';
    return `<div class="project projectCompact ${cls}" onclick="location.href='pilot-project.html?project=${encodeURIComponent(p.project_code)}'">
      <div class="projectCompactHead">
        <div class="projectCompactIdentity">${mark}<div><b>${esc(p.project_name)}</b><span>${p.fat_required?'With FAT Testing':'No FAT Testing'}</span></div></div>
@@ -971,14 +989,41 @@ function renderRows(){
  let active=trackers.filter(activeTracker).filter(x=>(!q||String(x.tracker_id||'').toLowerCase().includes(q)||String(x.serial_no||'').toLowerCase().includes(q))&&(!pr||x.project_code===pr)&&(!st||x.current_stage===st)).slice(0,40);
  upsRows.innerHTML=active.length?active.map((x,i)=>{let hx=heatExpired(x);return `<tr class="${x.is_faulty?'faultyRow':(hx?'heatExpiredRow':'')}"><td>${i+1}</td><td><a class="clickable" href="pilot-scan.html?id=${encodeURIComponent(x.tracker_id)}">${trackerBadge(x)}</a></td><td>${x.serial_no?`<a class="clickable" href="pilot-scan.html?id=${encodeURIComponent(x.tracker_id)}">${esc(x.serial_no)}</a>`:'—'}</td><td>${esc(x.project_code||'—')}</td><td>${x.rating_kva?x.rating_kva+' kVA':'—'}</td><td>${x.is_faulty?'<span class="pill red">FAULTY / RTA</span>':(hx?'<span class="pill amber">⚠ Heatrun Timer Completed</span>':stagePill(x.current_stage))}</td><td>${x.is_faulty?'<span class="pill red">FAULTY / RTA</span>':(hx?'<span class="pill amber">⚠ Check & Take Action</span>':'<span class="pill green">Active</span>')}</td><td>${esc(x.test_bay||'—')}</td><td>${dstr(x.last_updated_at)}</td><td>${esc(x.last_engineer||'—')}</td><td><a class="rowAction" href="pilot-scan.html?id=${encodeURIComponent(x.tracker_id)}">${hx?'Take Action →':'Update →'}</a></td></tr>`}).join(''):`<tr><td colspan="11" class="emptyState">No UPS currently under active testing.</td></tr>`
 }
-setupMonths();
+let __p9kAutoMonthKey=setupMonths(true);
+monthSel.addEventListener('change',()=>{
+  // Historical month selection is allowed; just refresh the selected period.
+  weekSel.dataset.userPicked='';
+  load();
+});
 startLiveClock(liveClock);
 load();
 subscribeTrackers(load);
 
 /* Realtime updates are primary. Poll only as a safety net, and never while hidden. */
-setInterval(()=>{if(!document.hidden)load()},60000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});
+setInterval(()=>{
+  if(document.hidden)return;
+  const nowKey=currentCalendarMonthKey();
+  if(nowKey!==__p9kAutoMonthKey){
+    __p9kAutoMonthKey=nowKey;
+    localStorage.removeItem(P9K_DASH_CACHE_KEY);
+    p9kMasterCache=null;p9kMasterCacheAt=0;
+    setupMonths(true);
+    weekSel.dataset.userPicked='';
+  }
+  load();
+},60000);
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)return;
+  const nowKey=currentCalendarMonthKey();
+  if(nowKey!==__p9kAutoMonthKey){
+    __p9kAutoMonthKey=nowKey;
+    localStorage.removeItem(P9K_DASH_CACHE_KEY);
+    p9kMasterCache=null;p9kMasterCacheAt=0;
+    setupMonths(true);
+    weekSel.dataset.userPicked='';
+  }
+  load();
+});
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script></body></html>
