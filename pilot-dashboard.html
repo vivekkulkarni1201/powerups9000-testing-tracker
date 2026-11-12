@@ -624,7 +624,7 @@ html.p9k-mobile .weekStat b{font-size:19px!important;line-height:1!important;}
 
 
 </main></div>
-<script src="pilot-common.js?v=3169"></script><script>
+<script src="pilot-common.js?v=3170"></script><script>
 sidebar.innerHTML=nav('dash');
 const P9K_DASH_CACHE_KEY='p9k_dashboard_last_render_v2';
 const P9K_DASH_CACHE_IDS=[
@@ -725,7 +725,13 @@ function getProductionWeeks(yy,mm){
   return weeks;
 }
 function productionWeekOfDate(d,weeks){
-  if(d.getDay()===0) return 0; // Sunday is not part of a production week
+  if(d.getDay()===0){
+    const day=d.getDate();
+    if(day===1) return 1;
+    const prevDay=day-1;
+    for(let i=0;i<weeks.length;i++) if(prevDay>=weeks[i].start&&prevDay<=weeks[i].end) return i+1;
+    return 1;
+  } // Sunday completion is credited to the preceding production week (or W1 on the 1st)
   const day=d.getDate();
   for(let i=0;i<weeks.length;i++){
     if(day>=weeks[i].start && day<=weeks[i].end) return i+1;
@@ -757,17 +763,20 @@ async function load(){
   try{
     weekSel.dataset.userPicked='';let [yy,mm]=monthSel.value.split('-').map(Number),[a,b]=monthBounds(yy,mm);
 const mastersPromise=getDashboardMasters();
-const [{data:t},{data:dp},{data:ms},{data:f},masters]=await Promise.all([
+const [{data:t},{data:dp},{data:ms},{data:f},{data:projectHistory},masters]=await Promise.all([
   sb.from('p9k_prod_trackers').select('*').order('last_updated_at',{ascending:false}),
   sb.from('p9k_prod_daily_plan').select('*').gte('work_date',`${yy}-${String(mm).padStart(2,'0')}-01`).lt('work_date',`${b.getFullYear()}-${String(b.getMonth()+1).padStart(2,'0')}-01`),
   sb.from('p9k_prod_monthly_summary').select('*').eq('year',yy).eq('month',mm).maybeSingle(),
   sb.from('p9k_prod_fault_events').select('*').gte('created_at',a.toISOString()).lt('created_at',b.toISOString()),
+  sb.from('p9k_prod_project_monthly_summary').select('*').eq('year',yy).eq('month',mm),
   mastersPromise
 ]);
+window.__p9kSelectedMonthSummary=ms||null;
 trackers=t||[];
 projectsData=masters.p||[];
 settings=masters.s||{};
 faults=f||[];
+let projectHistoryMap=new Map((projectHistory||[]).map(x=>[String(x.project_code||'').toUpperCase(),x]));
 let stg=masters.stg||null;
 
 /* Only fetch Testing history for currently-active UPS.
@@ -855,7 +864,8 @@ let weeklyCache={yy:null,mm:null,weeks:[],targets:[0,0,0,0,0]};
 function renderWeeks(yy,mm,mc,weeklyTarget){
  let fallback=+weeklyTarget||0;
  let prodWeeks=getProductionWeeks(yy,mm);
- let targets=[1,2,3,4,5].map(w=>+(settings['week_target_'+w] ?? fallback) || 0);
+ let historicalMonth=!(yy===new Date().getFullYear()&&mm===new Date().getMonth()+1);
+ let targets=[1,2,3,4,5].map(w=>historicalMonth ? (+(window.__p9kSelectedMonthSummary?.['week_target_'+w]||0)) : (+(settings['week_target_'+w] ?? fallback)||0));
  let weeks=[1,2,3,4,5].map(w=>({
    w,
    c:0,
@@ -936,7 +946,8 @@ function renderProjects(mt,mc,sod){
        monthCompleted=mc.filter(x=>x.project_code===p.project_code).length + (
          settings.opening_month_key===monthSel.value ? (+p.opening_completed_month||0) : 0
        ),
-       monthTarget=+p.monthly_target||0,
+       selectedProjectHistory=projectHistoryMap.get(String(p.project_code||'').toUpperCase()),
+       monthTarget=(monthSel.value===currentCalendarMonthKey())?(+p.monthly_target||0):(+selectedProjectHistory?.target||0),
        isStandard=(p.project_code||'').toUpperCase()==='STANDARD',
        monthReceived=mt.filter(x=>x.project_code===p.project_code).length,
        normalTotalReq=+p.total_requirement||0,

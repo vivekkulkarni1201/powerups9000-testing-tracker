@@ -1,4 +1,25 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>POWERUPS 9000 Admin</title><link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium-v32.css"><link rel="stylesheet" href="premium-v34.css"><link rel="stylesheet" href="premium-v3141.css?v=3141"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script><script src="config.js"></script></head><body><div class="app"><aside class="side" id="sidebar"></aside><main class="main"><div class="top"><div><h1>Admin Control Centre</h1><div class="small" style="margin-top:4px">Live Master Data · Projects · Engineers · Stages · Test Bays</div><div class="sub">V2.5 Pre-Live controls · targets, till-date opening data, bays, serials, QR, access, export</div></div><div class="actions"><a class="btn" href="pilot-active.html">Active UPS</a><a class="btn primary" href="pilot-dashboard.html">Dashboard</a></div></div><div id="msg" class="small"></div><div class="card">
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>POWERUPS 9000 Admin</title><link rel="stylesheet" href="pilot.css"><link rel="stylesheet" href="premium-v32.css"><link rel="stylesheet" href="premium-v34.css"><link rel="stylesheet" href="premium-v3141.css?v=3141"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script><script src="config.js"></script>
+<style>
+#serialCorrectionCard{margin-top:18px}
+.serialCorrectionGrid{display:grid;grid-template-columns:1.1fr 1fr 1.2fr auto;gap:12px;align-items:end}
+.serialCorrectionGrid label{display:flex;flex-direction:column;gap:6px}
+.serialCorrectionGrid input,.serialCorrectionGrid select{width:100%}
+.adminActionWrap{display:flex;align-items:flex-end}
+.adminInlineMsg{min-height:20px;margin-top:10px;font-size:13px}
+@media(max-width:900px){.serialCorrectionGrid{grid-template-columns:1fr 1fr}.adminActionWrap{grid-column:1/-1}}
+@media(max-width:560px){.serialCorrectionGrid{grid-template-columns:1fr}}
+</style>
+
+
+<style>
+.serialSwapGrid{display:grid;grid-template-columns:1.15fr 1fr 1.15fr 1fr auto;gap:12px;align-items:end}
+.serialSwapGrid label{display:flex;flex-direction:column;gap:6px}
+.serialSwapGrid input,.serialSwapGrid select{width:100%}
+@media(max-width:1100px){.serialSwapGrid{grid-template-columns:1fr 1fr}.serialSwapGrid .adminActionWrap{grid-column:1/-1}}
+@media(max-width:560px){.serialSwapGrid{grid-template-columns:1fr}}
+</style>
+
+</head><body><div class="app"><aside class="side" id="sidebar"></aside><main class="main"><div class="top"><div><h1>Admin Control Centre</h1><div class="small" style="margin-top:4px">Live Master Data · Projects · Engineers · Stages · Test Bays</div><div class="sub">V2.5 Pre-Live controls · targets, till-date opening data, bays, serials, QR, access, export</div></div><div class="actions"><a class="btn" href="pilot-active.html">Active UPS</a><a class="btn primary" href="pilot-dashboard.html">Dashboard</a></div></div><div id="msg" class="small"></div><div class="card">
 <div class="titleRow"><div><h2>Production Targets</h2><div class="small">Set monthly testing target, individual W1–W5 targets, and planned daily receipt.</div></div></div>
 <div class="targetCards">
   <div class="targetEdit"><span>Monthly Target</span><input id="opsMonthly" type="number"><b>Month</b></div>
@@ -52,7 +73,7 @@
 <div class="card"><div class="titleRow"><div><h2>5. Engineer Master</h2></div></div><div class="tableWrap"><table class="managerTable"><thead><tr><th>Engineer</th><th>Employee ID</th><th>Active</th></tr></thead><tbody id="engineerRows"></tbody></table></div><div class="formGrid" style="margin-top:12px"><div class="field"><label>Name</label><input id="eName"></div><div class="field"><label>Employee ID</label><input id="eID"></div></div><button class="btn primary" style="margin-top:10px" onclick="addEngineer()">Add / Reactivate Engineer</button></div>
 <div class="card"><div class="titleRow"><div><h2>6. Stage Master & Timers</h2><div class="small" id="stageCountMsg">Loading existing stages…</div><div class="small">Existing stages can be renamed and set Required / Optional below. Use the form underneath to add a new stage.</div></div></div><div class="tableWrap"><table class="managerTable"><thead><tr><th>Stage Code</th><th>Stage Name</th><th>Required?</th><th>Type</th><th>Timer</th><th>Active</th><th>Save</th></tr></thead><tbody id="stageRows"></tbody></table></div><div class="formGrid" style="margin-top:12px"><div class="field"><label>Stage Code</label><input id="sCode"></div><div class="field"><label>Stage Name</label><input id="sName"></div><div class="field"><label>Sort Order</label><input id="sOrder" type="number" value="70"></div><div class="field"><label>Mandatory?</label><select id="sMandatory"><option value="true">Yes</option><option value="false">No</option></select></div><div class="field"><label>Project Specific?</label><select id="sProjectSpecific"><option value="false">Common</option><option value="true">Project-specific / FAT-type</option></select></div><div class="field"><label>Timer (min)</label><input id="sTimer" type="number" value="0"></div></div><button class="btn primary" style="margin-top:10px" onclick="addStage()">Add / Update Stage</button></div>
 <div class="card"><div class="titleRow"><div><h2>7. Remark / Shortfall Categories</h2></div></div><div class="tableWrap"><table class="managerTable"><thead><tr><th>Code</th><th>Meaning</th><th>Active</th></tr></thead><tbody id="remarkRows"></tbody></table></div><div class="formGrid" style="margin-top:12px"><div class="field"><label>Code</label><input id="rCode" maxlength="6"></div><div class="field full"><label>Meaning</label><input id="rMeaning"></div></div><button class="btn primary" style="margin-top:10px" onclick="saveRemarkCategory()">Add / Update Remark Category</button></div>
-<div class="card"><div class="titleRow"><div><h2>8. Test Bay Master</h2><div class="small">Optional selection during serial assignment and stage update</div></div></div><div class="tableWrap"><table class="managerTable"><thead><tr><th>Code</th><th>Name</th><th>Active</th></tr></thead><tbody id="bayRows"></tbody></table></div><div class="formGrid" style="margin-top:12px"><div class="field"><label>Bay Code</label><input id="bCode"></div><div class="field"><label>Bay Name</label><input id="bName"></div><div class="field"><label>Sort Order</label><input id="bOrder" type="number" value="100"></div></div><button class="btn primary" onclick="saveBay()">Add / Update Test Bay</button></div><div class="card"><h2>9. Daily Input Override</h2><div class="dailyEditGrid" style="margin-top:10px"><div class="field"><label>Date</label><input id="dDate" type="date"></div><div class="field"><label>Planned Receipt</label><input id="dIdeal" type="number"></div><div class="field"><label>Received Override</label><input id="dReceived" type="number" value="0"></div><div class="field full"><label>Shortfall Reasons (multiple allowed)</label><div id="dRemarks" class="multiReasonBox"></div></div><div class="field"><label>Remark Text</label><input id="dText"></div></div><button class="btn green" style="margin-top:10px" onclick="saveDaily()">Save Daily Override</button></div>
+<div class="card"><div class="titleRow"><div><h2>8. Test Bay Master</h2><div class="small">Optional selection during serial assignment and stage update</div></div></div><div class="tableWrap"><table class="managerTable"><thead><tr><th>Code</th><th>Name</th><th>Active</th><th>Action</th></tr></thead><tbody id="bayRows"></tbody></table></div><div class="formGrid" style="margin-top:12px"><div class="field"><label>Bay Code</label><input id="bCode"></div><div class="field"><label>Bay Name</label><input id="bName"></div><div class="field"><label>Sort Order</label><input id="bOrder" type="number" value="100"></div><div class="field"><label>Active</label><select id="bActive"><option value="true">ON</option><option value="false">OFF</option></select></div></div><button class="btn primary" onclick="saveBay()">Add / Update Test Bay</button></div><div class="card"><h2>9. Daily Input Override</h2><div class="dailyEditGrid" style="margin-top:10px"><div class="field"><label>Date</label><input id="dDate" type="date"></div><div class="field"><label>Planned Receipt</label><input id="dIdeal" type="number"></div><div class="field"><label>Received Override</label><input id="dReceived" type="number" value="0"></div><div class="field full"><label>Shortfall Reasons (multiple allowed)</label><div id="dRemarks" class="multiReasonBox"></div></div><div class="field"><label>Remark Text</label><input id="dText"></div></div><button class="btn green" style="margin-top:10px" onclick="saveDaily()">Save Daily Override</button></div>
 
 <div class="card">
   <div class="titleRow"><div><h2>UPS Scan / Change History</h2>
@@ -67,8 +88,66 @@
     <tbody id="histRows"><tr><td colspan="6" class="small">Search a UPS to view history.</td></tr></tbody>
   </table></div>
 </div>
-<div class="card"><h2>10. Historical / Monthly Export</h2><div class="formGrid" style="margin-top:10px"><div class="field"><label>Year</label><input id="hYear" type="number" value="2026"></div><div class="field"><label>Month</label><select id="hMonth"></select></div><div class="field"><label>Historical Target</label><input id="hTarget" type="number"></div><div class="field"><label>Historical Received</label><input id="hReceived" type="number"></div><div class="field"><label>Historical Completed</label><input id="hCompleted" type="number"></div><div class="field"><label>Notes</label><input id="hNotes"></div></div><div class="actions" style="margin-top:10px"><button class="btn" onclick="saveHistory()">Save Historical Month</button><button class="btn green" onclick="exportMonth()">Export Selected Month to Excel</button><button class="btn primary" onclick="exportHistory()">Export Year Summary</button></div></div>
-</main></div><script src="pilot-common.js"></script><script>
+<div class="card"><h2>10. Historical / Monthly Export</h2><div class="small">Past-month targets are frozen here so later target revisions do not change old reports.</div><div class="formGrid" style="margin-top:10px"><div class="field"><label>Year</label><input id="hYear" type="number" value="2026" onchange="loadHistoricalMonth()"></div><div class="field"><label>Month</label><select id="hMonth" onchange="loadHistoricalMonth()"></select></div><div class="field"><label>Historical Target</label><input id="hTarget" type="number"></div><div class="field"><label>Historical Received</label><input id="hReceived" type="number"></div><div class="field"><label>Historical Completed</label><input id="hCompleted" type="number"></div><div class="field"><label>Notes</label><input id="hNotes"></div></div><div class="weeklyTargetGrid" style="margin-top:10px"><div class="field"><label>W1 Target</label><input id="hW1" type="number" min="0"></div><div class="field"><label>W2 Target</label><input id="hW2" type="number" min="0"></div><div class="field"><label>W3 Target</label><input id="hW3" type="number" min="0"></div><div class="field"><label>W4 Target</label><input id="hW4" type="number" min="0"></div><div class="field"><label>W5 Target</label><input id="hW5" type="number" min="0"></div></div><div style="margin-top:12px"><b>Project-wise Historical Monthly Targets</b><div id="hProjectTargets" class="formGrid" style="margin-top:8px"></div></div><div class="actions" style="margin-top:10px"><button class="btn" onclick="saveHistory()">Save / Freeze Historical Month</button><button class="btn green" onclick="exportMonth()">Export Selected Month to Excel</button><button class="btn primary" onclick="exportHistory()">Export Year Summary</button></div></div>
+
+
+<section class="adminCard" id="serialSwapCard">
+  <div class="adminCardHead">
+    <div>
+      <h2>Assigned Serial Interchange</h2>
+      <p>Swap the already-assigned serial numbers between two tracker QRs. Next serial counter is not changed.</p>
+    </div>
+  </div>
+  <div class="adminGrid serialSwapGrid">
+    <label>Tracker / QR A
+      <select id="serialSwapA"><option value="">Select first tracker</option></select>
+    </label>
+    <label>Serial A
+      <input id="serialSwapSerialA" type="text" readonly placeholder="—">
+    </label>
+    <label>Tracker / QR B
+      <select id="serialSwapB"><option value="">Select second tracker</option></select>
+    </label>
+    <label>Serial B
+      <input id="serialSwapSerialB" type="text" readonly placeholder="—">
+    </label>
+    <div class="adminActionWrap">
+      <button class="primaryBtn" id="serialSwapSave" type="button">Interchange Serials</button>
+    </div>
+  </div>
+  <div id="serialSwapMsg" class="adminInlineMsg"></div>
+</section>
+
+<section class="adminCard" id="serialCorrectionCard">
+  <div class="adminCardHead">
+    <div>
+      <h2>Assigned UPS Serial Correction</h2>
+      <p>Admin-only correction for a serial already assigned to a tracker QR. Next serial counter is not changed.</p>
+    </div>
+  </div>
+  <div class="adminGrid serialCorrectionGrid">
+    <label>
+      Tracker / QR
+      <select id="serialEditTracker">
+        <option value="">Select active tracker</option>
+      </select>
+    </label>
+    <label>
+      Current Serial
+      <input id="serialEditCurrent" type="text" readonly placeholder="—">
+    </label>
+    <label>
+      New Serial Number
+      <input id="serialEditNew" type="text" placeholder="e.g. 202610P9S0278">
+    </label>
+    <div class="adminActionWrap">
+      <button class="primaryBtn" id="serialEditSave" type="button">Save Serial Correction</button>
+    </div>
+  </div>
+  <div id="serialEditMsg" class="adminInlineMsg"></div>
+</section>
+
+</main></div><script src="pilot-common.js?v=3170"></script><script>
 sidebar.innerHTML=nav('admin');let projects=[],stages=[],engineers=[],remarkCats=[],testBays=[];function months(){hMonth.innerHTML=Array.from({length:12},(_,i)=>`<option value="${i+1}">${new Date(2026,i,1).toLocaleString([],{month:'long'})}</option>`).join('');hMonth.value=new Date().getMonth()+1}function say(t,good=true){msg.textContent=(good?'✅ ':'❌ ')+t;msg.className=good?'success':'error';showToast(t,good)}function previewSerial(){serialPreview.textContent=new Date().toISOString().slice(0,7).replace('-','')+(serialPrefix.value||'P9S')+String(+serialCounter.value||1).padStart(4,'0')}
 async function load(){let [rs,rp,rst,re,rr,rb,rtb]=await Promise.all([sb.from('p9k_prod_settings').select('*').eq('id',1).single(),sb.from('p9k_prod_projects').select('*').order('sort_order'),sb.rpc('p9k_prod_list_stages'),sb.from('p9k_prod_engineers').select('*').order('engineer_name'),sb.from('p9k_prod_remark_categories').select('*').order('sort_order'),sb.from('p9k_prod_qr_batches').select('*').order('created_at',{ascending:false}).limit(1),sb.from('p9k_prod_test_bays').select('*').order('sort_order')]);
 let {data:s,error:es}=rs,{data:p,error:ep}=rp,{data:st,error:est}=rst,{data:e,error:ee}=re,{data:r,error:er}=rr,{data:b,error:eb}=rb,{data:tb,error:etb}=rtb;
@@ -86,7 +165,7 @@ if(est || !st || !st.length){
 if(es||ep||est||ee||er||eb||etb){
   say('Admin data load warning: '+[es,ep,est,ee,er,eb,etb].filter(Boolean).map(x=>x.message).join(' | '),false)
 }
-projects=p||[];stages=st||[];engineers=e||[];remarkCats=r||[];testBays=tb||[];opsMonthly.value=s?.monthly_target||0;opsDaily.value=s?.ideal_daily_capacity||0;
+projects=p||[];stages=st||[];engineers=e||[];remarkCats=r||[];testBays=tb||[];window.__adminSettings=s||{};opsMonthly.value=s?.monthly_target||0;opsDaily.value=s?.ideal_daily_capacity||0;
 weekTarget1.value=s?.week_target_1??s?.weekly_target??0;
 weekTarget2.value=s?.week_target_2??s?.weekly_target??0;
 weekTarget3.value=s?.week_target_3??s?.weekly_target??0;
@@ -117,9 +196,43 @@ function toggleHtml(checked,fn){return `<label class="switch"><input type="check
 <td><input id="tm-${x.stage_code}" type="number" value="${x.timer_minutes||0}" style="width:90px"></td>
 <td>${(x.stage_code==='RECEIVED'||x.stage_code==='TO_FINISHING')?'<span class="systemTag">Always ON</span>':toggleHtml(x.active,`toggleStage('${x.stage_code}',this.checked)`)}</td>
 <td><button class="btn" onclick="saveStageRow('${x.stage_code}')">Save Changes</button></td>
-</tr>`).join('');bayRows.innerHTML=testBays.map(x=>`<tr><td><b>${esc(x.bay_code)}</b></td><td>${esc(x.bay_name)}</td><td>${x.active?'ON':'OFF'}</td></tr>`).join('');remarkRows.innerHTML=remarkCats.map(x=>`<tr><td><b>${esc(x.code)}</b></td><td>${esc(x.meaning)}</td><td>${toggleHtml(x.active,`toggleRemarkCategory('${x.code}',this.checked)`)}</td></tr>`).join('')}
+</tr>`).join('');bayRows.innerHTML=testBays.map(x=>`<tr><td><b>${esc(x.bay_code)}</b></td><td>${esc(x.bay_name)}</td><td>${x.active?'ON':'OFF'}</td><td><button class="btn" onclick="editBay('${String(x.bay_code).replaceAll("'","\'")}')">Edit</button></td></tr>`).join('');
+if(document.getElementById('hProjectTargets'))hProjectTargets.innerHTML=projects.filter(x=>x.active).map(x=>`<div class="field"><label>${esc(x.project_name)} Target</label><input type="number" min="0" data-hproj="${esc(x.project_code)}" value="${+x.monthly_target||0}"></div>`).join('');remarkRows.innerHTML=remarkCats.map(x=>`<tr><td><b>${esc(x.code)}</b></td><td>${esc(x.meaning)}</td><td>${toggleHtml(x.active,`toggleRemarkCategory('${x.code}',this.checked)`)}</td></tr>`).join('')}
 async function saveSettings(){let {error}=await sb.rpc('p9k_prod_save_settings',{p_monthly_target:+monthlyTarget.value,p_ideal_daily_capacity:+idealDaily.value,p_serial_mode:serialMode.value,p_serial_counter:+serialCounter.value,p_serial_prefix:serialPrefix.value});say(error?error.message:'Serial / master settings saved',!error);if(!error)load()}async function saveQRStart(){let {error}=await sb.rpc('p9k_prod_set_qr_counter',{p_counter:+qrCounter.value});say(error?error.message:'Next QR counter saved',!error);if(!error)load()}async function manualUPS(){if(!mSerial.value.trim())return say('Serial Number is required',false);if(!mProject.value)return say('Project is required',false);if(!mRating.value)return say('UPS Rating is required',false);let completed=[...mCompleted.querySelectorAll('input:checked')].map(x=>x.value),{error,data}=await sb.rpc('p9k_prod_manual_upsert_ups_v6',{p_tracker_id:mTracker.value||null,p_serial_no:mSerial.value,p_project_code:mProject.value,p_current_stage:mStage.value,p_received_at:mReceived.value?new Date(mReceived.value).toISOString():null,p_engineer:mEngineer.value||null,p_test_bay:mBay.value||null,p_completed_stages:completed,p_rating_kva:+mRating.value});say(error?error.message:`Live UPS saved. Tracker: ${data?.tracker_id}`,!error)}
-async function saveHistory(){let {error}=await sb.rpc('p9k_prod_save_month_summary',{p_year:+hYear.value,p_month:+hMonth.value,p_target:+hTarget.value,p_received:+hReceived.value,p_completed:+hCompleted.value,p_notes:hNotes.value});say(error?error.message:'Historical month saved',!error)}async function exportHistory(){let y=+hYear.value,{data,error}=await sb.from('p9k_prod_monthly_summary').select('*').eq('year',y).order('month');if(error)return say(error.message,false);let rows=(data||[]).map(x=>({Year:x.year,Month:new Date(x.year,x.month-1,1).toLocaleString([],{month:'long'}),Target:x.target,Received:x.received,Completed:x.completed,Pending:Math.max(x.target-x.completed,0),Notes:x.notes||''})),ws=XLSX.utils.json_to_sheet(rows),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Monthly Summary');XLSX.writeFile(wb,`POWERUPS9000_Historical_${y}.xlsx`)}
+async function loadHistoricalMonth(){
+  let y=+hYear.value,m=+hMonth.value,[a,b]=monthBounds(y,m);
+  let [{data:ms},{data:ps},{data:t}]=await Promise.all([
+    sb.from('p9k_prod_monthly_summary').select('*').eq('year',y).eq('month',m).maybeSingle(),
+    sb.from('p9k_prod_project_monthly_summary').select('*').eq('year',y).eq('month',m),
+    sb.from('p9k_prod_trackers').select('project_code,received_at,completed_at')
+  ]);
+  let tr=t||[],mr=tr.filter(x=>x.received_at&&new Date(x.received_at)>=a&&new Date(x.received_at)<b),mc=tr.filter(x=>x.completed_at&&new Date(x.completed_at)>=a&&new Date(x.completed_at)<b);
+  hTarget.value=ms?.target??'';hReceived.value=ms?.received??mr.length;hCompleted.value=ms?.completed??mc.length;hNotes.value=ms?.notes||'';
+  hW1.value=ms?.week_target_1??'';hW2.value=ms?.week_target_2??'';hW3.value=ms?.week_target_3??'';hW4.value=ms?.week_target_4??'';hW5.value=ms?.week_target_5??'';
+  let map=new Map((ps||[]).map(x=>[x.project_code,x]));
+  document.querySelectorAll('[data-hproj]').forEach(inp=>{let x=map.get(inp.dataset.hproj);inp.value=x?.target??''});
+}
+async function saveHistory(){
+  let y=+hYear.value,m=+hMonth.value,[a,b]=monthBounds(y,m),{data:t}=await sb.from('p9k_prod_trackers').select('*');let tr=t||[],mr=tr.filter(x=>x.received_at&&new Date(x.received_at)>=a&&new Date(x.received_at)<b),mc=tr.filter(x=>x.completed_at&&new Date(x.completed_at)>=a&&new Date(x.completed_at)<b);
+  let received=hReceived.value===''?mr.length:+hReceived.value,completed=hCompleted.value===''?mc.length:+hCompleted.value;
+  let r=await sb.rpc('p9k_prod_save_month_summary',{p_year:y,p_month:m,p_target:+hTarget.value||0,p_received:received,p_completed:completed,p_notes:hNotes.value});if(r.error)return say(r.error.message,false);
+  let u=await sb.from('p9k_prod_monthly_summary').update({week_target_1:+hW1.value||0,week_target_2:+hW2.value||0,week_target_3:+hW3.value||0,week_target_4:+hW4.value||0,week_target_5:+hW5.value||0}).eq('year',y).eq('month',m);if(u.error)return say(u.error.message,false);
+  let rows=[...document.querySelectorAll('[data-hproj]')].map(inp=>{let code=inp.dataset.hproj;return {year:y,month:m,project_code:code,target:+inp.value||0,received:mr.filter(x=>x.project_code===code).length,completed:mc.filter(x=>x.project_code===code).length,updated_at:new Date().toISOString()}});
+  if(rows.length){let pr=await sb.from('p9k_prod_project_monthly_summary').upsert(rows,{onConflict:'year,month,project_code'});if(pr.error)return say(pr.error.message,false)}
+  say('Historical month frozen successfully',true)
+}
+function histWeek(d,y,m){let day=d.getDate(),dow=d.getDay(),weeks=getProductionWeeks(y,m);if(dow===0){if(day===1)return 1;day--}for(let i=0;i<weeks.length;i++)if(day>=weeks[i].start&&day<=weeks[i].end)return i+1;return 1}
+async function exportHistory(){
+  let y=+hYear.value;
+  let [{data:t},{data:ms},{data:ps},{data:pr},{data:f}]=await Promise.all([
+    sb.from('p9k_prod_trackers').select('*'),sb.from('p9k_prod_monthly_summary').select('*').eq('year',y).order('month'),sb.from('p9k_prod_project_monthly_summary').select('*').eq('year',y).order('month'),sb.from('p9k_prod_projects').select('*').order('sort_order'),sb.from('p9k_prod_fault_events').select('*').gte('created_at',new Date(y,0,1).toISOString()).lt('created_at',new Date(y+1,0,1).toISOString())
+  ]);
+  let tr=t||[],sumMap=new Map((ms||[]).map(x=>[x.month,x])),projMap=new Map((ps||[]).map(x=>[`${x.month}|${x.project_code}`,x])),monthly=[];
+  for(let m=1;m<=12;m++){let [a,b]=monthBounds(y,m),mr=tr.filter(x=>x.received_at&&new Date(x.received_at)>=a&&new Date(x.received_at)<b),mc=tr.filter(x=>x.completed_at&&new Date(x.completed_at)>=a&&new Date(x.completed_at)<b),s=sumMap.get(m)||{},wk=[1,2,3,4,5].map(w=>mc.filter(x=>histWeek(new Date(x.completed_at),y,m)===w).length);if(!mr.length&&!mc.length&&!s.target)continue;monthly.push({Year:y,Month:new Date(y,m-1,1).toLocaleString([],{month:'long'}),Target:+s.target||0,Received:s.received??mr.length,Completed:s.completed??mc.length,Pending:Math.max((+s.target||0)-(s.completed??mc.length),0),W1_Target:+s.week_target_1||0,W1_Completed:wk[0],W2_Target:+s.week_target_2||0,W2_Completed:wk[1],W3_Target:+s.week_target_3||0,W3_Completed:wk[2],W4_Target:+s.week_target_4||0,W4_Completed:wk[3],W5_Target:+s.week_target_5||0,W5_Completed:wk[4],Notes:s.notes||''})}
+  let projectRows=[];(pr||[]).forEach(p=>{for(let m=1;m<=12;m++){let [a,b]=monthBounds(y,m),mr=tr.filter(x=>x.project_code===p.project_code&&x.received_at&&new Date(x.received_at)>=a&&new Date(x.received_at)<b),mc=tr.filter(x=>x.project_code===p.project_code&&x.completed_at&&new Date(x.completed_at)>=a&&new Date(x.completed_at)<b),s=projMap.get(`${m}|${p.project_code}`);if(!mr.length&&!mc.length&&!s)continue;projectRows.push({Year:y,Month:new Date(y,m-1,1).toLocaleString([],{month:'long'}),Project:p.project_name,Code:p.project_code,Target:+s?.target||0,Received:s?.received??mr.length,Completed:s?.completed??mc.length,Pending:Math.max((+s?.target||0)-(s?.completed??mc.length),0)})}});
+  let detail=tr.filter(x=>(x.received_at&&new Date(x.received_at).getFullYear()===y)||(x.completed_at&&new Date(x.completed_at).getFullYear()===y)).map(x=>({Tracker:x.tracker_id,Serial:x.serial_no||'',Project:x.project_code||'',Rating_kVA:x.rating_kva||'',Received:x.received_at?dstr(x.received_at):'',Completed:x.completed_at?dstr(x.completed_at):'',Stage:x.current_stage||'',Test_Bay:x.test_bay||'',Engineer:x.last_engineer||''}));
+  let wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(monthly),'Monthly Summary');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(projectRows),'Project Summary');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(detail),'UPS Detail');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(f||[]),'Fault RTA');XLSX.writeFile(wb,`POWERUPS9000_Historical_${y}.xlsx`);say('Historical workbook exported',true)
+}
 async function exportMonth(){let y=+hYear.value,m=+hMonth.value,[a,b]=monthBounds(y,m);let [{data:t},{data:p},{data:d},{data:f},{data:h}]=await Promise.all([sb.from('p9k_prod_trackers').select('*'),sb.from('p9k_prod_projects').select('*'),sb.from('p9k_prod_daily_plan').select('*').gte('work_date',`${y}-${String(m).padStart(2,'0')}-01`).lt('work_date',`${b.getFullYear()}-${String(b.getMonth()+1).padStart(2,'0')}-01`),sb.from('p9k_prod_fault_events').select('*').gte('created_at',a.toISOString()).lt('created_at',b.toISOString()),sb.from('p9k_prod_history').select('*').gte('created_at',a.toISOString()).lt('created_at',b.toISOString())]);let tr=t||[],pr=p||[],mt=tr.filter(x=>new Date(x.received_at)>=a&&new Date(x.received_at)<b),mc=tr.filter(x=>x.completed_at&&new Date(x.completed_at)>=a&&new Date(x.completed_at)<b),active=tr.filter(activeTracker),wb=XLSX.utils.book_new();let target=pr.filter(x=>x.active).reduce((n,x)=>n+(+x.monthly_target||0),0);let summary=[{Year:y,Month:m,Target:target,Received:mt.length,Completed:mc.length,Pending:Math.max(target-mc.length,0),Live_Active:active.length,Fault_Hits:(f||[]).filter(x=>x.event_type==='FAULTY').length}];XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(summary),'Monthly Summary');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(pr.map(x=>({Project:x.project_name,Code:x.project_code,Target:x.monthly_target||0,Received:mt.filter(z=>z.project_code===x.project_code).length,Completed:mc.filter(z=>z.project_code===x.project_code).length,Live:active.filter(z=>z.project_code===x.project_code).length}))), 'Project Summary');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(d||[]),'Daily Input');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(active),'Active UPS');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(mc),'Completed UPS');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(f||[]),'Fault RTA');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(h||[]),'Audit History');XLSX.writeFile(wb,`POWERUPS9000_${y}_${String(m).padStart(2,'0')}_Monthly_Data.xlsx`);say('Monthly workbook exported')}
 async function fileData(input){let f=input.files?.[0];if(!f)return null;return await new Promise((res,rej)=>{let r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)})}
 
@@ -156,7 +269,7 @@ async function updateProjectLogo(code){
  });
  say(error?error.message:`${p.project_name} logo updated`,!error);
  if(!error)load();
-}async function saveProject(){if(!pCode.value.trim()||!pName.value.trim())return say('Project code and name required',false);let logo=await fileData(pLogo),{error}=await sb.rpc('p9k_prod_upsert_project',{p_code:pCode.value,p_name:pName.value,p_logo_data:logo,p_fat_required:pFat.value==='true',p_active:true,p_sort_order:+pOrder.value});if(!error){let r=await sb.rpc('p9k_prod_set_project_target',{p_code:pCode.value,p_target:+pTarget.value});error=r.error}
+}async function saveProject(){if(!pCode.value.trim()||!pName.value.trim())return say('Project code and name required',false);try{await archivePreviousTargetMonthIfNeeded()}catch(e){return say('Could not freeze previous month: '+(e.message||e),false)}let logo=await fileData(pLogo),{error}=await sb.rpc('p9k_prod_upsert_project',{p_code:pCode.value,p_name:pName.value,p_logo_data:logo,p_fat_required:pFat.value==='true',p_active:true,p_sort_order:+pOrder.value});if(!error){let r=await sb.rpc('p9k_prod_set_project_target',{p_code:pCode.value,p_target:+pTarget.value});error=r.error}
 if(!error){let r=await sb.rpc('p9k_prod_set_project_total_requirement',{p_code:pCode.value,p_total:+pTotalReq.value});error=r.error}
 if(!error){let r=await sb.rpc('p9k_prod_set_project_opening_completed',{p_code:pCode.value,p_completed:+pOpeningCompleted.value||0});error=r.error}
 say(error?error.message:'Project saved',!error);if(!error)load()}
@@ -166,7 +279,7 @@ async function saveProjectOpeningCompleted(code){
   let {error}=await sb.rpc('p9k_prod_set_project_opening_completed',{p_code:code,p_completed:v});
   say(error?error.message:`${code} completed till date saved`,!error);
 }
-async function saveProjectTarget(code){let v=+document.getElementById('pt-'+code).value,{error}=await sb.rpc('p9k_prod_set_project_target',{p_code:code,p_target:v});say(error?error.message:`${code} monthly target saved`,!error)}async function addEngineer(){if(!eName.value.trim())return say('Engineer name required',false);let {error}=await sb.rpc('p9k_prod_add_engineer',{p_name:eName.value,p_employee_id:eID.value});say(error?error.message:'Engineer saved',!error);if(!error)load()}async function toggleProject(code,on){let {error}=await sb.rpc('p9k_prod_set_project_active',{p_code:code,p_active:on});say(error?error.message:`Project ${on?'enabled':'disabled'}`,!error);if(error)load()}async function toggleEngineer(id,on){let {error}=await sb.rpc('p9k_prod_set_engineer_active',{p_id:id,p_active:on});say(error?error.message:`Engineer ${on?'enabled':'disabled'}`,!error);if(error)load()}async function toggleStage(code,on){let {error}=await sb.rpc('p9k_prod_set_stage_active',{p_code:code,p_active:on});say(error?error.message:`Stage ${on?'enabled':'disabled'}`,!error);if(error)load()}async function saveStageRow(code){
+async function saveProjectTarget(code){try{await archivePreviousTargetMonthIfNeeded()}catch(e){return say('Could not freeze previous month: '+(e.message||e),false)}let v=+document.getElementById('pt-'+code).value,{error}=await sb.rpc('p9k_prod_set_project_target',{p_code:code,p_target:v});say(error?error.message:`${code} monthly target saved`,!error)}async function addEngineer(){if(!eName.value.trim())return say('Engineer name required',false);let {error}=await sb.rpc('p9k_prod_add_engineer',{p_name:eName.value,p_employee_id:eID.value});say(error?error.message:'Engineer saved',!error);if(!error)load()}async function toggleProject(code,on){let {error}=await sb.rpc('p9k_prod_set_project_active',{p_code:code,p_active:on});say(error?error.message:`Project ${on?'enabled':'disabled'}`,!error);if(error)load()}async function toggleEngineer(id,on){let {error}=await sb.rpc('p9k_prod_set_engineer_active',{p_id:id,p_active:on});say(error?error.message:`Engineer ${on?'enabled':'disabled'}`,!error);if(error)load()}async function toggleStage(code,on){let {error}=await sb.rpc('p9k_prod_set_stage_active',{p_code:code,p_active:on});say(error?error.message:`Stage ${on?'enabled':'disabled'}`,!error);if(error)load()}async function saveStageRow(code){
   let name=document.getElementById('sn-'+code).value.trim();
   let mandatory=document.getElementById('sm-'+code).value==='true';
   let minutes=+document.getElementById('tm-'+code).value||0;
@@ -177,7 +290,19 @@ async function saveProjectTarget(code){let v=+document.getElementById('pt-'+code
   say(error?error.message:`${code} updated`,!error);
   if(!error)load()
 }
-async function saveTimer(code){let v=+document.getElementById('tm-'+code).value,{error}=await sb.rpc('p9k_prod_set_stage_timer',{p_code:code,p_minutes:v});say(error?error.message:`Timer saved: ${v} min`,!error);if(!error)load()}async function addStage(){if(!sCode.value.trim()||!sName.value.trim())return say('Stage code and name required',false);let {error}=await sb.rpc('p9k_prod_upsert_stage',{p_code:sCode.value,p_name:sName.value,p_sort_order:+sOrder.value,p_mandatory:sMandatory.value==='true',p_adani_only:sProjectSpecific.value==='true',p_is_finishing:false,p_timer_minutes:+sTimer.value,p_active:true});say(error?error.message:'Stage added / updated',!error);if(!error)load()}async function saveRemarkCategory(){if(!rCode.value.trim()||!rMeaning.value.trim())return say('Remark code and meaning required',false);let {error}=await sb.rpc('p9k_prod_upsert_remark_category',{p_code:rCode.value,p_meaning:rMeaning.value,p_active:true});say(error?error.message:'Remark category saved',!error);if(!error)load()}async function toggleRemarkCategory(code,on){let x=remarkCats.find(r=>r.code===code);let {error}=await sb.rpc('p9k_prod_upsert_remark_category',{p_code:code,p_meaning:x?.meaning||code,p_active:on});say(error?error.message:`Remark ${on?'enabled':'disabled'}`,!error);if(!error)load()}async function saveDaily(){if(!dDate.value)return say('Date required',false);let codes=[...dRemarks.querySelectorAll('input:checked')].map(x=>x.value);let {error}=await sb.rpc('p9k_prod_save_daily_plan_v5',{p_work_date:dDate.value,p_ideal_capacity:dIdeal.value===''?null:+dIdeal.value,p_manual_received_qty:+dReceived.value,p_remark_codes:codes,p_remark_text:dText.value});say(error?error.message:'Daily input override saved',!error)}async function saveOpsTargets(){
+async function saveTimer(code){let v=+document.getElementById('tm-'+code).value,{error}=await sb.rpc('p9k_prod_set_stage_timer',{p_code:code,p_minutes:v});say(error?error.message:`Timer saved: ${v} min`,!error);if(!error)load()}async function addStage(){if(!sCode.value.trim()||!sName.value.trim())return say('Stage code and name required',false);let {error}=await sb.rpc('p9k_prod_upsert_stage',{p_code:sCode.value,p_name:sName.value,p_sort_order:+sOrder.value,p_mandatory:sMandatory.value==='true',p_adani_only:sProjectSpecific.value==='true',p_is_finishing:false,p_timer_minutes:+sTimer.value,p_active:true});say(error?error.message:'Stage added / updated',!error);if(!error)load()}async function saveRemarkCategory(){if(!rCode.value.trim()||!rMeaning.value.trim())return say('Remark code and meaning required',false);let {error}=await sb.rpc('p9k_prod_upsert_remark_category',{p_code:rCode.value,p_meaning:rMeaning.value,p_active:true});say(error?error.message:'Remark category saved',!error);if(!error)load()}async function toggleRemarkCategory(code,on){let x=remarkCats.find(r=>r.code===code);let {error}=await sb.rpc('p9k_prod_upsert_remark_category',{p_code:code,p_meaning:x?.meaning||code,p_active:on});say(error?error.message:`Remark ${on?'enabled':'disabled'}`,!error);if(!error)load()}async function saveDaily(){if(!dDate.value)return say('Date required',false);let codes=[...dRemarks.querySelectorAll('input:checked')].map(x=>x.value);let {error}=await sb.rpc('p9k_prod_save_daily_plan_v5',{p_work_date:dDate.value,p_ideal_capacity:dIdeal.value===''?null:+dIdeal.value,p_manual_received_qty:+dReceived.value,p_remark_codes:codes,p_remark_text:dText.value});say(error?error.message:'Daily input override saved',!error)}async function archivePreviousTargetMonthIfNeeded(){
+  const currentKey=new Date().toISOString().slice(0,7),oldKey=window.__adminSettings?.target_month_key;
+  if(!oldKey){await sb.from('p9k_prod_settings').update({target_month_key:currentKey}).eq('id',1);if(window.__adminSettings)window.__adminSettings.target_month_key=currentKey;return}
+  if(oldKey===currentKey)return;
+  let [y,m]=oldKey.split('-').map(Number),[a,b]=monthBounds(y,m),[{data:t}]=await Promise.all([sb.from('p9k_prod_trackers').select('*')]),tr=t||[],mr=tr.filter(x=>x.received_at&&new Date(x.received_at)>=a&&new Date(x.received_at)<b),mc=tr.filter(x=>x.completed_at&&new Date(x.completed_at)>=a&&new Date(x.completed_at)<b),s=window.__adminSettings||{};
+  let r=await sb.rpc('p9k_prod_save_month_summary',{p_year:y,p_month:m,p_target:+s.monthly_target||0,p_received:mr.length,p_completed:mc.length,p_notes:'Auto-frozen at month rollover'});if(r.error)throw r.error;
+  r=await sb.from('p9k_prod_monthly_summary').update({week_target_1:+s.week_target_1||0,week_target_2:+s.week_target_2||0,week_target_3:+s.week_target_3||0,week_target_4:+s.week_target_4||0,week_target_5:+s.week_target_5||0}).eq('year',y).eq('month',m);if(r.error)throw r.error;
+  let rows=projects.filter(x=>x.active).map(x=>({year:y,month:m,project_code:x.project_code,target:+x.monthly_target||0,received:mr.filter(z=>z.project_code===x.project_code).length,completed:mc.filter(z=>z.project_code===x.project_code).length,notes:'Auto-frozen at month rollover',updated_at:new Date().toISOString()}));
+  if(rows.length){r=await sb.from('p9k_prod_project_monthly_summary').upsert(rows,{onConflict:'year,month,project_code'});if(r.error)throw r.error}
+  await sb.from('p9k_prod_settings').update({target_month_key:currentKey}).eq('id',1);if(window.__adminSettings)window.__adminSettings.target_month_key=currentKey;
+}
+async function saveOpsTargets(){
+ try{await archivePreviousTargetMonthIfNeeded()}catch(e){return say('Could not freeze previous month: '+(e.message||e),false)}
  let {error}=await sb.rpc('p9k_prod_save_ops_targets_v34',{
    p_monthly:+opsMonthly.value||0,
    p_daily:+opsDaily.value||0,
@@ -188,7 +313,7 @@ async function saveTimer(code){let v=+document.getElementById('tm-'+code).value,
    p_w5:+weekTarget5.value||0,
    p_tolerance:+inputTolerance.value||10
  });
- say(error?error.message:'Production targets saved',!error);if(!error)load()
+ say(error?error.message:'Production targets saved',!error);if(!error){let currentKey=new Date().toISOString().slice(0,7);await sb.from('p9k_prod_settings').update({target_month_key:currentKey}).eq('id',1);load()}
 }
 async function saveGoLiveStart(){
   if(!goMonth.value)return say('Start / Opening Month is required',false);
@@ -215,7 +340,9 @@ async function saveGoLiveStart(){
   say(e?e.message:'GO-LIVE start data saved',!e);
   if(!e)load();
 }
-async function saveAccess(){let {error}=await sb.rpc('p9k_prod_set_access_mode',{p_mode:accessMode.value});say(error?error.message:'Access mode saved',!error);if(!error)load()}async function saveBay(){if(!bCode.value.trim()||!bName.value.trim())return say('Bay code and name required',false);let {error}=await sb.rpc('p9k_prod_upsert_test_bay',{p_code:bCode.value,p_name:bName.value,p_active:true,p_sort_order:+bOrder.value});say(error?error.message:'Test Bay saved',!error);if(!error)load()}
+async function saveAccess(){let {error}=await sb.rpc('p9k_prod_set_access_mode',{p_mode:accessMode.value});say(error?error.message:'Access mode saved',!error);if(!error)load()}function editBay(code){let x=testBays.find(b=>b.bay_code===code);if(!x)return;bCode.value=x.bay_code||'';bName.value=x.bay_name||'';bOrder.value=x.sort_order??100;bActive.value=String(x.active!==false);bCode.focus()}
+async function saveBay(){if(!bCode.value.trim()||!bName.value.trim())return say('Bay code and name required',false);let {error}=await sb.rpc('p9k_prod_upsert_test_bay',{p_code:bCode.value,p_name:bName.value,p_active:bActive.value==='true',p_sort_order:+bOrder.value});say(error?error.message:'Test Bay saved',!error);if(!error){bCode.value='';bName.value='';bOrder.value=100;bActive.value='true';load()}}
+function getProductionWeeks(yy,mm){const daysInMonth=new Date(yy,mm,0).getDate(),weeks=[];let day=1;while(day<=daysInMonth){while(day<=daysInMonth&&new Date(yy,mm-1,day).getDay()===0)day++;if(day>daysInMonth)break;const start=day;let end=day;while(end<daysInMonth){const next=end+1,dow=new Date(yy,mm-1,next).getDay();if(dow===0)break;end=next}weeks.push({start,end});day=end+1}if(weeks.length>5){weeks[4].end=weeks[weeks.length-1].end;weeks.length=5}return weeks}
 async function loadUpsHistory(){
  let q=(histSearch.value||'').trim();
  if(!q)return say('Enter Tracker ID or Serial Number',false);
@@ -235,4 +362,189 @@ async function loadUpsHistory(){
  histRows.innerHTML=(h||[]).length?(h||[]).map(x=>`<tr><td>${dstr(x.created_at)}</td><td>${esc(x.event_type||'—')}</td><td>${esc(STAGE_LABEL[x.stage]||x.stage||'—')}</td><td>${esc(x.engineer||'—')}</td><td>${esc(x.project_code||'—')}</td><td>${esc(x.remarks||'—')}</td></tr>`).join(''):'<tr><td colspan="6">No history found.</td></tr>';
 }
 months();mReceived.value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);dDate.value=new Date().toISOString().slice(0,10);load();
-</script></body></html>
+</script>
+<script>
+(function(){
+  const q = s => document.querySelector(s);
+  const trackerSel = q('#serialEditTracker');
+  const cur = q('#serialEditCurrent');
+  const next = q('#serialEditNew');
+  const save = q('#serialEditSave');
+  const msg = q('#serialEditMsg');
+  if(!trackerSel || !save) return;
+
+  let serialRows = [];
+
+  function showMsg(text, ok=false){
+    msg.textContent = text || '';
+    msg.style.color = ok ? '#42f5b0' : '#ffbf5b';
+  }
+
+  async function loadSerialEditTrackers(){
+    try{
+      const {data,error} = await sb
+        .from('p9k_prod_trackers')
+        .select('tracker_id,serial_number,current_stage,last_updated_at')
+        .order('last_updated_at',{ascending:false});
+      if(error) throw error;
+      serialRows = data || [];
+      trackerSel.innerHTML = '<option value="">Select tracker QR</option>' +
+        serialRows.map(r => `<option value="${r.tracker_id}">${r.tracker_id}${r.serial_number ? ' — '+r.serial_number : ' — No serial'}</option>`).join('');
+      cur.value=''; next.value=''; showMsg('');
+    }catch(e){
+      showMsg('Unable to load trackers: '+(e.message||e));
+    }
+  }
+
+  trackerSel.addEventListener('change',()=>{
+    const row = serialRows.find(r=>r.tracker_id===trackerSel.value);
+    cur.value = row?.serial_number || '';
+    next.value = row?.serial_number || '';
+    showMsg('');
+  });
+
+  save.addEventListener('click', async ()=>{
+    const trackerId = trackerSel.value;
+    const newSerial = next.value.trim().toUpperCase();
+    const oldSerial = cur.value.trim().toUpperCase();
+    if(!trackerId){ showMsg('Select a tracker QR first.'); return; }
+    if(!newSerial){ showMsg('Enter the required serial number.'); return; }
+    if(newSerial===oldSerial){ showMsg('New serial is the same as current serial.'); return; }
+
+    save.disabled=true;
+    save.textContent='Saving...';
+    try{
+      // Prevent duplicate serial assignment.
+      const {data:dup,error:dupErr}=await sb
+        .from('p9k_prod_trackers')
+        .select('tracker_id')
+        .eq('serial_number',newSerial)
+        .neq('tracker_id',trackerId)
+        .limit(1);
+      if(dupErr) throw dupErr;
+      if(dup && dup.length){
+        throw new Error(`Serial ${newSerial} is already assigned to ${dup[0].tracker_id}.`);
+      }
+
+      const {error}=await sb
+        .from('p9k_prod_trackers')
+        .update({serial_number:newSerial,last_updated_at:new Date().toISOString()})
+        .eq('tracker_id',trackerId);
+      if(error) throw error;
+
+      // Best-effort audit history; serial correction still succeeds if schema rejects remark-only row.
+      try{
+        await sb.from('p9k_prod_history').insert({
+          tracker_id:trackerId,
+          stage:'ADMIN_SERIAL_CORRECTION',
+          remark:`Admin serial correction: ${oldSerial||'blank'} -> ${newSerial}`,
+          created_at:new Date().toISOString()
+        });
+      }catch(_){}
+
+      showMsg(`Saved: ${trackerId} serial changed to ${newSerial}. Next serial counter unchanged.`,true);
+      cur.value=newSerial;
+      const row=serialRows.find(r=>r.tracker_id===trackerId);
+      if(row) row.serial_number=newSerial;
+      const opt=trackerSel.options[trackerSel.selectedIndex];
+      if(opt) opt.textContent=`${trackerId} — ${newSerial}`;
+    }catch(e){
+      showMsg(e.message||String(e));
+    }finally{
+      save.disabled=false;
+      save.textContent='Save Serial Correction';
+    }
+  });
+
+  loadSerialEditTrackers();
+})();
+</script>
+
+
+<script>
+(function(){
+  const q=s=>document.querySelector(s);
+  const a=q('#serialSwapA'), b=q('#serialSwapB');
+  const sa=q('#serialSwapSerialA'), sbx=q('#serialSwapSerialB');
+  const btn=q('#serialSwapSave'), msg=q('#serialSwapMsg');
+  if(!a||!b||!btn) return;
+
+  let rows=[];
+
+  function show(text,ok=false){
+    msg.textContent=text||'';
+    msg.style.color=ok?'#42f5b0':'#ffbf5b';
+  }
+
+  async function load(){
+    try{
+      const {data,error}=await sb.from('p9k_prod_trackers')
+        .select('tracker_id,serial_number,last_updated_at')
+        .order('last_updated_at',{ascending:false});
+      if(error) throw error;
+      rows=(data||[]).filter(r=>r.serial_number);
+      const opts='<option value="">Select tracker</option>'+
+        rows.map(r=>`<option value="${r.tracker_id}">${r.tracker_id} — ${r.serial_number}</option>`).join('');
+      a.innerHTML=opts;
+      b.innerHTML=opts;
+    }catch(e){ show('Unable to load trackers: '+(e.message||e)); }
+  }
+
+  function sync(){
+    const ra=rows.find(r=>r.tracker_id===a.value);
+    const rb=rows.find(r=>r.tracker_id===b.value);
+    sa.value=ra?.serial_number||'';
+    sbx.value=rb?.serial_number||'';
+    show('');
+  }
+  a.addEventListener('change',sync);
+  b.addEventListener('change',sync);
+
+  btn.addEventListener('click',async()=>{
+    const ra=rows.find(r=>r.tracker_id===a.value);
+    const rb=rows.find(r=>r.tracker_id===b.value);
+    if(!ra||!rb){ show('Select both tracker QRs.'); return; }
+    if(ra.tracker_id===rb.tracker_id){ show('Select two different tracker QRs.'); return; }
+    if(!ra.serial_number||!rb.serial_number){ show('Both trackers must already have serial numbers.'); return; }
+
+    btn.disabled=true; btn.textContent='Interchanging...';
+    const temp=`TMP-SWAP-${Date.now()}`;
+    try{
+      let r=await sb.from('p9k_prod_trackers')
+        .update({serial_number:temp,last_updated_at:new Date().toISOString()})
+        .eq('tracker_id',ra.tracker_id);
+      if(r.error) throw r.error;
+
+      r=await sb.from('p9k_prod_trackers')
+        .update({serial_number:ra.serial_number,last_updated_at:new Date().toISOString()})
+        .eq('tracker_id',rb.tracker_id);
+      if(r.error) throw r.error;
+
+      r=await sb.from('p9k_prod_trackers')
+        .update({serial_number:rb.serial_number,last_updated_at:new Date().toISOString()})
+        .eq('tracker_id',ra.tracker_id);
+      if(r.error) throw r.error;
+
+      try{
+        await sb.from('p9k_prod_history').insert([
+          {tracker_id:ra.tracker_id,stage:'ADMIN_SERIAL_SWAP',remark:`Serial interchanged: ${ra.serial_number} -> ${rb.serial_number}`,created_at:new Date().toISOString()},
+          {tracker_id:rb.tracker_id,stage:'ADMIN_SERIAL_SWAP',remark:`Serial interchanged: ${rb.serial_number} -> ${ra.serial_number}`,created_at:new Date().toISOString()}
+        ]);
+      }catch(_){}
+
+      const oldA=ra.serial_number, oldB=rb.serial_number;
+      show(`Done: ${ra.tracker_id} → ${oldB} and ${rb.tracker_id} → ${oldA}. Next serial counter unchanged.`,true);
+      await load();
+      sa.value=''; sbx.value=''; a.value=''; b.value='';
+    }catch(e){
+      show('Interchange failed: '+(e.message||e));
+    }finally{
+      btn.disabled=false; btn.textContent='Interchange Serials';
+    }
+  });
+
+  load();
+})();
+</script>
+
+</body></html>
