@@ -624,7 +624,7 @@ html.p9k-mobile .weekStat b{font-size:19px!important;line-height:1!important;}
 
 
 </main></div>
-<script src="pilot-common.js?v=3170"></script><script>
+<script src="pilot-common.js?v=3171"></script><script>
 sidebar.innerHTML=nav('dash');
 const P9K_DASH_CACHE_KEY='p9k_dashboard_last_render_v2';
 const P9K_DASH_CACHE_IDS=[
@@ -840,7 +840,18 @@ testProg=live.filter(testingIsActive).length,
 heatProg=live.filter(x=>!x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&!heatExpiredLocal(x)).length,
 fatProg=live.filter(x=>!x.is_faulty&&x.current_stage==='FAT_PROGRESS').length,
 faultNow=live.filter(x=>x.is_faulty).length;kTodayRec.textContent=todayRec;kTodayComp.textContent=todayComp;
-kAwaitBay.textContent=awaiting;kFault.textContent=faultNow;kTestProg.textContent=testProg;kHeatProg.textContent=heatProg;kFatProg.textContent=fatProg;kActiveFloor.textContent=live.length;perfActive.textContent=isCurrentMonth?live.length:monthEndActive;target.textContent=tar;received.textContent=rec;completed.textContent=comp;pending.textContent=pend;pct.textContent=pc+'%';prog.style.width=pc+'%';ring.style.background=`conic-gradient(#3ef1c5 ${pc*3.6}deg,#14476e 0)`;pFpy.textContent=fpy===null?'—':fpy+'%';pFaultHits.textContent=faultHits;completedProgress.textContent=`${comp} / ${tar}`;fillTableFilters();renderHeatAlerts(expiredHeat);renderWeeks(yy,mm,mc,settings.weekly_target||0);renderChart(yy,mm,mt,dp||[]);renderProjects(mt,mc,sod);renderRows();saveDashboardCache();const __lb=document.querySelector('.actions .live');if(__lb&&__lb.dataset.originalText){__lb.textContent=__lb.dataset.originalText;delete __lb.dataset.originalText;};
+kAwaitBay.textContent=awaiting;kFault.textContent=faultNow;kTestProg.textContent=testProg;kHeatProg.textContent=heatProg;kFatProg.textContent=fatProg;kActiveFloor.textContent=live.length;perfActive.textContent=isCurrentMonth?live.length:monthEndActive;target.textContent=tar;received.textContent=rec;completed.textContent=comp;pending.textContent=pend;pct.textContent=pc+'%';prog.style.width=pc+'%';ring.style.background=`conic-gradient(#3ef1c5 ${pc*3.6}deg,#14476e 0)`;pFpy.textContent=fpy===null?'—':fpy+'%';pFaultHits.textContent=faultHits;completedProgress.textContent=`${comp} / ${tar}`;fillTableFilters();
+
+/* Critical live list: render FIRST from the exact same tracker array used by Active UPS KPI. */
+renderRows();
+
+/* Secondary dashboard sections are isolated so one section can never block the live UPS table. */
+try{renderHeatAlerts(expiredHeat)}catch(e){console.error('Heatrun alerts render failed',e)}
+try{renderWeeks(yy,mm,mc,settings.weekly_target||0)}catch(e){console.error('Weekly render failed',e)}
+try{renderChart(yy,mm,mt,dp||[])}catch(e){console.error('Input chart render failed',e)}
+try{renderProjects(mt,mc,sod)}catch(e){console.error('Project cards render failed',e)}
+
+saveDashboardCache();const __lb=document.querySelector('.actions .live');if(__lb&&__lb.dataset.originalText){__lb.textContent=__lb.dataset.originalText;delete __lb.dataset.originalText;};
 const liveBadge=document.querySelector('.actions .live');
 if(liveBadge&&liveBadge.dataset.originalText){
   liveBadge.textContent=liveBadge.dataset.originalText;
@@ -990,15 +1001,35 @@ function renderProjects(mt,mc,sod){
 }
 function fillTableFilters(){
  let pval=tableProject?.value||'',sval=tableStage?.value||'';
- let ps=[...new Set(trackers.filter(activeTracker).map(x=>x.project_code).filter(Boolean))],
-     ss=[...new Set(trackers.filter(activeTracker).map(x=>x.current_stage).filter(Boolean))];
- tableProject.innerHTML='<option value="">All Projects</option>'+ps.map(x=>`<option ${x===pval?'selected':''}>${esc(x)}</option>`).join('');
- tableStage.innerHTML='<option value="">All Stages</option>'+ss.map(x=>`<option value="${esc(x)}" ${x===sval?'selected':''}>${esc(STAGE_LABEL[x]||x)}</option>`).join('')
+ let activeNow=trackers.filter(activeTracker),
+     ps=[...new Set(activeNow.map(x=>x.project_code).filter(Boolean))],
+     ss=[...new Set(activeNow.map(x=>x.current_stage).filter(Boolean))];
+
+ tableProject.innerHTML='<option value="">All Projects</option>'+ps.map(x=>`<option value="${esc(x)}" ${x===pval?'selected':''}>${esc(x)}</option>`).join('');
+ tableStage.innerHTML='<option value="">All Stages</option>'+ss.map(x=>`<option value="${esc(x)}" ${x===sval?'selected':''}>${esc(STAGE_LABEL[x]||x)}</option>`).join('');
+
+ if(pval && !ps.includes(pval)) tableProject.value='';
+ if(sval && !ss.includes(sval)) tableStage.value='';
 }
 function renderRows(){
- let q=(tableSearch?.value||'').toLowerCase(),pr=tableProject?.value||'',st=tableStage?.value||'';
- let active=trackers.filter(activeTracker).filter(x=>(!q||String(x.tracker_id||'').toLowerCase().includes(q)||String(x.serial_no||'').toLowerCase().includes(q))&&(!pr||x.project_code===pr)&&(!st||x.current_stage===st)).slice(0,40);
- upsRows.innerHTML=active.length?active.map((x,i)=>{let hx=heatExpired(x);return `<tr class="${x.is_faulty?'faultyRow':(hx?'heatExpiredRow':'')}"><td>${i+1}</td><td><a class="clickable" href="pilot-scan.html?id=${encodeURIComponent(x.tracker_id)}">${trackerBadge(x)}</a></td><td>${x.serial_no?`<a class="clickable" href="pilot-scan.html?id=${encodeURIComponent(x.tracker_id)}">${esc(x.serial_no)}</a>`:'—'}</td><td>${esc(x.project_code||'—')}</td><td>${x.rating_kva?x.rating_kva+' kVA':'—'}</td><td>${x.is_faulty?'<span class="pill red">FAULTY / RTA</span>':(hx?'<span class="pill amber">⚠ Heatrun Timer Completed</span>':stagePill(x.current_stage))}</td><td>${x.is_faulty?'<span class="pill red">FAULTY / RTA</span>':(hx?'<span class="pill amber">⚠ Check & Take Action</span>':'<span class="pill green">Active</span>')}</td><td>${esc(x.test_bay||'—')}</td><td>${dstr(x.last_updated_at)}</td><td>${esc(x.last_engineer||'—')}</td><td><a class="rowAction" href="pilot-scan.html?id=${encodeURIComponent(x.tracker_id)}">${hx?'Take Action →':'Update →'}</a></td></tr>`}).join(''):`<tr><td colspan="11" class="emptyState">No UPS currently under active testing.</td></tr>`
+ let q=(tableSearch?.value||'').trim().toLowerCase(),
+     pr=tableProject?.value||'',
+     st=tableStage?.value||'';
+
+ let active=trackers
+   .filter(activeTracker)
+   .filter(x=>
+     (!q||
+       String(x.tracker_id||'').toLowerCase().includes(q)||
+       String(x.serial_no||'').toLowerCase().includes(q)
+     )&&
+     (!pr||x.project_code===pr)&&
+     (!st||x.current_stage===st)
+   )
+   .sort((a,b)=>new Date(b.last_updated_at||b.received_at||0)-new Date(a.last_updated_at||a.received_at||0))
+   .slice(0,40);
+
+ upsRows.innerHTML=active.length?active.map((x,i)=>{let hx=heatExpired(x);return `<tr class="${x.is_faulty?'faultyRow':(hx?'heatExpiredRow':'')}"><td>${i+1}</td><td><a class="clickable" href="pilot-scan.html?id=${encodeURIComponent(x.tracker_id)}">${trackerBadge(x)}</a></td><td>${x.serial_no?`<a class="clickable" href="pilot-scan.html?id=${encodeURIComponent(x.tracker_id)}">${esc(x.serial_no)}</a>`:'—'}</td><td>${esc(x.project_code||'—')}</td><td>${x.rating_kva?x.rating_kva+' kVA':'—'}</td><td>${x.is_faulty?'<span class="pill red">FAULTY / RTA</span>':(hx?'<span class="pill amber">⚠ Heatrun Timer Completed</span>':stagePill(x.current_stage))}</td><td>${x.is_faulty?'<span class="pill red">FAULTY / RTA</span>':(hx?'<span class="pill amber">⚠ Check & Take Action</span>':'<span class="pill green">Active</span>')}</td><td>${esc(x.test_bay||'—')}</td><td>${dstr(x.last_updated_at)}</td><td>${esc(x.last_engineer||'—')}</td><td><a class="rowAction" href="pilot-scan.html?id=${encodeURIComponent(x.tracker_id)}">${hx?'Take Action →':'Update →'}</a></td></tr>`}).join(''):`<tr><td colspan="11" class="emptyState">No UPS currently under active testing.</td></tr>`;
 }
 let __p9kAutoMonthKey=setupMonths(true);
 monthSel.addEventListener('change',()=>{
