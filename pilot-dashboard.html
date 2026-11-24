@@ -624,7 +624,7 @@ html.p9k-mobile .weekStat b{font-size:19px!important;line-height:1!important;}
 
 
 </main></div>
-<script src="pilot-common.js?v=3171"></script><script>
+<script src="pilot-common.js?v=3172"></script><script>
 sidebar.innerHTML=nav('dash');
 const P9K_DASH_CACHE_KEY='p9k_dashboard_last_render_v2';
 const P9K_DASH_CACHE_IDS=[
@@ -682,7 +682,7 @@ if(!__p9kHadCachedDashboard){
   if(liveBadge){liveBadge.dataset.originalText=liveBadge.textContent;liveBadge.textContent='● Connecting…';}
 }
 
-let trackers=[],projectsData=[],settings={},faults=[],heatTimerMinutes=240;function heatExpired(x){return !x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&x.stage_started_at&&((Date.now()-new Date(x.stage_started_at).getTime())/60000)>=heatTimerMinutes}
+let trackers=[],projectsData=[],settings={},faults=[],projectHistoryMap=new Map(),heatTimerMinutes=240;function heatExpired(x){return !x.is_faulty&&x.current_stage==='HEATRUN_PROGRESS'&&x.stage_started_at&&((Date.now()-new Date(x.stage_started_at).getTime())/60000)>=heatTimerMinutes}
 function setupMonths(forceCurrent=true){
   let n=new Date(),o='',current=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
   for(let i=0;i<12;i++){
@@ -776,7 +776,7 @@ trackers=t||[];
 projectsData=masters.p||[];
 settings=masters.s||{};
 faults=f||[];
-let projectHistoryMap=new Map((projectHistory||[]).map(x=>[String(x.project_code||'').toUpperCase(),x]));
+projectHistoryMap=new Map((projectHistory||[]).map(x=>[String(x.project_code||'').toUpperCase(),x]));
 let stg=masters.stg||null;
 
 /* Only fetch Testing history for currently-active UPS.
@@ -847,7 +847,7 @@ renderRows();
 
 /* Secondary dashboard sections are isolated so one section can never block the live UPS table. */
 try{renderHeatAlerts(expiredHeat)}catch(e){console.error('Heatrun alerts render failed',e)}
-try{renderWeeks(yy,mm,mc,settings.weekly_target||0)}catch(e){console.error('Weekly render failed',e)}
+try{renderWeeks(yy,mm,mcAll,settings.weekly_target||0)}catch(e){console.error('Weekly render failed',e)}
 try{renderChart(yy,mm,mt,dp||[])}catch(e){console.error('Input chart render failed',e)}
 try{renderProjects(mt,mc,sod)}catch(e){console.error('Project cards render failed',e)}
 
@@ -873,6 +873,7 @@ function renderHeatAlerts(items){
 }
 let weeklyCache={yy:null,mm:null,weeks:[],targets:[0,0,0,0,0]};
 function renderWeeks(yy,mm,mc,weeklyTarget){
+ weeklyCache={yy:null,mm:null,weeks:[],targets:[0,0,0,0,0]};
  let fallback=+weeklyTarget||0;
  let prodWeeks=getProductionWeeks(yy,mm);
  let historicalMonth=!(yy===new Date().getFullYear()&&mm===new Date().getMonth()+1);
@@ -957,7 +958,7 @@ function renderProjects(mt,mc,sod){
        monthCompleted=mc.filter(x=>x.project_code===p.project_code).length + (
          settings.opening_month_key===monthSel.value ? (+p.opening_completed_month||0) : 0
        ),
-       selectedProjectHistory=projectHistoryMap.get(String(p.project_code||'').toUpperCase()),
+       selectedProjectHistory=(projectHistoryMap instanceof Map?projectHistoryMap.get(String(p.project_code||'').toUpperCase()):null),
        monthTarget=(monthSel.value===currentCalendarMonthKey())?(+p.monthly_target||0):(+selectedProjectHistory?.target||0),
        isStandard=(p.project_code||'').toUpperCase()==='STANDARD',
        monthReceived=mt.filter(x=>x.project_code===p.project_code).length,
